@@ -11,11 +11,11 @@ namespace GW_server_plugin.Features;
 /// </summary>
 public class IpcSocket
 {
-    private TcpClient client;
-    private NetworkStream stream;
-    private CancellationTokenSource cts;
+    private TcpClient? client;
+    private NetworkStream? stream;
+    private CancellationTokenSource? cts;
 
-    private string Host;
+    private string? Host;
     private int Port;
 
     /// <summary>
@@ -76,7 +76,7 @@ public class IpcSocket
 
         while (!token.IsCancellationRequested)
         {
-            int read = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+            int read = await stream!.ReadAsync(buffer, 0, buffer.Length, token);
             if (read == 0)
                 throw new Exception("Disconnected");
 
@@ -110,7 +110,7 @@ public class IpcSocket
         byte[] data = Encoding.UTF8.GetBytes(json + "\n");
         try
         {
-            await stream.WriteAsync(data, 0, data.Length);
+            await stream!.WriteAsync(data, 0, data.Length);
         }
         catch
         {

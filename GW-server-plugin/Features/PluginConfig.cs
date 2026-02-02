@@ -5,7 +5,7 @@ namespace GW_server_plugin.Features;
 /// <summary>
 ///     Configuration class for the plugin
 /// </summary>
-public class PluginConfig
+public static class PluginConfig
 {
     internal const string GeneralSetction = "General";
     internal const string IPCSection = "IPCSection";

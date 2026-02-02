@@ -41,6 +41,8 @@ riderModule.iml
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
+.idea/**/discord.xml
+.idea/**/vcs.xml
 
 # Gradle
 .idea/**/gradle.xml

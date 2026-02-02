@@ -28,7 +28,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private ConcurrentQueue<string> socketInbox = new();
 
-    private IpcSocket socket;
+    private IpcSocket? socket;
     
     private void Awake()
     {
