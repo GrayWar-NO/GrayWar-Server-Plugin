@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{c79daedb-3d9f-42d3-9b92-fce0afb7197b}") = "GW_server_plugin", "GW-server-plugin\GW-server-plugin.csproj", "{aceb3724-ec2d-4683-8d40-7575599ae356}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{aceb3724-ec2d-4683-8d40-7575599ae356}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{aceb3724-ec2d-4683-8d40-7575599ae356}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{aceb3724-ec2d-4683-8d40-7575599ae356}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{aceb3724-ec2d-4683-8d40-7575599ae356}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
