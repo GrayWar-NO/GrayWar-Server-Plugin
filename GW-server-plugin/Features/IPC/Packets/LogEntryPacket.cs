@@ -1,3 +1,5 @@
+using GW_server_plugin.Enums;
+
 namespace GW_server_plugin.Features.IPC.Packets;
 
 public class LogEntryPacket: CommunicationPacket

@@ -1,3 +1,4 @@
+using GW_server_plugin.Enums;
 using Newtonsoft.Json;
 
 namespace GW_server_plugin.Features.IPC.Packets;

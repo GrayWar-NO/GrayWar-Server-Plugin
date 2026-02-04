@@ -1,4 +1,4 @@
-namespace GW_server_plugin.Features.IPC.Packets;
+namespace GW_server_plugin.Enums;
 
 public enum PacketType
 {

@@ -1,4 +1,4 @@
-namespace GW_server_plugin.Features.IPC.Packets;
+namespace GW_server_plugin.Enums;
 
 /// <summary>
 /// Enumerates logs channels that are possible to send through the socket

@@ -1,4 +1,5 @@
 using System;
+using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
