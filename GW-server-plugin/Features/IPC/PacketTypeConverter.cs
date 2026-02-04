@@ -52,7 +52,7 @@ public class PacketTypeConverter : JsonConverter
         writer.WriteStartObject();
         
         writer.WritePropertyName("Type");
-        serializer.Serialize(writer, packet.Type);
+        serializer.Serialize(writer, packet.Type.ToString().ToLower());
         
         switch (packet)
         {
@@ -72,7 +72,7 @@ public class PacketTypeConverter : JsonConverter
                 break;
             case LogEntryPacket log:
                 writer.WritePropertyName("Channel");
-                serializer.Serialize(writer, log.Channel);
+                serializer.Serialize(writer, log.Channel.ToString().ToLower());
                 writer.WritePropertyName("LogText");
                 serializer.Serialize(writer, log.LogText);
                 break;
