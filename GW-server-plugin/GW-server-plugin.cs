@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Collections.Concurrent;
 using BepInEx;
 using BepInEx.Logging;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
-using HarmonyLib;
-using NuclearOption.Networking;
-using Steamworks;
-using UnityEngine;
-using Random = System.Random;
+using GW_server_plugin.Features.IPC;
+using GW_server_plugin.Features.IPC.Packets;
+using Newtonsoft.Json;
 
 namespace GW_server_plugin;
 
@@ -23,12 +17,10 @@ public class GwServerPlugin : BaseUnityPlugin
 {
     internal static GwServerPlugin? Instance { get; private set; }
     internal new static ManualLogSource? Logger { get; private set; }
-    private static Harmony? Harmony { get; set; }
-    private static bool IsPatched { get; set; }
 
-    private ConcurrentQueue<string> socketInbox = new();
+    private readonly ConcurrentQueue<string> _socketOutBox = new();
 
-    private IpcSocket socket;
+    private Socket? _socket;
     
     private void Awake()
     {
@@ -41,9 +33,9 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeService.Initialize();
 
 
-        socket = new IpcSocket();
-        socket.OnJson += msg => socketInbox.Enqueue(msg);
-        socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
+        _socket = new Socket();
+        _socket.OnJson += HandleMsg;
+        _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
 
         TimeEvents.EverySecond += EverySecond;
 
@@ -51,10 +43,18 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private void EverySecond()
     {
-        while (socketInbox.TryDequeue(out var msg))
+        while (_socketOutBox.TryDequeue(out var msg))
         {
-            socket?.SendJson(msg);
+            _socket?.SendJson(msg);
         }
+    }
+
+    private void HandleMsg(string msg)
+    {
+        var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
+        var respPacket = packet?.Process();
+        if (respPacket is null) return;
+        _socketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
     }
     
 }

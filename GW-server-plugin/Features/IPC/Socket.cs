@@ -4,24 +4,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GW_server_plugin.Features;
+namespace GW_server_plugin.Features.IPC;
 
 /// <summary>
 /// InterProcessCommunication TCP socket for the plugin
 /// </summary>
-public class IpcSocket
+public class Socket
 {
-    private TcpClient client;
-    private NetworkStream stream;
-    private CancellationTokenSource cts;
+    private TcpClient? _client;
+    private NetworkStream? _stream;
+    private CancellationTokenSource? _cts;
 
-    private string Host;
-    private int Port;
+    private string? _host;
+    private int _port;
 
     /// <summary>
     /// Bool for if the socket is connected
     /// </summary>
-    public bool Connected => client?.Connected == true;
+    public bool Connected => _client?.Connected == true;
     /// <summary>
     /// Event listener when Json command is recieved via socket
     /// </summary>
@@ -32,11 +32,11 @@ public class IpcSocket
   /// </summary>
   public void Start(string host, int port)
     {
-        Host = host;
-        Port = port;
-        cts = new CancellationTokenSource();
+        _host = host;
+        _port = port;
+        _cts = new CancellationTokenSource();
         // _ = Task.Run(() => ConnectionLoop(cts.Token));
-        _ = ConnectionLoop(cts.Token);
+        _ = ConnectionLoop(_cts.Token);
     }
 
     async Task ConnectionLoop(CancellationToken token)
@@ -45,10 +45,10 @@ public class IpcSocket
         {
             try
             {
-                client = new TcpClient();
-                client.NoDelay = true;
-                await client.ConnectAsync(Host, Port);
-                stream = client.GetStream();
+                _client = new TcpClient();
+                _client.NoDelay = true;
+                await _client.ConnectAsync(_host, _port);
+                _stream = _client.GetStream();
 
                 GwServerPlugin.Logger?.LogDebug("[IPC] socket connected");
 
@@ -76,7 +76,7 @@ public class IpcSocket
 
         while (!token.IsCancellationRequested)
         {
-            int read = await stream.ReadAsync(buffer, 0, buffer.Length, token);
+            int read = await _stream!.ReadAsync(buffer, 0, buffer.Length, token);
             if (read == 0)
                 throw new Exception("Disconnected");
 
@@ -110,7 +110,7 @@ public class IpcSocket
         byte[] data = Encoding.UTF8.GetBytes(json + "\n");
         try
         {
-            await stream.WriteAsync(data, 0, data.Length);
+            await _stream!.WriteAsync(data, 0, data.Length);
         }
         catch
         {
@@ -120,10 +120,10 @@ public class IpcSocket
 
     void Cleanup()
     {
-        stream?.Close();
-        client?.Close();
-        stream = null;
-        client = null;
+        _stream?.Close();
+        _client?.Close();
+        _stream = null;
+        _client = null;
     }
 
     /// <summary>
@@ -131,7 +131,7 @@ public class IpcSocket
     /// </summary>
     public void Dispose()
     {
-        cts?.Cancel();
+        _cts?.Cancel();
         Cleanup();
     }    
 }
