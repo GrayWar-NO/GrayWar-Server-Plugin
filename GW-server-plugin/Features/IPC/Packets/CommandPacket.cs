@@ -1,3 +1,5 @@
+using GW_server_plugin.Features.Commands;
+
 namespace GW_server_plugin.Features.IPC.Packets;
 
 public class CommandPacket: CommunicationPacket
@@ -12,9 +14,8 @@ public class CommandPacket: CommunicationPacket
     public override CommunicationPacket? Process()
     {
         GwServerPlugin.Logger?.LogDebug($"command {CommandName} recieved with args: {string.Join("; ", Parameters)}");
-        //todo Return Commands.Execute() something something
-        return null;
-
+        CommandService.TryExecuteCommand(CommandName, Parameters, out var response);
+        if (response is null) return null;
+        return new ResponsePacket { ResponseText = response };
     }
-
 }

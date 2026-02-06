@@ -52,7 +52,7 @@ public class GwServerPlugin : BaseUnityPlugin
     private void HandleMsg(string msg)
     {
         var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
-        var respPacket = packet?.Process();
+        CommunicationPacket? respPacket = packet!.Process();
         if (respPacket is null) return;
         _socketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
     }

@@ -7,8 +7,8 @@
 	<RootNamespace>GW_server_plugin</RootNamespace>
 	<PackageId>Graywar.ServerPlugin</PackageId>
         <Title>ServerPlugin</Title>
-        <Description>A flexible and powerful dedicated server managerment solution for Nuclear Option.</Description>
-        <Version>1.4.1</Version>
+        <Description>A flexible and powerful dedicated server management solution for Nuclear Option.</Description>
+        <Version>0.1.1</Version>
         <Authors>Pauel3312</Authors>
         <PackageTags>nuclear;option;bepinex</PackageTags>
 
@@ -43,7 +43,6 @@
     <ItemGroup>
         <None Include="$(ProjectDir)../README.md" Pack="true" PackagePath="/"/>
         <None Include="$(ProjectDir)../CHANGELOG.md" Pack="true" PackagePath="/"/>
-        <None Include="$(ProjectDir)../run_server.bat" Pack="true" PackagePath="/"/>
     </ItemGroup>
 
     <!-- BepInEx Package References -->

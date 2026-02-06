@@ -11,5 +11,9 @@ public abstract class CommunicationPacket
 {
     public PacketType Type { get; set; }
 
+    /// <summary>
+    /// Applies it's processing to the packet.
+    /// </summary>
+    /// <returns> The response to send back to the peer process. </returns>
     public abstract CommunicationPacket? Process();
 }
