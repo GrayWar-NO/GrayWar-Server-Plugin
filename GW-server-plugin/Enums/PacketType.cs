@@ -1,5 +1,8 @@
 namespace GW_server_plugin.Enums;
 
+/// <summary>
+///     Type for packets enum
+/// </summary>
 public enum PacketType
 {
     /// <summary>

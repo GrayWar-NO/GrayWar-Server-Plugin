@@ -6,13 +6,18 @@ using Newtonsoft.Json.Linq;
 
 namespace GW_server_plugin.Features.IPC;
 
+/// <summary>
+/// Json converter for handling packets.
+/// </summary>
 public class PacketTypeConverter : JsonConverter
 {
+    /// <inheritdoc />
     public override bool CanConvert(Type objectType)
     {
         return typeof(CommunicationPacket).IsAssignableFrom(objectType);
     }
 
+    /// <inheritdoc />
     public override object ReadJson(JsonReader reader,
         Type objectType,
         object? existingValue,
@@ -37,14 +42,15 @@ public class PacketTypeConverter : JsonConverter
                 packet = new LogEntryPacket();
                 break;
             default:
-                GwServerPlugin.Logger?.LogError($"Unknown packet type {type}");
+                GwServerPlugin.Logger.LogError($"Unknown packet type {type}");
                 throw new ArgumentOutOfRangeException();
         }
         
         serializer.Populate(jo.CreateReader(), packet);
         return packet;
     }
-    
+
+    /// <inheritdoc />
     public override void WriteJson(JsonWriter writer,
         object? value,
         JsonSerializer serializer)
@@ -65,7 +71,7 @@ public class PacketTypeConverter : JsonConverter
                 writer.WritePropertyName("CommandName");
                 serializer.Serialize(writer, cmd.CommandName);
                 writer.WritePropertyName("Parameters");
-                serializer.Serialize(writer, cmd.Parameters);
+                serializer.Serialize(writer, cmd.Arguments);
                 break;
             case ResponsePacket resp:
                 writer.WritePropertyName("ResponseText");

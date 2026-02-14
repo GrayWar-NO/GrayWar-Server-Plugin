@@ -15,8 +15,8 @@ namespace GW_server_plugin;
 [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 public class GwServerPlugin : BaseUnityPlugin
 {
-    internal static GwServerPlugin? Instance { get; private set; }
-    internal new static ManualLogSource? Logger { get; private set; }
+    internal new static ManualLogSource Logger { get; private set; } = null!;
+    internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
 
     private readonly ConcurrentQueue<string> _socketOutBox = new();
 
@@ -24,19 +24,22 @@ public class GwServerPlugin : BaseUnityPlugin
     
     private void Awake()
     {
-        Instance = this;
-        
         Logger = base.Logger;
+
+        PlayerIdentifier = new PlayerIdentificationService();
+
+        
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
         
         PluginConfig.InitSettings(Config);
         TimeService.Initialize();
 
 
-        _socket = new Socket();
-        _socket.OnJson += HandleMsg;
-        _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
-
+        if (PluginConfig.IpcEnable!.Value) {
+            _socket = new Socket();
+            _socket.OnJson += HandleJson;
+            _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
+        }
         TimeEvents.EverySecond += EverySecond;
 
     }
@@ -49,7 +52,7 @@ public class GwServerPlugin : BaseUnityPlugin
         }
     }
 
-    private void HandleMsg(string msg)
+    private void HandleJson(string msg)
     {
         var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
         CommunicationPacket? respPacket = packet!.Process();

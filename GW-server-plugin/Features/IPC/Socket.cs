@@ -50,18 +50,18 @@ public class Socket
                 await _client.ConnectAsync(_host, _port);
                 _stream = _client.GetStream();
 
-                GwServerPlugin.Logger?.LogDebug("[IPC] socket connected");
+                GwServerPlugin.Logger.LogDebug("[IPC] socket connected");
 
                 await ReceiveLoop(token);
             }
             catch (SocketException)
             {
-                GwServerPlugin.Logger?.LogWarning("[IPC] socket failed to connect or disconnected.");
-                GwServerPlugin.Logger?.LogWarning($"[IPC] Retrying connect in {PluginConfig.IpcRetryDelayMs!.Value / 1000} seconds...");
+                GwServerPlugin.Logger.LogWarning("[IPC] socket failed to connect or disconnected.");
+                GwServerPlugin.Logger.LogWarning($"[IPC] Retrying connect in {PluginConfig.IpcRetryDelayMs!.Value / 1000} seconds...");
             }
             catch (Exception ex)
             {
-                GwServerPlugin.Logger?.LogDebug("[IPC] " + ex.Message);
+                GwServerPlugin.Logger.LogDebug("[IPC] " + ex.Message);
             }
 
             Cleanup();
@@ -114,7 +114,7 @@ public class Socket
         }
         catch
         {
-            GwServerPlugin.Logger?.LogWarning($"[IPC] send json failed: {json}");
+            GwServerPlugin.Logger.LogWarning($"[IPC] send json failed: {json}");
         }
     }
 

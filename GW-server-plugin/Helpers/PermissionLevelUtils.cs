@@ -5,7 +5,10 @@ using NuclearOption.Networking;
 
 namespace GW_server_plugin.Helpers;
 
-public class PermissionLevelUtils
+/// <summary>
+/// Utilites for handling permission levels.
+/// </summary>
+public static class PermissionLevelUtils
 {
     /// <summary>
     ///     Get a player's permission level

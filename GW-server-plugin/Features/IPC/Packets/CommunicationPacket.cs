@@ -9,6 +9,9 @@ namespace GW_server_plugin.Features.IPC.Packets;
 [JsonConverter(typeof(PacketTypeConverter))]
 public abstract class CommunicationPacket
 {
+    /// <summary>
+    ///     Type of the packet.
+    /// </summary>
     public PacketType Type { get; set; }
 
     /// <summary>

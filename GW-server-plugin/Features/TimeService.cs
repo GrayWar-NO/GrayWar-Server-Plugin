@@ -1,4 +1,3 @@
-using System;
 using GW_server_plugin.Events;
 using UnityEngine;
 
@@ -46,7 +45,7 @@ public class TimeService : MonoBehaviour
         else if (Instance != this) { Destroy(gameObject); return; }
 
         DontDestroyOnLoad(gameObject);
-        GwServerPlugin.Logger?.LogInfo("Time Service started.");
+        GwServerPlugin.Logger.LogInfo("Time Service started.");
     }
     
     private void Update()

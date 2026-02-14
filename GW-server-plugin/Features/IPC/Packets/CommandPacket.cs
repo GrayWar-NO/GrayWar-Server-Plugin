@@ -2,10 +2,20 @@ using GW_server_plugin.Features.Commands;
 
 namespace GW_server_plugin.Features.IPC.Packets;
 
+/// <summary>
+/// Command packet for executing a command on the server
+/// </summary>
 public class CommandPacket: CommunicationPacket
-{ 
-    public string CommandName { get; set; }
-    public string[] Parameters { get; set; }
+{
+    /// <summary>
+    /// The name of the command
+    /// </summary>
+    public string CommandName { get; set; } = null!;
+
+    /// <summary>
+    /// Arguments for the command
+    /// </summary>
+    public string[] Arguments { get; set; } = null!;
 
     /// <summary>
     /// Process method for Command packet.
@@ -13,8 +23,8 @@ public class CommandPacket: CommunicationPacket
     /// </summary>
     public override CommunicationPacket? Process()
     {
-        GwServerPlugin.Logger?.LogDebug($"command {CommandName} recieved with args: {string.Join("; ", Parameters)}");
-        CommandService.TryExecuteCommand(CommandName, Parameters, out var response);
+        GwServerPlugin.Logger.LogDebug($"command {CommandName} recieved with args: {string.Join("; ", Arguments)}");
+        CommandService.TryExecuteCommand(CommandName, Arguments, out var response);
         if (response is null) return null;
         return new ResponsePacket { ResponseText = response };
     }
