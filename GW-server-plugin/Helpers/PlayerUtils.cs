@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using GW_server_plugin.Enums;
 using Mirage;
 using NuclearOption.Networking;
 
@@ -117,4 +118,25 @@ public static class PlayerUtils
         var newName = $"[{id}] {playerObject.PlayerName}";
         playerObject.PlayerName = newName; 
     }
+    
+    /// <summary>
+    ///     Get the permission level of a player.
+    /// </summary>
+    /// <param name="player"> The player. </param>
+    /// <returns> The permission level of the player. </returns>
+    public static PermissionLevel GetPlayerPermissionLevel(Player player)
+    {
+        if (PluginConfig.Owner!.Value == player.SteamID.ToString())
+            return PermissionLevel.Admin;
+        
+        if (PluginConfig.AdminsList.Contains(player.SteamID.ToString()))
+            return PermissionLevel.Admin;
+        
+        if (PluginConfig.ModeratorsList.Contains(player.SteamID.ToString()))
+            return PermissionLevel.Moderator;
+        
+        return PermissionLevel.Everyone;
+    }
+
+    
 }

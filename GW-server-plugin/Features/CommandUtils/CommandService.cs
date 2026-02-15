@@ -4,7 +4,7 @@ using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.Commands;
+namespace GW_server_plugin.Features.CommandUtils;
 
 /// <summary>
 ///     Service for handling commands
@@ -25,7 +25,7 @@ public static class CommandService
     /// <param name="command"> The command to add. </param>
     public static void AddCommand(ICommand command) => Commands.Add(command);
     
-
+    
     /// <summary>
     ///     Attempt to get a command by name.
     /// </summary>

@@ -1,7 +1,7 @@
 using GW_server_plugin.Enums;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.Commands;
+namespace GW_server_plugin.Features.CommandUtils;
 
 /// <summary>
 ///     Interface for defining commands

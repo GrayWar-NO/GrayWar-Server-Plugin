@@ -1,4 +1,4 @@
-using GW_server_plugin.Features.Commands;
+using GW_server_plugin.Features.CommandUtils;
 
 namespace GW_server_plugin.Features.IPC.Packets;
 

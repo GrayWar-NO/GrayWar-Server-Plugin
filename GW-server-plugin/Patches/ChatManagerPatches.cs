@@ -3,7 +3,7 @@ using HarmonyLib;
 using Mirage;
 using NuclearOption.Chat;
 using GW_server_plugin.Features;
-using GW_server_plugin.Features.Commands;
+using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Patches;
@@ -29,7 +29,10 @@ internal static class ChatManagerPatches
             var commandResult = CommandService.TryExecuteCommand(commandName, arguments, player!, out var response);
             if (response is not null)
             {
-                ChatService.SendPrivateChatMessage(response, player!);
+                foreach (var s in response.Split('\n'))
+                {
+                    ChatService.SendPrivateChatMessage(response, player!);
+                }
             }
             
             

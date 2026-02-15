@@ -4,7 +4,7 @@ using BepInEx;
 using BepInEx.Logging;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
-using GW_server_plugin.Features.Commands;
+using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
