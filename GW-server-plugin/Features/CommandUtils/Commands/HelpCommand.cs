@@ -45,16 +45,8 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
             response = $"You have access to the following commands: {string.Join(", ", commandNames)}";
             return true;
         }
-        
-        var commandName = args[0];
-        if (!CommandService.TryGetCommand(commandName, out var command))
-        {
-            response = $"Command {commandName} not found.";
-            return true;
-        }
 
-        response = $"Command '{command.Name}': {command.Description}\nUsage: {command.Usage}";
-        return true;
+        return Execute(args, out response);
     }
 
     /// <inheritdoc />
