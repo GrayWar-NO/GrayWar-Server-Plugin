@@ -53,6 +53,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PatchAll();
         
         CommandService.AddCommand(new TellCommand(Config));
+        CommandService.AddCommand(new HelpCommand(Config));
     }
 
     private static void PatchAll()
