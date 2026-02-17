@@ -55,6 +55,8 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new TellCommand(Config));
         CommandService.AddCommand(new HelpCommand(Config));
         CommandService.AddCommand(new ListPlayersCommand(Config));
+        CommandService.AddCommand(new ListMissionsCommand(Config));
+        CommandService.AddCommand(new NextMissionCommand(Config));
     }
 
     private static void PatchAll()
