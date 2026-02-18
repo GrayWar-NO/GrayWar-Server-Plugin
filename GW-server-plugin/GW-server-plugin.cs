@@ -10,6 +10,7 @@ using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
 using HarmonyLib;
 using Newtonsoft.Json;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin;
 
@@ -24,6 +25,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private readonly ConcurrentQueue<string> _socketOutBox = new();
 
+    internal static MissionVoteService MissionVote { get; private set; } = null!;
+
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
 
@@ -33,6 +36,8 @@ public class GwServerPlugin : BaseUnityPlugin
     private void Awake()
     {
         Logger = base.Logger;
+
+        MissionVote = new MissionVoteService(Config);
 
         PlayerIdentifier = new PlayerIdentificationService();
 
@@ -48,7 +53,6 @@ public class GwServerPlugin : BaseUnityPlugin
             _socket.OnJson += HandleJson;
             _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
         }
-        TimeEvents.EverySecond += EverySecond;
         
         PatchAll();
         
@@ -57,6 +61,11 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new ListPlayersCommand(Config));
         CommandService.AddCommand(new ListMissionsCommand(Config));
         CommandService.AddCommand(new NextMissionCommand(Config));
+        CommandService.AddCommand(new RtvCommand(Config));
+
+        TimeEvents.EverySecond += EverySecond;
+        
+        PlayerEvents.PlayerLeft += OnPlayerLeave;
     }
 
     private static void PatchAll()
@@ -121,5 +130,12 @@ public class GwServerPlugin : BaseUnityPlugin
         if (respPacket is null) return;
         _socketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
     }
-    
+
+    private void OnPlayerLeave(Player player)
+    {
+        Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
+        MissionVote.RemoveVoter(player.SteamID);
+    }
+
+
 }

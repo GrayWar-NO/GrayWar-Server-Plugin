@@ -69,6 +69,31 @@ public static class MissionService
         if (missions.Length == 0 || (missions.Length - 1) < index) return null;
         return missions[index];
     }
+
+    /// <summary>
+    /// Get the MissionOptions object for the next mission in rotation.
+    /// </summary>
+    /// <returns>the missionOptions object</returns>
+    public static MissionOptions? GetNextMissionOptions()
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        if (dsm == null)
+        {
+            GwServerPlugin.Logger.LogWarning("dsm is null");
+            return null;
+        }
+
+        var mr = dsm.missionRotation;
+        if (mr == null)
+        {
+            GwServerPlugin.Logger.LogWarning("missionRotation is null");
+            return null;
+        }
+
+        return mr.GetNext();
+
+    }
+    
     
     /// <summary>
     ///     Start a specific mission based on MissionOptions.
@@ -122,23 +147,8 @@ public static class MissionService
     /// </summary>
     public static async Task<bool> StartNextMission()
     {
-        var dsm = Globals.DedicatedServerManagerInstance;
-        if (dsm == null)
-        {
-            GwServerPlugin.Logger.LogWarning("dsm is null");
-            return false;
-        }
-
-        var mr = dsm.missionRotation;
-        if (mr == null)
-        {
-            GwServerPlugin.Logger.LogWarning("missionRotation is null");
-            return false;
-        }
-
-        var nextOpt = mr.GetNext();
-        
-        return await StartMission(nextOpt);
-        
+        var missionOpt = GetNextMissionOptions();
+        if (missionOpt == null) return false;
+        return await StartMission(missionOpt.Value);
     }
 }

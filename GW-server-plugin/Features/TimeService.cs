@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features;
 /// </summary>
 public class TimeService : MonoBehaviour
 {
-    private static int _lastWholeSecond = 1;
+    public static int _lastWholeSecond = 1;
 
     /// <summary>
     ///     The singleton instance of the time service.
