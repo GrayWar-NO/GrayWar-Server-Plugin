@@ -68,6 +68,8 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new NextMissionCommand(Config));
         CommandService.AddCommand(new RtvCommand(Config));
         
+        CommandService.AddCommand(new WarnCommand(Config));
+        
         CommandService.AddCommand(new KickCommand(Config));
         CommandService.AddCommand(new UnKickCommand(Config));
         CommandService.AddCommand(new ClearKickListCommand(Config));

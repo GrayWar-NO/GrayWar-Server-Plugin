@@ -112,7 +112,7 @@ public static class CommandService
             return false;
         }
 
-        GwServerPlugin.Logger.LogWarning($"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
+        GwServerPlugin.Logger.LogInfo($"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
         response = $"Invalid arguments: {command.Usage}";
         return false;
     }

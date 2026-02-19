@@ -6,7 +6,7 @@ namespace GW_server_plugin.Helpers;
 /// <summary>
 /// Utility functions for banlists
 /// </summary>
-public class AllowBanListUtils
+public static class AllowBanListUtils
 {
     /// <summary>
     /// Unbans a player and removes his steamID from the banlist.

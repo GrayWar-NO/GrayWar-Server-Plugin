@@ -28,5 +28,9 @@ public enum LogChannel
     /// <summary>
     /// Log when a player is banned.
     /// </summary>
-    Ban
+    Ban,
+    /// <summary>
+    /// Log when a player is warned.
+    /// </summary>
+    Warn
 }
