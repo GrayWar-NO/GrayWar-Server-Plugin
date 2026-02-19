@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using GW_server_plugin.Enums;
+using GW_server_plugin.Features.IPC.Packets;
 using Mirage;
+using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Helpers;
@@ -143,5 +145,15 @@ public static class PlayerUtils
         return PermissionLevel.Everyone;
     }
 
+    public static void KickPlayer(Player player, string reason)
+    {
+        Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
+        var kickLogPacket = new LogEntryPacket
+        {
+            LogText = $"1:{player.SteamID}:{reason}",
+            Channel = LogChannel.Kick
+        };
+        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));
+    }
     
 }

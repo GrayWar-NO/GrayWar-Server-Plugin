@@ -31,6 +31,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
+    internal static VoteKickService VoteKickService { get; private set; } = null!;
+    
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
 
@@ -43,6 +45,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
         MissionVote = new MissionVoteService(Config);
 
+        VoteKickService = new VoteKickService();
+        
         PlayerIdentifier = new PlayerIdentificationService();
 
         
@@ -71,6 +75,7 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new WarnCommand(Config));
         
+        CommandService.AddCommand(new VoteKickCommand(Config));
         CommandService.AddCommand(new KickCommand(Config));
         CommandService.AddCommand(new UnKickCommand(Config));
         CommandService.AddCommand(new ClearKickListCommand(Config));
@@ -164,6 +169,7 @@ public class GwServerPlugin : BaseUnityPlugin
     {
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
+        VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
     }
 
