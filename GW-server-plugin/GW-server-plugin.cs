@@ -63,11 +63,15 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new TellCommand(Config));
         CommandService.AddCommand(new HelpCommand(Config));
         CommandService.AddCommand(new ListPlayersCommand(Config));
+        
         CommandService.AddCommand(new ListMissionsCommand(Config));
         CommandService.AddCommand(new NextMissionCommand(Config));
         CommandService.AddCommand(new RtvCommand(Config));
+        
         CommandService.AddCommand(new KickCommand(Config));
         CommandService.AddCommand(new UnKickCommand(Config));
+        CommandService.AddCommand(new ClearKickListCommand(Config));
+        
         CommandService.AddCommand(new BanCommand(Config));
         CommandService.AddCommand(new UnbanCommand(Config));
 
@@ -150,7 +154,7 @@ public class GwServerPlugin : BaseUnityPlugin
         {
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
-        Logger?.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
+        Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
     }
 
     private static void OnPlayerLeave(Player player)
