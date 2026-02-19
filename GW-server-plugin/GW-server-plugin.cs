@@ -8,6 +8,7 @@ using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
+using GW_server_plugin.Helpers;
 using HarmonyLib;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
@@ -62,10 +63,13 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new ListMissionsCommand(Config));
         CommandService.AddCommand(new NextMissionCommand(Config));
         CommandService.AddCommand(new RtvCommand(Config));
+        CommandService.AddCommand(new KickCommand(Config));
 
         TimeEvents.EverySecond += EverySecond;
         
         PlayerEvents.PlayerLeft += OnPlayerLeave;
+        PlayerEvents.PlayerJoined += OnPlayerJoin;
+        
     }
 
     private static void PatchAll()
@@ -130,11 +134,24 @@ public class GwServerPlugin : BaseUnityPlugin
         if (respPacket is null) return;
         _socketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
     }
+    private static void OnPlayerJoin(Player player)
+    {
+        PlayerUtils.ApplyOrRemoveStaffTag(player);
+        PlayerIdentifier.AssignNewPlayer(player);
+        // Apply identification tag if not a staff member
+        if (!PluginConfig.IsAdmin(player.SteamID) && !PluginConfig.IsModerator(player.SteamID) &&
+            !PluginConfig.IsOwner(player.SteamID))
+        {
+            PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
+        }
+        Logger?.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
+    }
 
-    private void OnPlayerLeave(Player player)
+    private static void OnPlayerLeave(Player player)
     {
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
+        PlayerIdentifier.RemovePlayer(player);
     }
 
 
