@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features;
@@ -7,13 +8,13 @@ namespace GW_server_plugin.Features;
 internal sealed class PlayerIdentificationService
 {
     private readonly Dictionary<ulong, int> _players  = new();
-    private Stack<int> ids =  new Stack<int>();
+    private readonly Stack<int> _ids =  new Stack<int>();
 
     public PlayerIdentificationService()
     {
-        for (int i = 200; i > 0; i--)
+        for (int i = Globals.DedicatedServerManagerInstance.Config.MaxPlayers; i > 0; i--)
         {
-            ids.Push(i);
+            _ids.Push(i);
         }
     }
 
@@ -22,7 +23,7 @@ internal sealed class PlayerIdentificationService
         var steamID = player.SteamID;
         if (!_players.ContainsKey(player.SteamID))
         {
-            _players.Add(steamID, ids.Pop());
+            _players.Add(steamID, _ids.Pop());
         }
     }
 
@@ -30,7 +31,7 @@ internal sealed class PlayerIdentificationService
     {
         var found = _players.TryGetValue(player.SteamID, out var id);
         if (!found) return;
-        ids.Push(id);
+        _ids.Push(id);
         _players.Remove(player.SteamID);
     }
 

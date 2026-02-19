@@ -4,6 +4,7 @@ using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
+using Steamworks;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -11,16 +12,16 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to kick a player from the server
 /// </summary>
 /// <param name="config"></param>
-public class KickCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(config)
 {
     /// <inheritdoc />
-    public override string Name { get; } = "kick";
+    public override string Name { get; } = "unkick";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Kicks a player from the  server.";
+    public override string Description { get; } = "Unkicks a player from the  server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "kick <player (by name, steamID or ID tag)> <reason>";
+    public override string Usage { get; } = "unkick <player (by name, steamID or ID tag)>";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args) => Validate(args);
@@ -28,27 +29,20 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length != 2 && PlayerUtils.TryFindPlayer(args[0], out _);
+        return args.Length >= 1 && PlayerUtils.TryFindPlayer(string.Join(" ", args), out _);
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
-    {
-        var target = args[0];
-        PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute(args, out response);
-        response = "You cannot kick yourself!";
-        return false;
-    }
+    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
     public override bool Execute(string[] args, out string? response)
     {
-        var target = args[0];
+        var target = string.Join(" ", args);
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
         {
-            KickPlayer(targetPlayer!, args[1]);
-            response = $"{targetPlayer!.PlayerName} has been kicked!";
+            UnKickPlayer(targetPlayer!);
+            response = $"{targetPlayer!.PlayerName} has been unkicked!";
             return true;
         }
         response = $"{target} is not a valid player!";
@@ -58,12 +52,12 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
 
-    private static void KickPlayer(Player player, string reason)
+    private static void UnKickPlayer(Player player)
     {
-        Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.RemoveKicked(new CSteamID(player.SteamID));
         var kickLogPacket = new LogEntryPacket
         {
-            LogText = $"1:{player.SteamID}:{reason}",
+            LogText = $"0:{player.SteamID}:",
             Channel = LogChannel.Kick
         };
         GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));

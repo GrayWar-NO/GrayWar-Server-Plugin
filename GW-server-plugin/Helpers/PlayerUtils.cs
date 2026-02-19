@@ -43,9 +43,14 @@ public static class PlayerUtils
     public static bool TryFindPlayer(string playerName, out Player? playerObject)
     {
         playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p => string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.PlayerName ?? "")), StripStaffPrefix(StripIdPrefix(playerName)), StringComparison.CurrentCultureIgnoreCase))?.GetPlayer();
-        if (playerObject == null && int.TryParse(playerName, out var playerId))
-        { 
-            GwServerPlugin.PlayerIdentifier.GetPlayerById(playerId, out var playerSteamId);
+        if (playerObject == null && ulong.TryParse(playerName, out var playerId))
+        {
+            ulong? playerSteamId;
+            if (playerId < (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+            {
+                GwServerPlugin.PlayerIdentifier.GetPlayerById((int)playerId, out playerSteamId);
+            }
+            else playerSteamId = playerId;
             TryFindPlayerBySteamId(playerSteamId ?? 0ul, out playerObject);
         }
         return playerObject != null;
