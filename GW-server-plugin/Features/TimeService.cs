@@ -8,7 +8,10 @@ namespace GW_server_plugin.Features;
 /// </summary>
 public class TimeService : MonoBehaviour
 {
-    public static int _lastWholeSecond = 1;
+    /// <summary>
+    /// Number of seconds elapsed since this TimeService was started.
+    /// </summary>
+    public static int LastWholeSecond = 1;
 
     /// <summary>
     ///     The singleton instance of the time service.
@@ -51,13 +54,13 @@ public class TimeService : MonoBehaviour
     private void Update()
     {
         int whole = Mathf.FloorToInt(Time.unscaledTime);
-        if (whole <= _lastWholeSecond) return;
+        if (whole <= LastWholeSecond) return;
 
         // Fire once per missed second (handles frame hiccups)
-        for (int s = _lastWholeSecond + 1; s <= whole; s++)
+        for (int s = LastWholeSecond + 1; s <= whole; s++)
             FireForSecond(s);
 
-        _lastWholeSecond = whole;
+        LastWholeSecond = whole;
     }
     
     private static void FireForSecond(int secondsSinceStart)

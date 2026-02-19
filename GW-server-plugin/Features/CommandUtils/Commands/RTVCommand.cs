@@ -1,4 +1,3 @@
-using System;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
 using NuclearOption.Networking;

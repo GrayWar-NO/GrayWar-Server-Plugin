@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BepInEx.Configuration;
-using GW_server_plugin.Events;
 using GW_server_plugin.Helpers;
 using NuclearOption.DedicatedServer;
 
@@ -22,14 +21,14 @@ internal sealed class MissionVoteService(ConfigFile config)
         "Map Switch delay (seconds)",
         DefaultMapSwitchDelay);
 
-    private HashSet<ulong> RTVs = [];
-    private Dictionary<MissionOptions, List<ulong>> MissionVotes = new Dictionary<MissionOptions, List<ulong>>();
+    private readonly HashSet<ulong> RTVs = [];
+    private readonly Dictionary<MissionOptions, List<ulong>> _missionVotes = new Dictionary<MissionOptions, List<ulong>>();
     private MissionOptions[] Missions { get; set; } = MissionService.GetAllAvailableMissionOptions();
     private MissionOptions? DefaultMissionVote { get; set; }
 
     private MissionOptions MapVoteWinner { get; set; } = MissionService.GetAllAvailableMissionOptions().First();
 
-    public bool RtvActive = false;
+    public bool RtvActive;
     
     public bool RegisterRtv(ulong steamid, int? missionIndex)
     {
@@ -49,7 +48,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         Missions = MissionService.GetAllAvailableMissionOptions();
         DefaultMissionVote = MissionService.GetNextMissionOptions();
         DefaultMissionVote ??= Missions[0]; // Here in case GetNextMissionOption fails.
-        MissionVotes.Clear();
+        _missionVotes.Clear();
         RTVs.Clear();
         ChatService.SendChatMessage("-- Rock-The-Vote --");
         ChatService.SendChatMessage("Mission voting has started!");
@@ -62,16 +61,16 @@ internal sealed class MissionVoteService(ConfigFile config)
     public void ResetRtv()
     {
         RTVs.Clear();
-        MissionVotes.Clear();
+        _missionVotes.Clear();
         RtvActive = false;
     }
     
 
     public void RemoveExistingMissionVote(ulong steamid)
     {
-        foreach (var mission in MissionVotes.Keys)
+        foreach (var mission in _missionVotes.Keys)
         {
-            MissionVotes.TryGetValue(mission, out var missionVotes);
+            _missionVotes.TryGetValue(mission, out var missionVotes);
             if (missionVotes == null) continue;
             if (missionVotes.Contains(steamid)) missionVotes.Remove(steamid);
         }
@@ -83,11 +82,11 @@ internal sealed class MissionVoteService(ConfigFile config)
         if (!RtvActive) return false;
         if (!Missions.Contains(mission)) return false;
         RemoveExistingMissionVote(steamid);
-        MissionVotes.TryGetValue(mission, out var missionVotes);
+        _missionVotes.TryGetValue(mission, out var missionVotes);
         if (missionVotes == null)
         {
             var newMissionVotes = new List<ulong> { steamid };
-            MissionVotes[mission] = newMissionVotes;
+            _missionVotes[mission] = newMissionVotes;
             return true;
         }
         missionVotes.Add(steamid);
@@ -116,11 +115,11 @@ internal sealed class MissionVoteService(ConfigFile config)
 
     private MissionOptions GetVoteWinner()
     {
-        var winnerKvp = MissionVotes.First();
+        var winnerKvp = _missionVotes.First();
         var winner = winnerKvp.Key;
         var winnerCount = winnerKvp.Value.Count;
 
-        foreach (var kvp in MissionVotes)
+        foreach (var kvp in _missionVotes)
         {
             if (kvp.Value.Count > winnerCount)
             {

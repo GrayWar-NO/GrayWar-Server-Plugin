@@ -9,7 +9,7 @@ public class LogEntryPacket: CommunicationPacket
 {
     /// <summary>
     ///     The channel to log to.
-    ///     Channels can be anything, it's up to the reciever to handle channels.
+    ///     Channels can be anything, it's up to the receiver to handle channels.
     /// </summary>
     public LogChannel Channel { get; set; }
     /// <summary>
