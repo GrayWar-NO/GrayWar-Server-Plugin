@@ -69,14 +69,14 @@ public class Socket
         }
     }
 
-    async Task ReceiveLoop(CancellationToken token)
+    private async Task ReceiveLoop(CancellationToken token)
     {
         var buffer = new byte[4096];
         var sb = new StringBuilder();
 
         while (!token.IsCancellationRequested)
         {
-            int read = await _stream!.ReadAsync(buffer, 0, buffer.Length, token);
+            var read = await _stream!.ReadAsync(buffer, 0, buffer.Length, token);
             if (read == 0)
                 throw new Exception("Disconnected");
 
@@ -84,11 +84,11 @@ public class Socket
 
             while (true)
             {
-                int newline = sb.ToString().IndexOf('\n');
+                var newline = sb.ToString().IndexOf('\n');
                 if (newline == -1)
                     break;
 
-                string line = sb.ToString(0, newline).Trim();
+                var line = sb.ToString(0, newline).Trim();
                 sb.Remove(0, newline + 1);
 
                 if (!string.IsNullOrEmpty(line))
@@ -107,7 +107,7 @@ public class Socket
     {
         if (!Connected) return;
 
-        byte[] data = Encoding.UTF8.GetBytes(json + "\n");
+        var data = Encoding.UTF8.GetBytes(json + "\n");
         try
         {
             await _stream!.WriteAsync(data, 0, data.Length);
@@ -118,7 +118,7 @@ public class Socket
         }
     }
 
-    void Cleanup()
+    private void Cleanup()
     {
         _stream?.Close();
         _client?.Close();

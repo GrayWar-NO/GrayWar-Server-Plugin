@@ -1,6 +1,8 @@
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
+using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
+using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -46,7 +48,7 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var target = string.Join(" ", args);
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
         {
-            _ = Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(targetPlayer);
+            KickPlayer(targetPlayer!);
             response = $"{targetPlayer!.PlayerName} has been kicked!";
             return true;
         }
@@ -56,4 +58,16 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+
+    private static void KickPlayer(Player player)
+    {
+        Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
+        var kickLogPacket = new LogEntryPacket
+        {
+            LogText = player.SteamID.ToString(),
+            Channel = LogChannel.Kick
+        };
+        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));
+    }
+    
 }

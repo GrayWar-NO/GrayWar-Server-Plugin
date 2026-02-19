@@ -20,5 +20,9 @@ public enum LogChannel
     /// <summary>
     /// Damage by or to player.
     /// </summary>
-    Damage
+    Damage,
+    /// <summary>
+    /// Log when a player is kicked.
+    /// </summary>
+    Kick
 }

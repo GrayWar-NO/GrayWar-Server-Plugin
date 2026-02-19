@@ -24,7 +24,10 @@ public class GwServerPlugin : BaseUnityPlugin
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
 
-    private readonly ConcurrentQueue<string> _socketOutBox = new();
+    /// <summary>
+    /// Socket Outbox for the IPC communication
+    /// </summary>
+    internal static readonly ConcurrentQueue<string> SocketOutBox = new();
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
@@ -121,7 +124,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private void EverySecond()
     {
-        while (_socketOutBox.TryDequeue(out var msg))
+        while (SocketOutBox.TryDequeue(out var msg))
         {
             _socket?.SendJson(msg);
         }
@@ -132,7 +135,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
         CommunicationPacket? respPacket = packet!.Process();
         if (respPacket is null) return;
-        _socketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
+        SocketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
     }
     private static void OnPlayerJoin(Player player)
     {
