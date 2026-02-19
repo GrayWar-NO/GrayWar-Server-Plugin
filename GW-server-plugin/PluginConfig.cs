@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
+using GW_server_plugin.Enums;
 
 namespace GW_server_plugin;
 
@@ -140,8 +142,63 @@ public static class PluginConfig
         return Owner!.Value == steamId.ToString();
     }
 
-    
-    
-    
+    /// <summary>
+    /// Removes Admin perms for an user
+    /// </summary>
+    /// <param name="steamId">User steamID</param>
+    public static void RemoveAdmin(ulong steamId)
+    {
+        var adminsList = AdminsList;
+        adminsList.Remove(steamId.ToString());
+        Admins!.Value = string.Join(";", adminsList);
+    }
+
+    /// <summary>
+    /// Removes Moderator perms for an user
+    /// </summary>
+    /// <param name="steamId">User steamID</param>
+    public static void RemoveMod(ulong steamId)
+    {
+        var modsList = ModeratorsList;
+        modsList.Remove(steamId.ToString());
+        Moderators!.Value = string.Join(";", modsList);
+    }
+
+    /// <summary>
+    /// Clears all permissions for an user.
+    /// </summary>
+    /// <param name="steamId">User steamID</param>
+    public static void ClearPermissions(ulong steamId)
+    {
+        RemoveAdmin(steamId);
+        RemoveMod(steamId);
+    }
+
+    /// <summary>
+    /// Sets an user's permission level.
+    /// </summary>
+    /// <param name="steamId">User SteamID</param>
+    /// <param name="level">Permission level to give</param>
+    public static void SetPermissionLevel(ulong steamId, PermissionLevel level)
+    {
+        ClearPermissions(steamId);
+        switch (level)
+        {
+            case PermissionLevel.Admin:
+                var adminsList = AdminsList;
+                adminsList.Add(steamId.ToString());
+                Admins!.Value = string.Join(";", adminsList);
+                break;
+            case PermissionLevel.Moderator:
+                var modsList = ModeratorsList;
+                modsList.Add(steamId.ToString());
+                Moderators!.Value = string.Join(";", modsList);
+                break;
+            case PermissionLevel.Everyone:
+            case PermissionLevel.Owner:
+            default:
+                break;
+        }
+    }
     
 }
