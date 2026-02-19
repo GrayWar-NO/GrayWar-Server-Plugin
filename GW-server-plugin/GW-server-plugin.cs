@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
 using GW_server_plugin.Events;
@@ -12,6 +13,7 @@ using GW_server_plugin.Helpers;
 using HarmonyLib;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
+using Steamworks;
 
 namespace GW_server_plugin;
 
@@ -35,6 +37,8 @@ public class GwServerPlugin : BaseUnityPlugin
     
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
+    
+    internal static Dictionary<ulong, ulong> FamilySharingBorrowers = new Dictionary<ulong, ulong>();
 
 
     private Socket? _socket;
@@ -154,6 +158,11 @@ public class GwServerPlugin : BaseUnityPlugin
     }
     private static void OnPlayerJoin(Player player)
     {
+        if (CheckOwnerBanned(player))
+        {
+            PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
+        }
+        
         PlayerUtils.ApplyOrRemoveStaffTag(player);
         PlayerIdentifier.AssignNewPlayer(player);
         // Apply identification tag if not a staff member
@@ -173,5 +182,10 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerIdentifier.RemovePlayer(player);
     }
 
+    private static bool CheckOwnerBanned(Player player)
+    {
+        var ownerSteamId = FamilySharingBorrowers[player.SteamID];
+        return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamId));
+    }
 
 }

@@ -5,7 +5,9 @@ using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using Mirage;
 using Newtonsoft.Json;
+using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
+using Steamworks;
 
 namespace GW_server_plugin.Helpers;
 
@@ -159,6 +161,28 @@ public static class PlayerUtils
             Channel = LogChannel.Kick
         };
         GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));
+    }
+
+    /// <summary>
+    /// Bans a player from a steamID.
+    /// </summary>
+    /// <param name="banSteamID"></param>
+    /// <param name="reason"></param>
+    public static void BanPlayer(ulong banSteamID, string reason)
+    {
+        AllowBanList.BanAndAppendId(
+            Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
+            Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
+            new CSteamID(banSteamID),
+            reason
+        ); 
+        var banLogPacket = new LogEntryPacket
+        {
+            LogText = $"1:{banSteamID}:{reason}",
+            Channel = LogChannel.Ban
+        };
+        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(banLogPacket));
+
     }
     
 }

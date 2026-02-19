@@ -63,21 +63,18 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
                 throw new VerificationException(
                     $"Could not find player {target}: validation was not called properly.");
             banSteamID = player!.SteamID;
+            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
             response = $"Banned player {player.PlayerName} for reason {reason}";
         }
 
-        AllowBanList.BanAndAppendId(
-            Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
-            Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
-            new CSteamID(banSteamID),
-            reason
-            ); 
-        var banLogPacket = new LogEntryPacket
+        
+        var ownerSteamID = GwServerPlugin.FamilySharingBorrowers[banSteamID];
+        PlayerUtils.BanPlayer(banSteamID, reason);
+        if (ownerSteamID != banSteamID)
         {
-            LogText = $"1:{banSteamID}:{reason}",
-            Channel = LogChannel.Ban
-        };
-        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(banLogPacket));
+            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}");
+            response += $"\tBanned Owner with steamID {ownerSteamID} as well";
+        }
         return true;
     }
 

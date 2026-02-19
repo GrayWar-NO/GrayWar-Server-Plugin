@@ -43,7 +43,13 @@ public class UnitPatches
     }
 }
 
-//Unit.RegisterHit for cannon hits.
+//Unit.RegisterHit for cannon hits ONLY.
+//Unit.HitOnPhysicsFrame idem
 //Unit.RecordDamage records damage on self.
 //Unit.ReportKilled reports self killed
-//FireControl.Firre fires a weapon.
+//FireControl.Fire fires a weapon.
+//WeaponStation.LaunchMount (owner target)??
+//WeaponStation.Fire (owner target)??
+//WeaponStation.RemoteFireAuto (owner target)??
+
+//Aircraft.CmdLaunchMissile??
