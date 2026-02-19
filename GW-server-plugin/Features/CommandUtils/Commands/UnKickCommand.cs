@@ -7,7 +7,6 @@ using NuclearOption.Networking;
 using Steamworks;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
-
 /// <summary>
 /// Command to kick a player from the server
 /// </summary>
@@ -21,7 +20,7 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     public override string Description { get; } = "Unkicks a player from the  server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "unkick <player (by name, steamID or ID tag)>";
+    public override string Usage { get; } = "unkick <player (by steamID only)>";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args) => Validate(args);
@@ -29,7 +28,7 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length >= 1 && PlayerUtils.TryFindPlayer(string.Join(" ", args), out _);
+        return args.Length == 1 && ulong.TryParse(args[0], out _);
     }
 
     /// <inheritdoc />
@@ -38,26 +37,20 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     /// <inheritdoc />
     public override bool Execute(string[] args, out string? response)
     {
-        var target = string.Join(" ", args);
-        if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
-        {
-            UnKickPlayer(targetPlayer!);
-            response = $"{targetPlayer!.PlayerName} has been unkicked!";
-            return true;
-        }
-        response = $"{target} is not a valid player!";
-        return false;
+        UnKickPlayer(ulong.Parse(args[0]));
+        response = $"Unkicked player with steamID {args[0]}";
+        return true;
     }
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
 
-    private static void UnKickPlayer(Player player)
+    private static void UnKickPlayer(ulong steamID)
     {
-        Globals.NetworkManagerNuclearOptionInstance.Authenticator.RemoveKicked(new CSteamID(player.SteamID));
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.RemoveKicked(new CSteamID(steamID));
         var kickLogPacket = new LogEntryPacket
         {
-            LogText = $"0:{player.SteamID}:",
+            LogText = $"0:{steamID}:",
             Channel = LogChannel.Kick
         };
         GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));
