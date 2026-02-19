@@ -44,6 +44,9 @@ public static class PluginConfig
 
     internal static ConfigEntry<string>? ServerBroadcastName;
     internal const string DefaultServerBroadcastName = "<color=#99182e>[Nuclei]</color>";
+
+    internal static ConfigEntry<bool>? EnableTeamDamageAutoWarning;
+    internal const bool DefaultEnableTeamDamageAutoWarning = true;
     
 
     internal static ConfigEntry<string>? Moderators;
@@ -91,6 +94,9 @@ public static class PluginConfig
         ServerBroadcastName = config.Bind(GeneralSection, "ServerBroadcastName", DefaultServerBroadcastName,
             "The name that appears in the chat when the server broadcasts a message.");
         GwServerPlugin.Logger.LogDebug($"ServerBroadcastName: {ServerBroadcastName}");
+
+        EnableTeamDamageAutoWarning = config.Bind(GeneralSection, "Enable team damage automatic warning",
+            DefaultEnableTeamDamageAutoWarning);
         
 
         

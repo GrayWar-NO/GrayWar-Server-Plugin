@@ -1,0 +1,49 @@
+using System.Runtime.CompilerServices;
+using GW_server_plugin.Enums;
+using GW_server_plugin.Features;
+using GW_server_plugin.Features.IPC.Packets;
+using HarmonyLib;
+using Newtonsoft.Json;
+
+namespace GW_server_plugin.Patches;
+
+
+/// <summary>
+/// Patches for when an unit takes damage. 
+/// </summary>
+[HarmonyPatch(typeof(Unit))]
+[HarmonyPriority(Priority.First)]
+[HarmonyWrapSafe]
+public class UnitPatches
+{
+    /// <summary>
+    /// Postfix for detecting firing at teammates.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="lastDamageDealer"></param>
+    /// <param name="damageAmount"></param>
+    [HarmonyPostfix]
+    [HarmonyPatch("RecordDamage")]
+    public static void DetectHitTeamMate(Unit instance, PersistentID lastDamageDealer, float damageAmount)
+    {
+        var hitID = instance.persistentID;
+        // return if either hit or damager cannot be found in unit registry.
+        if (!(UnitRegistry.TryGetPersistentUnit(hitID, out var hitUnit) && UnitRegistry.TryGetPersistentUnit(lastDamageDealer, out var damagerUnit))) return;
+        // return if either hit or damager are not a player.
+        if (hitUnit.player is null || damagerUnit.player is null) return;
+        // warn if both players on the same team.
+        if (hitUnit.unit.NetworkHQ != damagerUnit.unit.NetworkHQ) return;
+        ChatService.SendPrivateChatMessage($"You have been warned for damaging teammate {hitUnit.player.PlayerName}", damagerUnit.player);
+        var warnLogPacket = new LogEntryPacket
+        {
+            LogText = $"{damagerUnit.player.SteamID}:AUTO damaged teammate {hitUnit.player.SteamID}",
+            Channel = LogChannel.Warn
+        };
+        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(warnLogPacket));
+    }
+}
+
+//Unit.RegisterHit for cannon hits.
+//Unit.RecordDamage records damage on self.
+//Unit.ReportKilled reports self killed
+//FireControl.Firre fires a weapon.
