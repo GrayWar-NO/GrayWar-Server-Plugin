@@ -67,6 +67,8 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new NextMissionCommand(Config));
         CommandService.AddCommand(new RtvCommand(Config));
         CommandService.AddCommand(new KickCommand(Config));
+        CommandService.AddCommand(new UnKickCommand(Config));
+        CommandService.AddCommand(new BanCommand(Config));
 
         TimeEvents.EverySecond += EverySecond;
         
