@@ -50,7 +50,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     {
         var target = args[0];
         var reason = string.Join(" ", args.Skip(1).ToArray()); 
-        ulong? banSteamID = null;
+        ulong banSteamID;
         if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             banSteamID = targetID;
@@ -61,7 +61,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
             var rs = PlayerUtils.TryFindPlayer(target, out var player);
             if (!rs)
                 throw new VerificationException(
-                    $"Could not find player {target}: verification was not called properly.");
+                    $"Could not find player {target}: validation was not called properly.");
             banSteamID = player!.SteamID;
             response = $"Banned player {player.PlayerName} for reason {reason}";
         }
@@ -69,7 +69,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
         AllowBanList.BanAndAppendId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
-            new CSteamID(banSteamID.Value),
+            new CSteamID(banSteamID),
             reason
             ); 
         var banLogPacket = new LogEntryPacket
