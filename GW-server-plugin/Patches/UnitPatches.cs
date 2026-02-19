@@ -23,7 +23,7 @@ public class UnitPatches
     /// <param name="lastDamageDealer"></param>
     /// <param name="damageAmount"></param>
     [HarmonyPostfix]
-    [HarmonyPatch("RecordDamage")]
+    [HarmonyPatch(nameof(Unit.RecordDamage))]
     public static void DetectHitTeamMate(Unit instance, PersistentID lastDamageDealer, float damageAmount)
     {
         var hitID = instance.persistentID;

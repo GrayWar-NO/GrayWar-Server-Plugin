@@ -5,6 +5,10 @@ using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
+/// <summary>
+/// Command for setting the permission level of a player.
+/// </summary>
+/// <param name="config"></param>
 public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurableCommand(config)
 {
     /// <inheritdoc />

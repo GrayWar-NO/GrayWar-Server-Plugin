@@ -145,6 +145,11 @@ public static class PlayerUtils
         return PermissionLevel.Everyone;
     }
 
+    /// <summary>
+    /// Function that kicks a player.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <param name="reason"></param>
     public static void KickPlayer(Player player, string reason)
     {
         Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
