@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using BepInEx;
 using BepInEx.Logging;
+using GW_server_plugin.Enums;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
@@ -161,6 +162,7 @@ public class GwServerPlugin : BaseUnityPlugin
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
+            return;
         }
         
         PlayerUtils.ApplyOrRemoveStaffTag(player);
@@ -172,6 +174,12 @@ public class GwServerPlugin : BaseUnityPlugin
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
+        var joinPacket = new LogEntryPacket
+        {
+            Channel = LogChannel.Info,
+            LogText = $"joined:{player.SteamID}"
+        };
+        SocketOutBox.Enqueue(JsonConvert.SerializeObject(joinPacket));
     }
 
     private static void OnPlayerLeave(Player player)
@@ -180,6 +188,12 @@ public class GwServerPlugin : BaseUnityPlugin
         MissionVote.RemoveVoter(player.SteamID);
         VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
+        var leavePacket = new LogEntryPacket
+        {
+            Channel = LogChannel.Info,
+            LogText = $"left:{player.SteamID}"
+        };
+        SocketOutBox.Enqueue(JsonConvert.SerializeObject(leavePacket));
     }
 
     private static bool CheckOwnerBanned(Player player)
