@@ -40,7 +40,7 @@ internal static class ChatManagerPatches
             {
                 foreach (var s in response.Split('\n'))
                 {
-                    ChatService.SendPrivateChatMessage(response, player!);
+                    ChatService.SendPrivateChatMessage(s, player!);
                 }
             }
             

@@ -168,6 +168,7 @@ public static class PlayerUtils
     /// </summary>
     /// <param name="banSteamID"></param>
     /// <param name="reason"></param>
+    /// <param name="duration"></param>
     public static void BanPlayer(ulong banSteamID, string reason, string? duration)
     {
         AllowBanList.BanAndAppendId(

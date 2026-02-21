@@ -13,23 +13,20 @@ internal sealed class MissionVoteService(ConfigFile config)
     private const string RtvCommandSection = "RTV";
 
     private const int DefaultVoteLength = 300;
-    private ConfigEntry<int> VoteLength { get; } = config.Bind(RtvCommandSection,
-        "Vote length (seconds)",
-        DefaultVoteLength);
+    private ConfigEntry<int> VoteLength { get; } = config.Bind(RtvCommandSection, "Vote length (seconds)", DefaultVoteLength);
+
     private const int DefaultMapSwitchDelay = 30;
-    private ConfigEntry<int> MapSwitchDelay { get; } = config.Bind(RtvCommandSection,
-        "Map Switch delay (seconds)",
-        DefaultMapSwitchDelay);
+    private ConfigEntry<int> MapSwitchDelay { get; } = config.Bind(RtvCommandSection, "Map Switch delay (seconds)", DefaultMapSwitchDelay);
 
     private readonly HashSet<ulong> RTVs = [];
     private readonly Dictionary<MissionOptions, List<ulong>> _missionVotes = new Dictionary<MissionOptions, List<ulong>>();
-    private MissionOptions[] Missions { get; set; } = MissionService.GetAllAvailableMissionOptions();
+    private MissionOptions[] Missions { get; set; } = null!;
     private MissionOptions? DefaultMissionVote { get; set; }
 
-    private MissionOptions MapVoteWinner { get; set; } = MissionService.GetAllAvailableMissionOptions().First();
+    private MissionOptions MapVoteWinner { get; set; }
 
     public bool RtvActive;
-    
+
     public bool RegisterRtv(ulong steamid, int? missionIndex)
     {
         if (!RtvActive) StartRtv();

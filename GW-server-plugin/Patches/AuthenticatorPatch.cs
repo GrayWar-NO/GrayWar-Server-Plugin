@@ -8,7 +8,7 @@ namespace GW_server_plugin.Patches;
 [HarmonyPatch(typeof(NetworkAuthenticatorNuclearOption))]
 [HarmonyPriority(Priority.First)]
 [HarmonyWrapSafe]
-internal static class NetworkingPatches
+internal static class AuthenticatorPatch
 {
     [HarmonyPrefix]
     [HarmonyPatch(nameof(NetworkAuthenticatorNuclearOption.ValidateAuthTicketResponse))]

@@ -43,7 +43,7 @@ public static class PluginConfig
     internal const string DefaultStaffPrefix = "<color=#FFD700>[Staff]</color>";
 
     internal static ConfigEntry<string>? ServerBroadcastName;
-    internal const string DefaultServerBroadcastName = "<color=#99182e>[Nuclei]</color>";
+    internal const string DefaultServerBroadcastName = "<color=#99182e>[GrayWar]</color>";
 
     internal static ConfigEntry<bool>? EnableTeamDamageAutoWarning;
     internal const bool DefaultEnableTeamDamageAutoWarning = true;

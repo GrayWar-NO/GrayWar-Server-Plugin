@@ -73,6 +73,12 @@ public static class ChatService
             GwServerPlugin.Logger.LogWarning("Cannot send chat message.");
             return;
         }
+
+        while (actualMessage.Length > 128)
+        {
+            Globals.ChatManagerInstance.RpcServerMessage(actualMessage.Substring(0, 128), false);
+            actualMessage = actualMessage.Substring(128);
+        }
         
         Globals.ChatManagerInstance.RpcServerMessage(actualMessage, false);
     }
@@ -90,6 +96,11 @@ public static class ChatService
         {
             GwServerPlugin.Logger.LogWarning("Cannot send private chat message.");
             return;
+        }
+        while (actualMessage.Length > 128)
+        {
+            Globals.ChatManagerInstance.TargetReceiveMessage(targetPlayer.Owner, actualMessage, targetPlayer, true);
+            actualMessage = actualMessage.Substring(128);
         }
 
         Globals.ChatManagerInstance.TargetReceiveMessage(targetPlayer.Owner, actualMessage, targetPlayer, true);

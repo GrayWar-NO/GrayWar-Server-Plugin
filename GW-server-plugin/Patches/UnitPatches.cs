@@ -19,16 +19,16 @@ public class UnitPatches
     /// <summary>
     /// Postfix for detecting firing at teammates.
     /// </summary>
-    /// <param name="instance"></param>
-    /// <param name="lastDamageDealer"></param>
+    /// <param name="__instance"></param>
+    /// <param name="lastDamagedBy"></param>
     /// <param name="damageAmount"></param>
     [HarmonyPostfix]
     [HarmonyPatch(nameof(Unit.RecordDamage))]
-    public static void DetectHitTeamMate(Unit instance, PersistentID lastDamageDealer, float damageAmount)
+    public static void DetectHitTeamMate(Unit __instance, PersistentID lastDamagedBy, float damageAmount)
     {
-        var hitID = instance.persistentID;
+        var hitID = __instance.persistentID;
         // return if either hit or damager cannot be found in unit registry.
-        if (!(UnitRegistry.TryGetPersistentUnit(hitID, out var hitUnit) && UnitRegistry.TryGetPersistentUnit(lastDamageDealer, out var damagerUnit))) return;
+        if (!(UnitRegistry.TryGetPersistentUnit(hitID, out var hitUnit) && UnitRegistry.TryGetPersistentUnit(lastDamagedBy, out var damagerUnit))) return;
         // return if either hit or damager are not a player.
         if (hitUnit.player is null || damagerUnit.player is null) return;
         // warn if both players on the same team.
@@ -53,3 +53,7 @@ public class UnitPatches
 //WeaponStation.RemoteFireAuto (owner target)??
 
 //Aircraft.CmdLaunchMissile??
+
+
+//UnitPart.TakeDamage()!!!!
+

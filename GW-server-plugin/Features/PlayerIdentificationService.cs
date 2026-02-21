@@ -9,17 +9,21 @@ internal sealed class PlayerIdentificationService
 {
     private readonly Dictionary<ulong, int> _players  = new();
     private readonly Stack<int> _ids =  new Stack<int>();
+    private bool _idsOk;
 
-    public PlayerIdentificationService()
+    private void InitIDs()
     {
-        for (int i = Globals.DedicatedServerManagerInstance.Config.MaxPlayers; i > 0; i--)
+        GwServerPlugin.Logger.LogDebug("Initializing IDs");
+        for (var i = Globals.DedicatedServerManagerInstance.Config.MaxPlayers; i > 0; i--)
         {
             _ids.Push(i);
         }
+        _idsOk = true;
     }
 
     public void AssignNewPlayer(Player player)
     {
+        if (!_idsOk) InitIDs();
         var steamID = player.SteamID;
         if (!_players.ContainsKey(player.SteamID))
         {

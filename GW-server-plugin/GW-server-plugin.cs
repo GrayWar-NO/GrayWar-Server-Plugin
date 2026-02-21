@@ -47,17 +47,24 @@ public class GwServerPlugin : BaseUnityPlugin
     private void Awake()
     {
         Logger = base.Logger;
-
+        
+        PluginConfig.InitSettings(Config);
         MissionVote = new MissionVoteService(Config);
+        Logger.LogInfo("Loaded MissionVote");
 
         VoteKickService = new VoteKickService();
-        
-        PlayerIdentifier = new PlayerIdentificationService();
-
+        Logger.LogInfo("Loaded VoteKick");
+        try
+        {
+            PlayerIdentifier = new PlayerIdentificationService();
+            Logger.LogInfo("Loaded PlayerID");
+        } catch (Exception e)
+        {
+            Logger.LogDebug($"Failed loading PlayerID with exception {e}");
+        }
         
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
         
-        PluginConfig.InitSettings(Config);
         TimeService.Initialize();
 
 
@@ -159,6 +166,7 @@ public class GwServerPlugin : BaseUnityPlugin
     }
     private static void OnPlayerJoin(Player player)
     {
+        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");

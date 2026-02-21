@@ -12,13 +12,13 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class ListMissionsCommand(ConfigFile config): PermissionConfigurableCommand(config)
 {
     /// <inheritdoc />
-    public override string Name { get; } = "listmissions";
+    public override string Name { get; } = "missions";
 
     /// <inheritdoc />
     public override string Description { get; } = "List all currently available missions";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "listmissions (takes no arguments)";
+    public override string Usage { get; } = "missions (takes no arguments)";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args)
@@ -54,5 +54,5 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
 }
