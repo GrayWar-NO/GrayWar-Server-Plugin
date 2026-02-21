@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Mirage;
 using NuclearOption.Chat;
@@ -19,14 +20,20 @@ internal static class ChatManagerPatches
     [HarmonyPatch("UserCode_CmdSendChatMessage_\u002D456754112")]
     private static bool UserCode_CmdSendChatMessagePrefix(string message, bool allChat, INetworkPlayer sender)
     {
-        if (!sender.TryGetPlayer(out var player)) 
+        if (!sender.TryGetPlayer(out var player))
+        {
             GwServerPlugin.Logger.LogWarning("Player component is null");
-
+            return false;
+        }
         if (message.StartsWith(PluginConfig.CommandPrefix!.Value) && message.Length > 1)
         {
-            var split = message.Remove(0, 1).Split(' ');
-            var commandName = split[0];
-            var arguments = split.Skip(1).ToArray();
+            var input = message.Remove(0,1);
+            var matches = Regex.Matches(input, """[\"].+?[\"]|'[^']+'|\S+""");
+
+            var arguments = (from Match m in matches select m.Value.Trim('"', '\'')).ToArray();
+
+            var commandName = arguments[0];
+            arguments = arguments.Skip(1).ToArray();
 
             var commandResult = CommandService.TryExecuteCommand(commandName, arguments, player!, out var response);
             if (response is not null)

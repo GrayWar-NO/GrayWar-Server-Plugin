@@ -168,7 +168,7 @@ public static class PlayerUtils
     /// </summary>
     /// <param name="banSteamID"></param>
     /// <param name="reason"></param>
-    public static void BanPlayer(ulong banSteamID, string reason)
+    public static void BanPlayer(ulong banSteamID, string reason, string? duration)
     {
         AllowBanList.BanAndAppendId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
@@ -178,7 +178,7 @@ public static class PlayerUtils
         ); 
         var banLogPacket = new LogEntryPacket
         {
-            LogText = $"1:{banSteamID}:{reason}",
+            LogText = $"1:{banSteamID}:{reason}:{duration ?? ""}",
             Channel = LogChannel.Ban
         };
         GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(banLogPacket));

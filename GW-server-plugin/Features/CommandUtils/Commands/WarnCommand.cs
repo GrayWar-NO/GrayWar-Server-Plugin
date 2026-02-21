@@ -33,7 +33,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length >= 2 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return args.Length == 2 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
@@ -50,7 +50,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
     public override bool Execute(string[] args, out string? response)
     {
         var target = args[0];
-        var reason = string.Join(" ", args.Skip(1).ToArray()); 
+        var reason = args[1]; 
         ulong warnSteamID;
         if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {

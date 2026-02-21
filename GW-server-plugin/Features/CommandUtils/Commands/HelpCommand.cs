@@ -39,9 +39,9 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
     {
         if (args.Length == 0)
         {
-            var accessibleCmmands = CommandService.GetCommands()
+            var accessibleCommands = CommandService.GetCommands()
                 .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
-            var commandNames = accessibleCmmands.Select(c => c.Name).ToList();
+            var commandNames = accessibleCommands.Select(c => c.Name).ToList();
             response = $"You have access to the following commands: {string.Join(", ", commandNames)}";
             return true;
         }

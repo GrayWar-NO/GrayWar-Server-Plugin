@@ -24,7 +24,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Description { get; } = "Bans a player from the server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Reason>";
+    public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Reason> <Optional duration (Xh or Xd)>";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args) => Validate(args);
@@ -32,7 +32,8 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length >= 2 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return args.Length is >= 2 and <= 3 &&
+               (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
@@ -49,7 +50,12 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override bool Execute(string[] args, out string? response)
     {
         var target = args[0];
-        var reason = string.Join(" ", args.Skip(1).ToArray()); 
+        var reason = args[1];
+        string? duration = null;
+        if (args.Length == 3)
+        {
+            duration = args[2];
+        }
         ulong banSteamID;
         if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
@@ -67,12 +73,17 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
             response = $"Banned player {player.PlayerName} for reason {reason}";
         }
 
+        if (duration is not null)
+        {
+            response += $" for {duration}.";
+        }
+
         
         var ownerSteamID = GwServerPlugin.FamilySharingBorrowers[banSteamID];
-        PlayerUtils.BanPlayer(banSteamID, reason);
+        PlayerUtils.BanPlayer(banSteamID, reason, duration);
         if (ownerSteamID != banSteamID)
         {
-            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}");
+            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}", duration);
             response += $"\tBanned Owner with steamID {ownerSteamID} as well";
         }
         return true;
