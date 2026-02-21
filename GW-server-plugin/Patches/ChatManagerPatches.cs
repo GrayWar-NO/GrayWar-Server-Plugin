@@ -4,7 +4,9 @@ using Mirage;
 using NuclearOption.Chat;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
+using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
+using Newtonsoft.Json;
 
 namespace GW_server_plugin.Patches;
 
@@ -44,7 +46,13 @@ internal static class ChatManagerPatches
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player!.PlayerName} sent message: {message}"
             : $"{player!.PlayerName} sent message in {player.HQ.faction.factionName} chat: {message}");
-
+        
+        var outPacket = new ChatLogPacket
+        {
+            ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
+            LogText = message
+        };
+        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(outPacket));
         return true;
     }
 }

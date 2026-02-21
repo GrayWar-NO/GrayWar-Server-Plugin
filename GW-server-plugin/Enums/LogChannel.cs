@@ -10,7 +10,7 @@ public enum LogChannel
     /// </summary>
     Info,
     /// <summary>
-    /// Chat messages TODO need team discrimination
+    /// Chat messages
     /// </summary>
     Chat,
     /// <summary>

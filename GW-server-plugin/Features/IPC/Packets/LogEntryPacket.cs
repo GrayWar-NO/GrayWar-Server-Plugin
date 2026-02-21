@@ -11,7 +11,7 @@ public class LogEntryPacket: CommunicationPacket
     ///     The channel to log to.
     ///     Channels can be anything, it's up to the receiver to handle channels.
     /// </summary>
-    public LogChannel Channel { get; set; }
+    public virtual LogChannel Channel { get; set; }
     /// <summary>
     ///     Text to log.
     /// </summary>
