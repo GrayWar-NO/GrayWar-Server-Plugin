@@ -1,13 +1,8 @@
-using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
-using Newtonsoft.Json;
-using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
-using Steamworks;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -61,6 +56,10 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
         {
             banSteamID = targetID;
             response = $"Banned player with steamID {banSteamID} for reason {reason}";
+            if (PlayerUtils.TryFindPlayerBySteamId(banSteamID, out var targetPlayer))
+            {
+                Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(targetPlayer);
+            }
         }
         else
         {
@@ -79,8 +78,8 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
         }
 
         
-        var ownerSteamID = GwServerPlugin.FamilySharingBorrowers[banSteamID];
         PlayerUtils.BanPlayer(banSteamID, reason, duration);
+        if (!GwServerPlugin.FamilySharingBorrowers.TryGetValue(banSteamID, out var ownerSteamID)) return true;
         if (ownerSteamID != banSteamID)
         {
             PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}", duration);

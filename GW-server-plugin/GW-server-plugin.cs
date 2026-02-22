@@ -206,8 +206,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static bool CheckOwnerBanned(Player player)
     {
-        var ownerSteamId = FamilySharingBorrowers[player.SteamID];
-        return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamId));
+        if (!FamilySharingBorrowers.TryGetValue(player.SteamID, out var ownerSteamID)) return false;
+        return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamID));
     }
 
 }

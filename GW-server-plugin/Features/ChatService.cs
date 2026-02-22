@@ -20,9 +20,10 @@ public static class ChatService
 
         try
         {
-            if (Globals.ChatManagerInstance == null);
-        }
-        catch (NullReferenceException)
+            if (Globals.ChatManagerInstance == null)
+            {
+            }
+        } catch (NullReferenceException)
         {
             GwServerPlugin.Logger.LogWarning("Chat manager instance is null.");
             return false;
