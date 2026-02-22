@@ -17,7 +17,12 @@ public static class ChatService
             GwServerPlugin.Logger.LogWarning("Cannot send empty chat message.");
             return false;
         }
-        if (!Globals.ChatManagerInstance)
+
+        try
+        {
+            if (Globals.ChatManagerInstance == null);
+        }
+        catch (NullReferenceException)
         {
             GwServerPlugin.Logger.LogWarning("Chat manager instance is null.");
             return false;

@@ -1,3 +1,5 @@
+using GW_server_plugin.Enums;
+
 namespace GW_server_plugin.Features.IPC.Packets;
 
 /// <summary>
@@ -9,6 +11,10 @@ public class ResponsePacket: CommunicationPacket
     /// The text to send in the response
     /// </summary>
     public string ResponseText { get; set; } = null!;
+
+    /// <inheritdoc />
+    public override PacketType Type { get; set; } = PacketType.Response;
+
 
     /// <inheritdoc />
     public override CommunicationPacket? Process()

@@ -12,7 +12,7 @@ public abstract class CommunicationPacket
     /// <summary>
     ///     Type of the packet.
     /// </summary>
-    public PacketType Type { get; set; }
+    public virtual PacketType Type { get; set; }
 
     /// <summary>
     /// Applies it's processing to the packet.

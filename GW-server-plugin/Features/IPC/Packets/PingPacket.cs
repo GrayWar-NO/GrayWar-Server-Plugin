@@ -1,3 +1,5 @@
+using GW_server_plugin.Enums;
+
 namespace GW_server_plugin.Features.IPC.Packets;
 
 /// <summary>
@@ -9,6 +11,10 @@ public class PingPacket : CommunicationPacket
     /// Ping data, to be printed in the logs.
     /// </summary>
     public string Data { get; set; } = null!;
+
+    /// <inheritdoc />
+    public override PacketType Type { get; set; } = PacketType.Ping;
+
 
     /// <summary>
     /// Process method for Ping packet.

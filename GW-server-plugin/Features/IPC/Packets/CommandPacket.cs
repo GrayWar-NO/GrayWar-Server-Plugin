@@ -1,3 +1,4 @@
+using GW_server_plugin.Enums;
 using GW_server_plugin.Features.CommandUtils;
 
 namespace GW_server_plugin.Features.IPC.Packets;
@@ -12,11 +13,14 @@ public class CommandPacket: CommunicationPacket
     /// </summary>
     public string CommandName { get; set; } = null!;
 
+    /// <inheritdoc />
+    public override PacketType Type { get; set; } = PacketType.Command;
+
     /// <summary>
     /// Arguments for the command
     /// </summary>
     public string[] Arguments { get; set; } = null!;
-
+    
     /// <summary>
     /// Process method for Command packet.
     /// orders running the command in question
