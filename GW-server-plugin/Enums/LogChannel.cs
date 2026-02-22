@@ -18,9 +18,9 @@ public enum LogChannel
     /// </summary>
     Teamkill,
     /// <summary>
-    /// Damage by or to player.
+    /// Player killed someone.
     /// </summary>
-    Damage,
+    Kill,
     /// <summary>
     /// Log when a player is kicked.
     /// </summary>
