@@ -26,10 +26,7 @@ public static class PluginConfig
 
     internal static ConfigEntry<string>? IpcHost;
     internal const string DefaultIpcHost = "127.0.0.1";
-
-    internal static ConfigEntry<int>? IpcRetryDelayMs;
-    internal const int DefaultIpcRetryDelayMs = 5000;
-
+    
     internal static ConfigEntry<string>? IpcCommandPermissionLevel;
     internal const string DefaultIpcCommandPermissionLevel = "admin";
 
@@ -108,9 +105,6 @@ public static class PluginConfig
         
         IpcHost = config.Bind(IpcSection, "Communication Host", DefaultIpcHost);
         GwServerPlugin.Logger.LogDebug($"IpcHost: {IpcHost}");
-        
-        IpcRetryDelayMs = config.Bind(IpcSection, "Communication Retry Delay", DefaultIpcRetryDelayMs);
-        GwServerPlugin.Logger.LogDebug($"Retry delay: {IpcRetryDelayMs}");
         
         IpcCommandPermissionLevel = config.Bind(IpcSection, "Communication Permission Level", DefaultIpcCommandPermissionLevel);
         GwServerPlugin.Logger.LogDebug($"Communication Permission level: {IpcCommandPermissionLevel}");
