@@ -20,5 +20,9 @@ public enum PacketType
     /// <summary>
     /// Packet type for logs that are sent to the peer process.
     /// </summary>
-    LogEntry
+    LogEntry,
+    /// <summary>
+    /// Packet type for chat logs (allows logging of channels)
+    /// </summary>
+    ChatLog
 }
