@@ -11,7 +11,7 @@ public class LogEntryPacket: CommunicationPacket
     ///     The channel to log to.
     ///     Channels can be anything, it's up to the receiver to handle channels.
     /// </summary>
-    public virtual LogChannel Channel { get; set; }
+    public LogChannel Channel { get; set; }
 
     /// <inheritdoc />
     public override PacketType Type { get; set; } = PacketType.LogEntry;

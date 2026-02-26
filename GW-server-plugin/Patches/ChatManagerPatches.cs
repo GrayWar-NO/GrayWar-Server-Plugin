@@ -57,7 +57,7 @@ internal static class ChatManagerPatches
         var outPacket = new ChatLogPacket
         {
             ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
-            LogText = message
+            MessageText = message
         };
         GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(outPacket));
         return true;
