@@ -8,11 +8,7 @@ public enum LogChannel
     /// <summary>
     /// Info logging (mission change, performance, etc...)
     /// </summary>
-    Info,
-    /// <summary>
-    /// Chat messages
-    /// </summary>
-    Chat,
+    JoinLeave,
     /// <summary>
     /// Teamkill logs
     /// </summary>
