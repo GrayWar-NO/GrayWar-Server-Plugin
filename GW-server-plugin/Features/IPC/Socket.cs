@@ -1,4 +1,5 @@
 using System;
+using System.Drawing.Printing;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -105,7 +106,7 @@ public class Socket : IDisposable
             }
             catch (Exception ex)
             {
-                GwServerPlugin.Logger.LogDebug("[IPC] " + ex.Message);
+                GwServerPlugin.Logger.LogError("[IPC]  " + ex);
             }
 
         }

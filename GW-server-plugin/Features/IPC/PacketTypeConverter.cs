@@ -59,7 +59,7 @@ public class PacketTypeConverter : JsonConverter
         writer.WriteStartObject();
         
         writer.WritePropertyName("Type");
-        serializer.Serialize(writer, packet.Type.ToString().ToLower());
+        serializer.Serialize(writer, packet.Type.ToString());
         
         switch (packet)
         {

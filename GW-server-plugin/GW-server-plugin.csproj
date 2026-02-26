@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-	    <NUCLEAR_OPTION_SERVER_REFERENCES>/home/pauel/.local/share/Steam/steamapps/common/NuclearOptionServer/NuclearOptionServer_Data/Managed</NUCLEAR_OPTION_SERVER_REFERENCES>
+	    <NUCLEAR_OPTION_SERVER_REFERENCES></NUCLEAR_OPTION_SERVER_REFERENCES>
         <!-- General Project Information -->
         <TargetFramework>net48</TargetFramework>
         <AssemblyName>GrayWar.ServerPlugin</AssemblyName>
@@ -62,6 +62,7 @@
         <Reference Include="UnityEngine.CoreModule" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\UnityEngine.CoreModule.dll" Private="False" Publicize="True"/>
         <Reference Include="UnityEngine.AudioModule" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\UnityEngine.AudioModule.dll" Private="False" Publicize="True"/>
         <Reference Include="UnityEngine.PhysicsModule" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\UnityEngine.PhysicsModule.dll" Private="False" Publicize="True"/>
+        <Reference Include="UnityEngine.JSONSerializeModule" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\UnityEngine.JSONSerializeModule.dll" Private="False" Publicize="True"/>
         <Reference Include="UniTask" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\UniTask.dll" Private="False" Publicize="True"/>
         <Reference Include="Mirage" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\Mirage.dll" Private="False" Publicize="True"/>
         <Reference Include="Mirage.SocketLayer" HintPath="$(NUCLEAR_OPTION_SERVER_REFERENCES)\Mirage.SocketLayer.dll" Private="False" Publicize="True"/>
