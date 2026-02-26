@@ -7,8 +7,16 @@ using Random = System.Random;
 
 namespace GW_server_plugin.Features
 {
+    /// <summary>
+    ///    A service to make the weather be random at mission start
+    /// </summary>
     public static class WeatherRandomizerService
     {
+        /// <summary>
+        ///     Randomizes the weather in a json mission string.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
         public static string RandomizeWeather(string json)
         {
             var mission = JsonUtility.FromJson<Mission>(json);
@@ -16,7 +24,7 @@ namespace GW_server_plugin.Features
 
             var rnd = new Random();
 
-            object env = GetFieldOrProperty(mission, "environment");
+            var env = GetFieldOrProperty(mission, "environment");
             if (env == null)
             {
                 var envMemberType = GetFieldOrPropertyType(mission.GetType(), "environment");
@@ -37,7 +45,7 @@ namespace GW_server_plugin.Features
             return JsonUtility.ToJson(mission);
         }
 
-        private static object GetFieldOrProperty(object obj, string name)
+        private static object? GetFieldOrProperty(object obj, string name)
         {
             var t = obj.GetType();
             var f = t.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -49,7 +57,7 @@ namespace GW_server_plugin.Features
             return null;
         }
 
-        private static Type GetFieldOrPropertyType(Type t, string name)
+        private static Type? GetFieldOrPropertyType(Type t, string name)
         {
             var f = t.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (f != null) return f.FieldType;
@@ -80,7 +88,6 @@ namespace GW_server_plugin.Features
 
         private static object ConvertTo(object value, Type targetType)
         {
-            if (value == null) return null;
             if (targetType.IsInstanceOfType(value)) return value;
 
             if (targetType == typeof(float)) return Convert.ToSingle(value);

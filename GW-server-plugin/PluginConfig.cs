@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
@@ -20,6 +19,9 @@ public static class PluginConfig
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
 
+
+    internal static ConfigEntry<bool>? EnableWeatherRandomizer;
+    internal const bool DefaultWeatherRandomizer = true;    
 
     internal static ConfigEntry<int>? IpcPort;
     internal const int DefaultIpcPort = 10042;
@@ -88,6 +90,10 @@ public static class PluginConfig
             "The prefix added in-front of the usernames of Moderators, Admins and the Owner.");
         GwServerPlugin.Logger.LogDebug($"StaffTag: {StaffPrefix.Value}");
 
+        EnableWeatherRandomizer = config.Bind(GeneralSection, "Enable weather randomizer", DefaultWeatherRandomizer);
+        GwServerPlugin.Logger.LogDebug($"Weather randomizer {(EnableWeatherRandomizer.Value ? "enabled" : "disabled")}.");
+        
+        
         ServerBroadcastName = config.Bind(GeneralSection, "ServerBroadcastName", DefaultServerBroadcastName,
             "The name that appears in the chat when the server broadcasts a message.");
         GwServerPlugin.Logger.LogDebug($"ServerBroadcastName: {ServerBroadcastName}");
