@@ -36,14 +36,21 @@ public class Socket : IDisposable
     /// </summary>
     public void Start(string host, int port)
     {
-        // Create a TCP listener and start it
-        _cts = new CancellationTokenSource();
-        var ip = IPAddress.Parse(host);
-        _listener = new TcpListener(ip, port);
-        _listener.Start();
+        try
+        {
+            // Create a TCP listener and start it
+            _cts = new CancellationTokenSource();
+            var ip = IPAddress.Parse(host);
+            _listener = new TcpListener(ip, port);
+            _listener.Start();
 
-        // Kick off the accept loop in the background
-        _ = AcceptLoop(_cts.Token);
+            // Kick off the accept loop in the background
+            _ = AcceptLoop(_cts.Token);
+        }
+        catch (Exception ex)
+        {
+            GwServerPlugin.Logger.LogError($"[IPC]: failed to open socket: {ex.Message}");
+        }
     }
 
     /// <summary>
