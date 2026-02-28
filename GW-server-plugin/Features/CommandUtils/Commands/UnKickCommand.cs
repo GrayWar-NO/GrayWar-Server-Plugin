@@ -53,7 +53,7 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
             LogText = $"0:{steamID}:",
             Channel = LogChannel.Kick
         };
-        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(kickLogPacket));
+        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(kickLogPacket));
     }
     
 }
