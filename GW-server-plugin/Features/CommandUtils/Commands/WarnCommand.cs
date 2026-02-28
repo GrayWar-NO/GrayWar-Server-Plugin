@@ -73,7 +73,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
             LogText = $"{warnSteamID}:{reason}",
             Channel = LogChannel.Warn
         };
-        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(warnLogPacket));
+        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(warnLogPacket));
         return true;
     }
 

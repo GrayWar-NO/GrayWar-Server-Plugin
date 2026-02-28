@@ -26,6 +26,6 @@ public class ReportKilledPatch
             LogText =
                 $"{MunitionContext.CurrentOwner.SteamID}:{MunitionContext.CurrentWeaponInfo!.weaponName}:{outText}"
         };
-        GwServerPlugin.SocketOutBox.Enqueue(JsonConvert.SerializeObject(killLogPacket));
+        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(killLogPacket));
     }
 }
