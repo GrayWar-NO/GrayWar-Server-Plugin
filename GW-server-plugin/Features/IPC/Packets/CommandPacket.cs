@@ -24,7 +24,7 @@ public class CommandPacket: CommunicationPacket
     /// <summary>
     ///     Whether the called command needs a result.
     /// </summary>
-    private bool Result { get; set; } = true;
+    public bool Result { get; set; } = true;
     
     /// <summary>
     /// Process method for Command packet.

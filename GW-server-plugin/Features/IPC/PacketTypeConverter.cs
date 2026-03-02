@@ -58,29 +58,39 @@ public class PacketTypeConverter : JsonConverter
         var packet = (CommunicationPacket)value!;
         writer.WriteStartObject();
         
-        writer.WritePropertyName("Type");
+        writer.WritePropertyName("type");
         serializer.Serialize(writer, packet.Type.ToString().ToLower());
         
         switch (packet)
         {
             case PingPacket ping:
-                writer.WritePropertyName("Data");
+                writer.WritePropertyName("data");
                 serializer.Serialize(writer, ping.Data);
                 break;
             case CommandPacket cmd:
-                writer.WritePropertyName("CommandName");
+                writer.WritePropertyName("commandName");
                 serializer.Serialize(writer, cmd.CommandName);
-                writer.WritePropertyName("Parameters");
+                writer.WritePropertyName("arguments");
                 serializer.Serialize(writer, cmd.Arguments);
+                writer.WritePropertyName("result");
+                serializer.Serialize(writer, cmd.Result);
                 break;
             case ResponsePacket resp:
-                writer.WritePropertyName("ResponseText");
+                writer.WritePropertyName("responseText");
                 serializer.Serialize(writer, resp.ResponseText);
                 break;
-            case LogEntryPacket log:
-                writer.WritePropertyName("Channel");
+            case ChatLogPacket log:
+                writer.WritePropertyName("chatName");
+                serializer.Serialize(writer, log.ChatName);
+                writer.WritePropertyName("channel");
                 serializer.Serialize(writer, log.Channel.ToString().ToLower());
-                writer.WritePropertyName("LogText");
+                writer.WritePropertyName("logText");
+                serializer.Serialize(writer, log.LogText);
+                break;
+            case LogEntryPacket log:
+                writer.WritePropertyName("channel");
+                serializer.Serialize(writer, log.Channel.ToString().ToLower());
+                writer.WritePropertyName("logText");
                 serializer.Serialize(writer, log.LogText);
                 break;
         }
