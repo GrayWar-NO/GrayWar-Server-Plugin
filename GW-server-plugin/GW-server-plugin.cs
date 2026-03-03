@@ -199,7 +199,7 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
         var joinPacket = new LogEntryPacket
         {
-            Channel = LogChannel.Info,
+            Channel = LogChannel.JoinLeave,
             LogText = $"joined:{player.SteamID}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(joinPacket));
@@ -213,7 +213,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerIdentifier.RemovePlayer(player);
         var leavePacket = new LogEntryPacket
         {
-            Channel = LogChannel.Info,
+            Channel = LogChannel.JoinLeave,
             LogText = $"left:{player.SteamID}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(leavePacket));

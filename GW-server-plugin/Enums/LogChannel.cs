@@ -6,9 +6,13 @@ namespace GW_server_plugin.Enums;
 public enum LogChannel
 {
     /// <summary>
-    /// Info logging (mission change, performance, etc...)
+    /// Players joining and leaving.
     /// </summary>
-    Info,
+    JoinLeave,
+    /// <summary>
+    /// Missions starting and stopping, and general mission-related logging.
+    /// </summary>
+    MissionStatus,
     /// <summary>
     /// Chat messages
     /// </summary>
