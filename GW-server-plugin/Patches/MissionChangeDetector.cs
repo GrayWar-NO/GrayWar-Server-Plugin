@@ -67,6 +67,7 @@ public class MissionChangeDetector
     /// <param name="mission"></param>
     public static void OnMissionChanged(Mission? mission)
     {
+        GwServerPlugin.Logger.LogDebug($"Mission changed: {mission?.Name ?? "null"}");
         var missionChangePacket = new LogEntryPacket
         {
             Channel = LogChannel.MissionStatus,
@@ -74,6 +75,15 @@ public class MissionChangeDetector
         };
         
         GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(missionChangePacket));
-        System.Console.WriteLine($"Mission changed: {mission?.Name ?? "null"}");
     }
 }   
+
+[HarmonyPatch(typeof(DedicatedServerManager), nameof(DedicatedServerManager.PreloadAndUpdateLobby))]
+internal class LobbyPatch
+{
+    [HarmonyPostfix]
+    static void Postfix(MissionOptions option, bool setStartTime, ref Mission mission)
+    {
+        MissionChangeDetector.OnMissionChanged(mission);
+    }
+}
