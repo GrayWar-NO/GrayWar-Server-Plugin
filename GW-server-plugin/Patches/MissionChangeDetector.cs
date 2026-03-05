@@ -75,6 +75,7 @@ public class MissionChangeDetector
         };
         
         GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(missionChangePacket));
+        GwServerPlugin.WarnService.ClearWarns();
     }
 }   
 
