@@ -179,7 +179,7 @@ public static class PlayerUtils
         ); 
         var banLogPacket = new LogEntryPacket
         {
-            LogText = $"1:{banSteamID}:{reason}:{duration ?? ""}",
+            LogText = $"1:{banSteamID}:{duration ?? ""}:{reason}",
             Channel = LogChannel.Ban
         };
         GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(banLogPacket));
