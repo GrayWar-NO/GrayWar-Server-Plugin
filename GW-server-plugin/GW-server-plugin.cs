@@ -37,13 +37,15 @@ public class GwServerPlugin : BaseUnityPlugin
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
     internal static VoteKickService VoteKickService { get; private set; } = null!;
+
+    internal static WarnService WarnService { get; private set; } = null!;
     
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
     
-    private CancellationTokenSource? _cts = null!;
+    private CancellationTokenSource? _cts;
     
-    internal static Dictionary<ulong, ulong> FamilySharingBorrowers = new Dictionary<ulong, ulong>();
+    internal static readonly Dictionary<ulong, ulong> FamilySharingBorrowers = new();
 
 
     private Socket? _socket;
@@ -55,7 +57,10 @@ public class GwServerPlugin : BaseUnityPlugin
         PluginConfig.InitSettings(Config);
         MissionVote = new MissionVoteService(Config);
         Logger.LogInfo("Loaded MissionVote");
-
+        
+        WarnService = new WarnService(Config);
+        Logger.LogInfo("Loaded WarnService");
+        
         VoteKickService = new VoteKickService();
         Logger.LogInfo("Loaded VoteKick");
         try
@@ -200,7 +205,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var joinPacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"joined:{player.SteamID}"
+            LogText = $"1:{player.SteamID}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(joinPacket));
     }
@@ -214,7 +219,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var leavePacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"left:{player.SteamID}"
+            LogText = $"0:{player.SteamID}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(leavePacket));
     }
