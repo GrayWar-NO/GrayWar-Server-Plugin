@@ -20,6 +20,11 @@ public class CommandPacket: CommunicationPacket
     /// Arguments for the command
     /// </summary>
     public string[] Arguments { get; set; } = null!;
+
+    /// <summary>
+    ///     Whether the called command needs a result.
+    /// </summary>
+    public bool Result { get; set; } = true;
     
     /// <summary>
     /// Process method for Command packet.
@@ -29,7 +34,7 @@ public class CommandPacket: CommunicationPacket
     {
         GwServerPlugin.Logger.LogDebug($"command {CommandName} recieved with args: {string.Join("; ", Arguments)}");
         CommandService.TryExecuteCommand(CommandName, Arguments, out var response);
-        if (response is null) return null;
-        return new ResponsePacket { ResponseText = response };
+        if (response is null) response = $"Command {CommandName} executed successfully.";
+        return Result ? new ResponsePacket { ResponseText = response } : null;
     }
 }

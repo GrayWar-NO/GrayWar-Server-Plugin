@@ -19,7 +19,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Description { get; } = "Bans a player from the server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Reason> <Optional duration (Xh or Xd)>";
+    public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args) => Validate(args);
@@ -27,7 +27,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length is >= 2 and <= 3 &&
+        return args.Length is >= 1 and <= 3 &&
                (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
@@ -45,7 +45,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override bool Execute(string[] args, out string? response)
     {
         var target = args[0];
-        var reason = args[1];
+        var reason = args.Length > 1 ? args[1] : "Unknown reason";
         string? duration = null;
         if (args.Length == 3)
         {

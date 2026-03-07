@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
 using GW_server_plugin.Enums;
@@ -30,16 +32,20 @@ public class GwServerPlugin : BaseUnityPlugin
     /// <summary>
     /// Socket Outbox for the IPC communication
     /// </summary>
-    internal static readonly ConcurrentQueue<string> SocketOutBox = new();
+    internal static readonly BlockingCollection<string> SocketOutBox = new();
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
     internal static VoteKickService VoteKickService { get; private set; } = null!;
+
+    internal static WarnService WarnService { get; private set; } = null!;
     
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
     
-    internal static Dictionary<ulong, ulong> FamilySharingBorrowers = new Dictionary<ulong, ulong>();
+    private CancellationTokenSource? _cts;
+    
+    internal static readonly Dictionary<ulong, ulong> FamilySharingBorrowers = new();
 
 
     private Socket? _socket;
@@ -51,7 +57,10 @@ public class GwServerPlugin : BaseUnityPlugin
         PluginConfig.InitSettings(Config);
         MissionVote = new MissionVoteService(Config);
         Logger.LogInfo("Loaded MissionVote");
-
+        
+        WarnService = new WarnService(Config);
+        Logger.LogInfo("Loaded WarnService");
+        
         VoteKickService = new VoteKickService();
         Logger.LogInfo("Loaded VoteKick");
         try
@@ -65,13 +74,14 @@ public class GwServerPlugin : BaseUnityPlugin
         
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
         
-        TimeService.Initialize();
+        // TimeService.Initialize();
 
 
         if (PluginConfig.IpcEnable!.Value) {
             _socket = new Socket();
             _socket.OnJson += HandleJson;
             _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
+            StartSender();
         }
         
         PatchAll();
@@ -95,8 +105,6 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new BanCommand(Config));
         CommandService.AddCommand(new UnbanCommand(Config));
 
-        TimeEvents.EverySecond += EverySecond;
-        
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
         
@@ -149,20 +157,32 @@ public class GwServerPlugin : BaseUnityPlugin
     }
 
 
-    private void EverySecond()
-    {
-        while (SocketOutBox.TryDequeue(out var msg))
-        {
-            _socket?.SendJson(msg);
-        }
-    }
 
+    private void StartSender()
+    {
+        _cts = new CancellationTokenSource();
+
+        Task.Run(() =>
+        {
+            try
+            {
+                foreach (var msg in SocketOutBox.GetConsumingEnumerable(_cts.Token))
+                {
+                    _socket?.SendJson(msg);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on shutdown
+            }
+        });
+    }
     private void HandleJson(string msg)
     {
         var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
         CommunicationPacket? respPacket = packet!.Process();
         if (respPacket is null) return;
-        SocketOutBox.Enqueue(JsonConvert.SerializeObject(respPacket));
+        SocketOutBox.Add(JsonConvert.SerializeObject(respPacket));
     }
     private static void OnPlayerJoin(Player player)
     {
@@ -184,10 +204,10 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
         var joinPacket = new LogEntryPacket
         {
-            Channel = LogChannel.Info,
-            LogText = $"joined:{player.SteamID}"
+            Channel = LogChannel.JoinLeave,
+            LogText = $"1:{player.SteamID}"
         };
-        SocketOutBox.Enqueue(JsonConvert.SerializeObject(joinPacket));
+        SocketOutBox.Add(JsonConvert.SerializeObject(joinPacket));
     }
 
     private static void OnPlayerLeave(Player player)
@@ -198,10 +218,10 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerIdentifier.RemovePlayer(player);
         var leavePacket = new LogEntryPacket
         {
-            Channel = LogChannel.Info,
-            LogText = $"left:{player.SteamID}"
+            Channel = LogChannel.JoinLeave,
+            LogText = $"0:{player.SteamID}"
         };
-        SocketOutBox.Enqueue(JsonConvert.SerializeObject(leavePacket));
+        SocketOutBox.Add(JsonConvert.SerializeObject(leavePacket));
     }
 
     private static bool CheckOwnerBanned(Player player)
