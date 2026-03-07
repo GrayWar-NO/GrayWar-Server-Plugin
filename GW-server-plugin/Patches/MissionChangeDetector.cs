@@ -37,7 +37,7 @@ public class MissionChangeDetector
     [HarmonyTranspiler]
     // ReSharper disable once UnusedMember.Local
     private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-    {
+    { // TODO change: this is broken
         var found = false;
         foreach (var ci in instructions)
         {

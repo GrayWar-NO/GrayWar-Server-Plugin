@@ -13,6 +13,7 @@ using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
@@ -39,6 +40,16 @@ public class GwServerPlugin : BaseUnityPlugin
     internal static VoteKickService VoteKickService { get; private set; } = null!;
 
     internal static WarnService WarnService { get; private set; } = null!;
+
+    /// <summary>
+    /// Weapon type storage for weapon kill detection.
+    /// </summary>
+    public static readonly UnitWeaponLogStorage WeaponStorage = new();
+
+    /// <summary>
+    /// Weapon name storage for shockwaves.
+    /// </summary>
+    public static readonly ShockwaveWeaponTypeStorage ShockwaveWeaponStorage = new();
     
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
