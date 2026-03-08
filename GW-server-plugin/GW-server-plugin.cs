@@ -241,4 +241,21 @@ public class GwServerPlugin : BaseUnityPlugin
         return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamID));
     }
 
+    /// <summary>
+    /// Method for handling teamkills
+    /// </summary>
+    /// <param name="killer"></param>
+    /// <param name="killed"></param>
+    /// <param name="weaponName"></param>
+    public static void OnTeamkill(Player killer, Player killed, string weaponName)
+    {
+        if (weaponName.Contains("kt")) return;// if weapon is a nuke
+        var warnLogPacket = new LogEntryPacket
+        {
+            LogText = $"{killer.SteamID}:Teamkilled player {killed.PlayerName} with weapon {weaponName}",
+            Channel = LogChannel.Warn
+        };
+        SocketOutBox.Add(JsonConvert.SerializeObject(warnLogPacket));
+        WarnService.AddWarn(killer.SteamID);
+    }
 }

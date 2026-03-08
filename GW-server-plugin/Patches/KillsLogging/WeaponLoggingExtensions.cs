@@ -179,6 +179,7 @@ public static class WeaponLoggingExtensions
             killerAircraft.Player.AddScore(-Mathf.Sqrt(killedAircraft.definition.value));
             killerAircraft.Player.AddAllocation(-amount);
             killedAircraft.Player.AddAllocation(amount);
+            GwServerPlugin.OnTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
         }
         else logPacket.Channel = LogChannel.Kill;
 
@@ -194,7 +195,7 @@ public static class WeaponLoggingExtensions
             _ => KillType.Vehicle
         };
 
-        if (!(NetworkSceneSingleton<MessageManager>.i != null))
+        if (NetworkSceneSingleton<MessageManager>.i == null)
             return;
         NetworkSceneSingleton<MessageManager>.i.RpcKillMessage(killerID, unit.persistentID, killedType,
             killerWeaponName);

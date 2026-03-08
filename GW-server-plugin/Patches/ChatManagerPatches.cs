@@ -43,12 +43,7 @@ internal static class ChatManagerPatches
                     ChatService.SendPrivateChatMessage(s, player!);
                 }
             }
-            
-            
             if (commandResult) return false;
-            
-            
-            
         }
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player!.PlayerName} sent message: {message}"
