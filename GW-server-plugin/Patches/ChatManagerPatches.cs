@@ -51,6 +51,7 @@ internal static class ChatManagerPatches
         
         var outPacket = new ChatLogPacket
         {
+            SteamID = player.SteamID,
             ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
             LogText = message
         };

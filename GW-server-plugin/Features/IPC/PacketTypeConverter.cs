@@ -86,6 +86,8 @@ public class PacketTypeConverter : JsonConverter
                 serializer.Serialize(writer, log.Channel.ToString().ToLower());
                 writer.WritePropertyName("logText");
                 serializer.Serialize(writer, log.LogText);
+                writer.WritePropertyName("steamID");
+                serializer.Serialize(writer, log.SteamID);
                 break;
             case LogEntryPacket log:
                 writer.WritePropertyName("channel");
