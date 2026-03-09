@@ -182,8 +182,9 @@ public static class WeaponLoggingExtensions
             GwServerPlugin.OnTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
         }
         else logPacket.Channel = LogChannel.Kill;
-
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(logPacket));
+        
+        if (killerSteamID != null || killedSteamID != null)
+            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(logPacket));
 
         // ReSharper disable once RedundantCast
         var killedType = unit switch
