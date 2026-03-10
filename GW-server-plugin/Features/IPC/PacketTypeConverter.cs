@@ -83,7 +83,7 @@ public class PacketTypeConverter : JsonConverter
                 writer.WritePropertyName("chatName");
                 serializer.Serialize(writer, log.ChatName);
                 writer.WritePropertyName("channel");
-                serializer.Serialize(writer, log.Channel.ToString().ToLower());
+                serializer.Serialize(writer, log.Channel.ToString());
                 writer.WritePropertyName("logText");
                 serializer.Serialize(writer, log.LogText);
                 writer.WritePropertyName("steamID");
@@ -91,7 +91,7 @@ public class PacketTypeConverter : JsonConverter
                 break;
             case LogEntryPacket log:
                 writer.WritePropertyName("channel");
-                serializer.Serialize(writer, log.Channel.ToString().ToLower());
+                serializer.Serialize(writer, log.Channel.ToString());
                 writer.WritePropertyName("logText");
                 serializer.Serialize(writer, log.LogText);
                 break;
