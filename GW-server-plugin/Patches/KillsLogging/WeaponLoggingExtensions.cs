@@ -140,13 +140,13 @@ public static class WeaponLoggingExtensions
         string killerWeaponName;
         if (!weaponCredit.TryGetValue(killerID, out var killerAircraftWeapons))
         {
-            killerWeaponName = "UNKNOWN";
+            killerWeaponName = "";
         }
         else if (killerAircraftWeapons is null)
         {
             GwServerPlugin.Logger.LogError(
                 "This should not happen. Something killed something else without recording any dealt damage");
-            killerWeaponName = "UNKNOWN";
+            killerWeaponName = "";
         }
         else
         {
@@ -155,7 +155,7 @@ public static class WeaponLoggingExtensions
             {
                 killerWeapon = kvp;
             }
-            killerWeaponName = killerWeapon?.Key ?? "UNKNOWN";
+            killerWeaponName = killerWeapon?.Key ?? "";
         }
 
         GwServerPlugin.Logger.LogDebug($"An {unit.unitName} was killed with weapon {killerWeaponName}");
