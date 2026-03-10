@@ -230,7 +230,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var leavePacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"0:{player.SteamID}"
+            LogText = $"0:{player.SteamID}:{Math.Round(player.PlayerScore, 2)}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(leavePacket));
     }
