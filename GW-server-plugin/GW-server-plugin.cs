@@ -198,6 +198,7 @@ public class GwServerPlugin : BaseUnityPlugin
     private static void OnPlayerJoin(Player player)
     {
         Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
+        var originalName = player.PlayerName;
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
@@ -216,7 +217,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var joinPacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"1:{player.SteamID}"
+            LogText = $"1:{player.SteamID}:{originalName}"
         };
         SocketOutBox.Add(JsonConvert.SerializeObject(joinPacket));
     }
