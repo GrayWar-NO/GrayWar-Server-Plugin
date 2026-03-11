@@ -158,12 +158,28 @@ public static class WeaponLoggingExtensions
             killerWeaponName = killerWeapon?.Key ?? "";
         }
 
-        GwServerPlugin.Logger.LogDebug($"An {unit.unitName} was killed with weapon {killerWeaponName}");
-
+        string killedName;
+        if (killedSteamID != null)
+        {
+            var s = killedUnit.unitName;
+            killedName = s.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+        }
+        else killedName = killedUnit.unitName;
+        
+        string? killerName;
+        if (killerSteamID != null)
+        {
+            var s = killerUnit?.unitName;
+            killerName = s?.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+        }
+        else killerName = killerUnit?.unitName;
+        
+        GwServerPlugin.Logger.LogDebug($"An {killedName} was killed with weapon {killerWeaponName}");
+        
         var logPacket = new LogEntryPacket
         {
             LogText =
-                $"{killerSteamID?.ToString() ?? ""}:{killerUnit?.unitName ?? ""}:{killerWeaponName}:{killedSteamID?.ToString() ?? ""}:{killedUnit.unitName}"
+                $"{killerSteamID?.ToString() ?? ""}:{killerName ?? ""}:{killerWeaponName}:{killedSteamID?.ToString() ?? ""}:{killedName}"
         };
 
         if (killedAircraft is not null &&
