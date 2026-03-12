@@ -169,21 +169,23 @@ public static class PlayerUtils
     /// <param name="banSteamID"></param>
     /// <param name="reason"></param>
     /// <param name="duration"></param>
-    public static void BanPlayer(ulong banSteamID, string reason, string? duration)
+    /// <param name="suppressLogging"></param>
+    public static void BanPlayer(ulong banSteamID, string reason, string? duration, bool suppressLogging)
     {
         AllowBanList.BanAndAppendId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
             new CSteamID(banSteamID),
             reason
-        ); 
+        );
+        
+        if (suppressLogging) return;
         var banLogPacket = new LogEntryPacket
         {
             LogText = $"1:{banSteamID}:{duration ?? ""}:{reason}",
             Channel = LogChannel.Ban
         };
         GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(banLogPacket));
-
     }
     
 }

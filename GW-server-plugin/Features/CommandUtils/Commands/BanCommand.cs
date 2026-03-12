@@ -36,14 +36,16 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute(args, out response);
+        if (targetPlayer != player) return Behaviour(args, false, out response);
         response = "You cannot ban yourself!";
         return false;
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
-    {
+    public override bool Execute(string[] args, out string? response) => Behaviour(args, true, out response);
+    
+    
+    private bool Behaviour(string[] args, bool comesFromIpc, out string? response ){
         var target = args[0];
         var reason = args.Length > 1 ? args[1] : "Unknown reason";
         string? duration = null;
@@ -77,12 +79,12 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
             response += $" for {duration}.";
         }
 
-        
-        PlayerUtils.BanPlayer(banSteamID, reason, duration);
+        PlayerUtils.BanPlayer(banSteamID, reason, duration, comesFromIpc);
         if (!GwServerPlugin.FamilySharingBorrowers.TryGetValue(banSteamID, out var ownerSteamID)) return true;
         if (ownerSteamID != banSteamID)
         {
-            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}", duration);
+            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}",
+                duration, comesFromIpc);
             response += $"\tBanned Owner with steamID {ownerSteamID} as well";
         }
         return true;
