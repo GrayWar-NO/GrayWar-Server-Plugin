@@ -214,7 +214,6 @@ public static class WeaponLoggingExtensions
 
         if (NetworkSceneSingleton<MessageManager>.i == null)
             return;
-        NetworkSceneSingleton<MessageManager>.i.RpcKillMessage(killerID, unit.persistentID, killedType,
-            killerWeaponName);
+        NetworkSceneSingleton<MessageManager>.i.RpcKillMessage(killerID, unit.persistentID, killedType);
     }
 }
