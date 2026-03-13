@@ -24,5 +24,9 @@ public enum PacketType
     /// <summary>
     /// Packet type for chat logs (allows logging of channels)
     /// </summary>
-    ChatLog
+    ChatLog,
+    /// <summary>
+    ///  Packet for linking players.
+    /// </summary>
+    Link
 }

@@ -95,6 +95,12 @@ public class PacketTypeConverter : JsonConverter
                 writer.WritePropertyName("logText");
                 serializer.Serialize(writer, log.LogText);
                 break;
+            case LinkPacket log:
+                writer.WritePropertyName("steamID");
+                serializer.Serialize(writer, log.SteamID);
+                writer.WritePropertyName("oneTimeCode");
+                serializer.Serialize(writer, log.OneTimeCode);
+                break;
         }
 
         writer.WriteEndObject();
