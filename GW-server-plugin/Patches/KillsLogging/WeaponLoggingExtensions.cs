@@ -182,6 +182,15 @@ public static class WeaponLoggingExtensions
                 $"{killerSteamID?.ToString() ?? ""}:{killerName ?? ""}:{killerWeaponName}:{killedSteamID?.ToString() ?? ""}:{killedName}"
         };
 
+        if (killerAircraft != null &&
+            killerAircraft.Player != null &&
+            killerAircraft.NetworkHQ == killedUnit.unit.NetworkHQ &&
+            totalReceivedDamage > 1.0)
+        {
+            // if player-anything teamkill
+            logPacket.Channel = LogChannel.Teamkill;
+        } else logPacket.Channel = LogChannel.Kill;
+        
         if (killedAircraft is not null &&
             killedAircraft.Player != null &&
             totalReceivedDamage > 1.0 && killerIsUnit &&
@@ -189,15 +198,13 @@ public static class WeaponLoggingExtensions
             killerAircraft is not null &&
             killerAircraft.Player != null)
         {
-            // if TEAMKILL
-            logPacket.Channel = LogChannel.Teamkill;
+            // if player-player TEAMKILL
             var amount = killedAircraft.definition.value + killedAircraft.weaponManager.GetCurrentValue(true);
             killerAircraft.Player.AddScore(-Mathf.Sqrt(killedAircraft.definition.value));
             killerAircraft.Player.AddAllocation(-amount);
             killedAircraft.Player.AddAllocation(amount);
             GwServerPlugin.OnTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
         }
-        else logPacket.Channel = LogChannel.Kill;
         
         if (killerSteamID != null || killedSteamID != null)
             GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(logPacket));
