@@ -27,7 +27,7 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
     /// <inheritdoc />
     public override bool Validate(string[] args)
     {
-        return args.Length == 2 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
@@ -46,7 +46,7 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var target = args[0];
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
         {
-            PlayerUtils.KickPlayer(targetPlayer!, args[1]);
+            PlayerUtils.KickPlayer(targetPlayer!,  string.Join(" ", args.Skip(1)));
             response = $"{targetPlayer!.PlayerName} has been kicked!";
             return true;
         }
