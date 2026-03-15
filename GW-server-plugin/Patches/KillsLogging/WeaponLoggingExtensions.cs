@@ -123,6 +123,7 @@ public static class WeaponLoggingExtensions
         }
 
         var killerIsUnit = UnitRegistry.TryGetUnit(killerID, out var killerUnit);
+        UnitRegistry.TryGetPersistentUnit(killerID, out var killerPUnit);
         ulong? killerSteamID;
         Aircraft? killerAircraft;
         if (killerUnit is Aircraft killerAircraftUnit)
@@ -133,7 +134,7 @@ public static class WeaponLoggingExtensions
         else
         {
             killerAircraft = null;
-            killerSteamID = null;
+            killerSteamID = killerPUnit?.player.SteamID;
         }
 
         KeyValuePair<string, float>? killerWeapon;
@@ -169,13 +170,12 @@ public static class WeaponLoggingExtensions
         string? killerName;
         if (killerSteamID != null)
         {
-            var s = killerUnit?.unitName;
+            var s = killerPUnit?.unitName;
             killerName = s?.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
         }
-        else killerName = killerUnit?.unitName;
+        else killerName = killerPUnit?.unitName;
         
-        GwServerPlugin.Logger.LogDebug($"An {killedName} was killed with weapon {killerWeaponName}");
-        
+        GwServerPlugin.Logger.LogDebug($"An {killedName} was killed by {killerName} with weapon {killerWeaponName}");
         var logPacket = new LogEntryPacket
         {
             LogText =
