@@ -14,6 +14,10 @@ public enum LogChannel
     /// </summary>
     MissionStatus,
     /// <summary>
+    /// Start and end of a player's sortie.
+    /// </summary>
+    SortieStatus,
+    /// <summary>
     /// Chat messages
     /// </summary>
     Chat,

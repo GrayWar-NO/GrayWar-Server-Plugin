@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
@@ -119,13 +121,13 @@ public static class WeaponLoggingExtensions
         else
         {
             killedAircraft = null;
-            killedSteamID = null;
+            killedSteamID = killedUnit.player?.SteamID;
         }
+        ulong? killerSteamID;
+        Aircraft? killerAircraft;
 
         var killerIsUnit = UnitRegistry.TryGetUnit(killerID, out var killerUnit);
         UnitRegistry.TryGetPersistentUnit(killerID, out var killerPUnit);
-        ulong? killerSteamID;
-        Aircraft? killerAircraft;
         if (killerUnit is Aircraft killerAircraftUnit)
         {
             killerAircraft = killerAircraftUnit;
@@ -134,7 +136,7 @@ public static class WeaponLoggingExtensions
         else
         {
             killerAircraft = null;
-            killerSteamID = killerPUnit?.player.SteamID;
+            killerSteamID = killerPUnit?.player?.SteamID;
         }
 
         KeyValuePair<string, float>? killerWeapon;
@@ -176,7 +178,7 @@ public static class WeaponLoggingExtensions
         else killerName = killerPUnit?.unitName;
         
         GwServerPlugin.Logger.LogDebug($"An {killedName} was killed by {killerName} with weapon {killerWeaponName}");
-        var logPacket = new LogEntryPacket
+        var killPacket = new LogEntryPacket
         {
             LogText =
                 $"{killerSteamID?.ToString() ?? ""}:{killerName ?? ""}:{killerWeaponName}:{killedSteamID?.ToString() ?? ""}:{killedName}"
@@ -188,8 +190,8 @@ public static class WeaponLoggingExtensions
             totalReceivedDamage > 1.0)
         {
             // if player-anything teamkill
-            logPacket.Channel = LogChannel.Teamkill;
-        } else logPacket.Channel = LogChannel.Kill;
+            killPacket.Channel = LogChannel.Teamkill;
+        } else killPacket.Channel = LogChannel.Kill;
         
         if (killedAircraft is not null &&
             killedAircraft.Player != null &&
@@ -207,7 +209,17 @@ public static class WeaponLoggingExtensions
         }
         
         if (killerSteamID != null || killedSteamID != null)
-            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(logPacket));
+            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(killPacket));
+
+        if (killedSteamID != null)
+        {
+            var outAirframePacket = new LogEntryPacket // Log player finished sortie
+            {
+                Channel = LogChannel.SortieStatus,
+                LogText = $"0:{killedSteamID}:0"
+            };
+            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(outAirframePacket));
+        }
 
         // ReSharper disable once RedundantCast
         var killedType = unit switch
