@@ -162,7 +162,7 @@ public static class WeaponLoggingExtensions
         }
 
         string killedName;
-        if (killedSteamID != null)
+        if (killedSteamID != null && killedUnit.unitName.IndexOf('[') != -1)
         {
             var s = killedUnit.unitName;
             killedName = s.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
@@ -170,7 +170,7 @@ public static class WeaponLoggingExtensions
         else killedName = killedUnit.unitName;
         
         string? killerName;
-        if (killerSteamID != null)
+        if (killerSteamID != null && killerPUnit?.unitName.IndexOf('[') != -1)
         {
             var s = killerPUnit?.unitName;
             killerName = s?.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
