@@ -1,7 +1,5 @@
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
-using Mirage;
-using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
