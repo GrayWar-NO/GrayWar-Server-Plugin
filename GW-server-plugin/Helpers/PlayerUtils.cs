@@ -122,7 +122,7 @@ public static class PlayerUtils
     /// <returns></returns>
     public static void ApplyOrRemoveStaffTag(Player playerObject)
     {
-        if (!PluginConfig.UseStaffPrefix!.Value || IsStaff(playerObject)) return;
+        if (!PluginConfig.UseStaffPrefix!.Value || !IsStaff(playerObject)) return;
         var newName = $"{PluginConfig.StaffPrefix!.Value} {playerObject.PlayerName}";
         playerObject.PlayerName = newName;
     }
