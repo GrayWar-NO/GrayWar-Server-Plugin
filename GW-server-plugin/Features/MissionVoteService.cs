@@ -100,6 +100,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     {
         var connectedPlayers = Globals.AuthenticatedPlayers.Count - 1;
         var minLimit = Math.Ceiling((double)connectedPlayers / 2f);
+        if (connectedPlayers % 2 == 0) minLimit++; // make it absolute majority.
         ChatService.SendChatMessage($"RTV: {RTVs.Count} / {minLimit} ");
         if (RTVs.Count >= minLimit)
         {
