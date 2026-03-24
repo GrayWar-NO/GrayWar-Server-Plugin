@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using Mirage;
@@ -102,7 +103,18 @@ public static class PlayerUtils
 
         return Regex.Replace(playerName, pattern, "");
     }
-
+    
+    /// <summary>
+    /// Checks if a player is staff.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    public static bool IsStaff(Player player)
+    {
+        return !(!PluginConfig.IsAdmin(player.SteamID) &&
+                !PluginConfig.IsOwner(player.SteamID) &&
+                !PluginConfig.IsModerator(player.SteamID));
+    }
     /// <summary>
     ///     Apply or remove the staff tag based on player permission level.
     /// </summary>
@@ -110,11 +122,22 @@ public static class PlayerUtils
     /// <returns></returns>
     public static void ApplyOrRemoveStaffTag(Player playerObject)
     {
-        if (!PluginConfig.UseStaffPrefix!.Value || (!PluginConfig.IsAdmin(playerObject.SteamID) &&
-                                                   !PluginConfig.IsOwner(playerObject.SteamID) &&
-                                                   !PluginConfig.IsModerator(playerObject.SteamID))) return;
+        if (!PluginConfig.UseStaffPrefix!.Value || IsStaff(playerObject)) return;
         var newName = $"{PluginConfig.StaffPrefix!.Value} {playerObject.PlayerName}";
         playerObject.PlayerName = newName;
+    }
+
+
+    /// <summary>
+    /// Counts the staff members in a given list of players.
+    /// </summary>
+    /// <returns></returns>
+    public static int CountStaff()
+    {
+        return Globals.NetworkManagerNuclearOptionInstance.Server.AuthenticatedPlayers
+            .Count(networkPlayer =>
+                networkPlayer.TryGetPlayer<Player>(out var player) &&
+                IsStaff(player));
     }
 
     /// <summary>
@@ -154,7 +177,7 @@ public static class PlayerUtils
     /// <param name="reason"></param>
     public static void KickPlayer(Player player, string reason)
     {
-        Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
+        Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, reason).Forget();
         var kickLogPacket = new LogEntryPacket
         {
             LogText = $"1:{player.SteamID}:{reason}",
@@ -187,5 +210,26 @@ public static class PlayerUtils
         };
         GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(banLogPacket));
     }
+
+    /// <summary>
+    /// Kicks a player asynchronously with reason.
+    /// </summary>
+    /// <param name="managerNuclearOption"></param>
+    /// <param name="player"></param>
+    /// <param name="reason"></param>
+    /// <exception cref="MethodInvocationException"></exception>
+    public static async UniTaskVoid KickPlayerAsync(this NetworkManagerNuclearOption managerNuclearOption, Player player, string reason)
+    {
+        GwServerPlugin.Logger.LogDebug("Called new kick");
+        if (!managerNuclearOption.Server.Active)
+            throw new MethodInvocationException("KickPlayerAsync called when server is not active");
+        var conn = player.Owner;
+        managerNuclearOption.authenticator.OnKick(conn);
+        var hostName = GameManager.GetLocalPlayer<Player>(out var localPlayer) ? localPlayer.PlayerName : "server";
+        player.KickReason(reason, hostName);
+        await UniTask.Delay(100);
+        conn.Disconnect();
+    }
+
     
 }

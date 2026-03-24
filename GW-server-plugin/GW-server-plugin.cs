@@ -101,6 +101,8 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new HelpCommand(Config));
         CommandService.AddCommand(new ListPlayersCommand(Config));
         CommandService.AddCommand(new SetPermissionLevelCommand(Config));
+        CommandService.AddCommand(new AddSlotCommand(Config));
+        CommandService.AddCommand(new RemoveSlotCommand(Config));
         
         CommandService.AddCommand(new ListMissionsCommand(Config));
         CommandService.AddCommand(new NextMissionCommand(Config));
@@ -199,20 +201,25 @@ public class GwServerPlugin : BaseUnityPlugin
     }
     private static void OnPlayerJoin(Player player)
     {
-        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
-        var originalName = player.PlayerName;
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
             return;
         }
         
-        PlayerUtils.ApplyOrRemoveStaffTag(player);
-        PlayerIdentifier.AssignNewPlayer(player);
-        // Apply identification tag if not a staff member
-        if (!PluginConfig.IsAdmin(player.SteamID) && !PluginConfig.IsModerator(player.SteamID) &&
-            !PluginConfig.IsOwner(player.SteamID))
+        if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(player))
         {
+            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.").Forget();
+            return;
+        }
+        
+        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
+        var originalName = player.PlayerName;
+        PlayerUtils.ApplyOrRemoveStaffTag(player);
+        // Apply identification tag if not a staff member
+        if (!PlayerUtils.IsStaff(player))
+        {
+            PlayerIdentifier.AssignNewPlayer(player);
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
