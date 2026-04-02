@@ -54,7 +54,7 @@ public class MissionChangeDetector
             LogText = mission?.Name ?? "null"
         };
         
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(missionChangePacket));
+        GwServerPlugin.LoggingOutBox.Add(missionChangePacket);
         GwServerPlugin.WarnService.ClearWarns();
     }
 }   

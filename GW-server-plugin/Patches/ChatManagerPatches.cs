@@ -55,7 +55,7 @@ internal static class ChatManagerPatches
             ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
             LogText = message
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(outPacket));
+        GwServerPlugin.LoggingOutBox.Add(outPacket);
         return true;
     }
 }

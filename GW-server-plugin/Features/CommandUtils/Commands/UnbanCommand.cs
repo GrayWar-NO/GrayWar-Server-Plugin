@@ -67,7 +67,7 @@ public class UnbanCommand(ConfigFile config): PermissionConfigurableCommand(conf
             LogText = $"0:{banSteamID}:",
             Channel = LogChannel.Ban
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(banLogPacket));
+        GwServerPlugin.LoggingOutBox.Add(banLogPacket);
         return true;
     }
 

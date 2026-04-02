@@ -50,7 +50,7 @@ public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(con
             SteamID = steamID,
             OneTimeCode = code
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(packet));
+        GwServerPlugin.LoggingOutBox.Add(packet);
         return true;
     }
 

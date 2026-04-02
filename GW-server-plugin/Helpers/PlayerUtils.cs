@@ -183,7 +183,7 @@ public static class PlayerUtils
             LogText = $"1:{player.SteamID}:{reason}",
             Channel = LogChannel.Kick
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(kickLogPacket));
+        GwServerPlugin.LoggingOutBox.Add(kickLogPacket);
     }
 
     /// <summary>
@@ -208,7 +208,7 @@ public static class PlayerUtils
             LogText = $"1:{banSteamID}:{duration ?? ""}:{reason}",
             Channel = LogChannel.Ban
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(banLogPacket));
+        GwServerPlugin.LoggingOutBox.Add(banLogPacket);
     }
 
     /// <summary>

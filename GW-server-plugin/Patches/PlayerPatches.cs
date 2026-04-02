@@ -26,7 +26,7 @@ public class PlayerPatches
             Channel = LogChannel.SortieStatus,
             LogText = $"1:{__instance.SteamID}:{airframe.unitName}"
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(packet));
+        GwServerPlugin.LoggingOutBox.Add(packet);
     }
     
     /// <summary>
@@ -43,6 +43,6 @@ public class PlayerPatches
             Channel = LogChannel.SortieStatus,
             LogText = $"0:{__instance.SteamID}:1"// GetOut:steamID:Success
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(packet));
+        GwServerPlugin.LoggingOutBox.Add(packet);
     }
 }

@@ -209,7 +209,7 @@ public static class WeaponLoggingExtensions
         }
         
         if (killerSteamID != null || killedSteamID != null)
-            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(killPacket));
+            GwServerPlugin.LoggingOutBox.Add(killPacket);
 
         if (killedSteamID != null)
         {
@@ -218,7 +218,7 @@ public static class WeaponLoggingExtensions
                 Channel = LogChannel.SortieStatus,
                 LogText = $"0:{killedSteamID}:0"
             };
-            GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(outAirframePacket));
+            GwServerPlugin.LoggingOutBox.Add(outAirframePacket);
         }
 
         // ReSharper disable once RedundantCast
