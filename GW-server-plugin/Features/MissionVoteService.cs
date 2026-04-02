@@ -99,10 +99,9 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void CheckRtvCount()
     {
         var connectedPlayers = Globals.AuthenticatedPlayers.Count - 1;
-        var minLimit = (connectedPlayers + 1) / 2;
-        if (connectedPlayers <= 1) return;
+        var minLimit = Math.Ceiling((double)connectedPlayers / 2f);
+        if (connectedPlayers % 2 == 0) minLimit++; // make it absolute majority.
         ChatService.SendChatMessage($"RTV: {RTVs.Count} / {minLimit} ");
-
         if (RTVs.Count >= minLimit)
         {
             ExecuteRtv();

@@ -12,9 +12,6 @@ public static class PluginConfig
 {
     internal const string GeneralSection = "General";
     internal const string IpcSection = "IPCSection";
-
-    internal static ConfigEntry<string>? BannedPlayers;
-    internal const string DefaultBannedPlayers = "";
     
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
@@ -69,9 +66,6 @@ public static class PluginConfig
 
         CommandPrefix = config.Bind(GeneralSection, "CommandPrefix", DefaultCommandPrefix, "What to use as the command prefix (the character at the start of a command).");
         GwServerPlugin.Logger.LogDebug($"CommandPrefix: {CommandPrefix.Value}");
-        
-        BannedPlayers = config.Bind(GeneralSection, "BannedPlayers", DefaultBannedPlayers);
-        GwServerPlugin.Logger.LogDebug($"BannedPlayers: {BannedPlayers}");
         
         Moderators = config.Bind(GeneralSection, "Moderators", DefaultModerators, "A list of moderators who have access to moderator commands. Separate steam IDs with a semicolon.");
         GwServerPlugin.Logger.LogDebug($"Moderators: {Moderators.Value}");

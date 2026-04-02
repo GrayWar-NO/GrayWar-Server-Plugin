@@ -13,6 +13,7 @@ using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
@@ -30,15 +31,25 @@ public class GwServerPlugin : BaseUnityPlugin
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
 
     /// <summary>
-    /// Socket Outbox for the IPC communication
+    /// Logging Outbox for the IPC communication and general logging to a file
     /// </summary>
-    internal static readonly BlockingCollection<string> SocketOutBox = new();
+    public static BlockingCollection<CommunicationPacket> LoggingOutBox = new();
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
     internal static VoteKickService VoteKickService { get; private set; } = null!;
 
     internal static WarnService WarnService { get; private set; } = null!;
+
+    /// <summary>
+    /// Weapon type storage for weapon kill detection.
+    /// </summary>
+    public static readonly UnitWeaponLogStorage WeaponStorage = new();
+
+    /// <summary>
+    /// Weapon name storage for shockwaves.
+    /// </summary>
+    public static readonly ShockwaveWeaponTypeStorage ShockwaveWeaponStorage = new();
     
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
@@ -81,7 +92,7 @@ public class GwServerPlugin : BaseUnityPlugin
             _socket = new Socket();
             _socket.OnJson += HandleJson;
             _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
-            StartSender();
+            StartLoggingSender();
         }
         
         PatchAll();
@@ -90,6 +101,8 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new HelpCommand(Config));
         CommandService.AddCommand(new ListPlayersCommand(Config));
         CommandService.AddCommand(new SetPermissionLevelCommand(Config));
+        CommandService.AddCommand(new AddSlotCommand(Config));
+        CommandService.AddCommand(new RemoveSlotCommand(Config));
         
         CommandService.AddCommand(new ListMissionsCommand(Config));
         CommandService.AddCommand(new NextMissionCommand(Config));
@@ -104,6 +117,8 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new BanCommand(Config));
         CommandService.AddCommand(new UnbanCommand(Config));
+        
+        CommandService.AddCommand(new LinkmeCommand(Config));
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
@@ -158,7 +173,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
 
 
-    private void StartSender()
+    private void StartLoggingSender()
     {
         _cts = new CancellationTokenSource();
 
@@ -166,9 +181,9 @@ public class GwServerPlugin : BaseUnityPlugin
         {
             try
             {
-                foreach (var msg in SocketOutBox.GetConsumingEnumerable(_cts.Token))
+                foreach (var msg in LoggingOutBox.GetConsumingEnumerable(_cts.Token))
                 {
-                    _socket?.SendJson(msg);
+                    _socket?.SendJson(JsonConvert.SerializeObject(msg)); // Null if IPC is not enabled.
                 }
             }
             catch (OperationCanceledException)
@@ -182,32 +197,38 @@ public class GwServerPlugin : BaseUnityPlugin
         var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
         CommunicationPacket? respPacket = packet!.Process();
         if (respPacket is null) return;
-        SocketOutBox.Add(JsonConvert.SerializeObject(respPacket));
+        LoggingOutBox.Add(respPacket);
     }
     private static void OnPlayerJoin(Player player)
     {
-        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
             return;
         }
         
-        PlayerUtils.ApplyOrRemoveStaffTag(player);
-        PlayerIdentifier.AssignNewPlayer(player);
-        // Apply identification tag if not a staff member
-        if (!PluginConfig.IsAdmin(player.SteamID) && !PluginConfig.IsModerator(player.SteamID) &&
-            !PluginConfig.IsOwner(player.SteamID))
+        if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(player))
         {
+            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.").Forget();
+            return;
+        }
+        
+        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
+        var originalName = player.PlayerName;
+        PlayerUtils.ApplyOrRemoveStaffTag(player);
+        // Apply identification tag if not a staff member
+        if (!PlayerUtils.IsStaff(player))
+        {
+            PlayerIdentifier.AssignNewPlayer(player);
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
         var joinPacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"1:{player.SteamID}"
+            LogText = $"1:{player.SteamID}:{originalName}"
         };
-        SocketOutBox.Add(JsonConvert.SerializeObject(joinPacket));
+        LoggingOutBox.Add(joinPacket);
     }
 
     private static void OnPlayerLeave(Player player)
@@ -219,9 +240,9 @@ public class GwServerPlugin : BaseUnityPlugin
         var leavePacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
-            LogText = $"0:{player.SteamID}"
+            LogText = $"0:{player.SteamID}:{Math.Round(player.PlayerScore, 2)}"
         };
-        SocketOutBox.Add(JsonConvert.SerializeObject(leavePacket));
+        LoggingOutBox.Add(leavePacket);
     }
 
     private static bool CheckOwnerBanned(Player player)
@@ -230,4 +251,21 @@ public class GwServerPlugin : BaseUnityPlugin
         return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamID));
     }
 
+    /// <summary>
+    /// Method for handling teamkills
+    /// </summary>
+    /// <param name="killer"></param>
+    /// <param name="killed"></param>
+    /// <param name="weaponName"></param>
+    public static void OnTeamkill(Player killer, Player killed, string weaponName)
+    {
+        if (weaponName.Contains("kt")) return;// if weapon is a nuke
+        var warnLogPacket = new LogEntryPacket
+        {
+            LogText = $"{killer.SteamID}:Teamkilled player {killed.PlayerName} with weapon {weaponName}",
+            Channel = LogChannel.Warn
+        };
+        LoggingOutBox.Add(warnLogPacket);
+        WarnService.AddWarn(killer.SteamID);
+    }
 }

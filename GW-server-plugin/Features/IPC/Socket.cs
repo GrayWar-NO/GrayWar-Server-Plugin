@@ -90,11 +90,10 @@ public class Socket : IDisposable
     {
         while (!token.IsCancellationRequested)
         {
-            TcpClient? newClient = null;
             try
             {
                 // Wait for a client to connect
-                newClient = await _listener!.AcceptTcpClientAsync();
+                var newClient = await _listener!.AcceptTcpClientAsync();
                 GwServerPlugin.Logger.LogDebug("[IPC] client connected");
 
                 // Close any previous connection (if we only support 1)

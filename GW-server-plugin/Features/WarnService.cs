@@ -13,7 +13,10 @@ public class WarnService(ConfigFile config)
 {
     private const int DefaultWarnsToKick = 3;
     private readonly Dictionary<ulong, int> _playerWarnCount = new();
+
+    private const bool DefaultWarnsToKickEnabled = true;
     private ConfigEntry<int> WarnsToKickConfig { get; } = config.Bind("Warns", "WarnsToKick", DefaultWarnsToKick, "Number of warnings per mission until player is kicked.");
+    private ConfigEntry<bool> WarnsToKickOnConfig { get; } = config.Bind("Warns", "WarnsToKick Enabled", DefaultWarnsToKickEnabled, "Do you want to kick players after x warns?");
 
     /// <summary>
     /// Adds a warning to the designated player.
@@ -28,7 +31,7 @@ public class WarnService(ConfigFile config)
             return true;
         }
         _playerWarnCount[steamID]++;
-        if (_playerWarnCount[steamID] < WarnsToKickConfig.Value) return true;
+        if (_playerWarnCount[steamID] < WarnsToKickConfig.Value || !WarnsToKickOnConfig.Value) return true;
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player)) return false;
         PlayerUtils.KickPlayer(player!, "Too many warnings!");
         return true;

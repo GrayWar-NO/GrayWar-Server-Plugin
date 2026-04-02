@@ -32,16 +32,21 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public override bool Execute(Player player, string[] args, out string? response)
     {
         var targetSteamID = ulong.Parse(args[0]);
         _ = PermissionLevelUtils.TryParsePermissionLevel(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID, level);
         response = $"Successfully set permission level to {level}";
         return true;
+    }
+
+
+    /// <inheritdoc />
+    public override bool Execute(string[] args, out string? response)
+    {
+        response = "You cannot set permission levels from the console for security reasons";
+        return false;
     }
 
     /// <inheritdoc />

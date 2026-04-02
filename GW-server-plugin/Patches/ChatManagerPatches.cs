@@ -43,12 +43,7 @@ internal static class ChatManagerPatches
                     ChatService.SendPrivateChatMessage(s, player!);
                 }
             }
-            
-            
             if (commandResult) return false;
-            
-            
-            
         }
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player!.PlayerName} sent message: {message}"
@@ -56,10 +51,11 @@ internal static class ChatManagerPatches
         
         var outPacket = new ChatLogPacket
         {
+            SteamID = player.SteamID,
             ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
             LogText = message
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(outPacket));
+        GwServerPlugin.LoggingOutBox.Add(outPacket);
         return true;
     }
 }

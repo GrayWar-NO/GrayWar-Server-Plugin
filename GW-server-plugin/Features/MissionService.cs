@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
@@ -9,7 +8,6 @@ using NuclearOption.Networking.Lobbies;
 using NuclearOption.SavedMission;
 using NuclearOption.SavedMission.ObjectiveV2;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace GW_server_plugin.Features;
 
@@ -120,6 +118,9 @@ public static class MissionService
             // Switch to main thread for Unity scene/lobby ops
             await UniTask.SwitchToMainThread();
             var dsm = Globals.DedicatedServerManagerInstance;
+
+            while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
+
             dsm.UpdateLobby(mission, false);
             var ok = await dsm.LoadNext(mission);
             if (!ok)

@@ -39,7 +39,7 @@ public class UnitPatches
             LogText = $"{damagerUnit.player.SteamID}:{hitUnit.player.SteamID}",
             Channel = LogChannel.Teamkill
         };
-        GwServerPlugin.SocketOutBox.Add(JsonConvert.SerializeObject(warnLogPacket));
+        GwServerPlugin.LoggingOutBox.Add(warnLogPacket);
     }
 }
 
