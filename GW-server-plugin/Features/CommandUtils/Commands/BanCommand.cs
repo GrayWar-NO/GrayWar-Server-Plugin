@@ -54,7 +54,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
             duration = args[2];
         }
         ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             banSteamID = targetID;
             response = $"Banned player with steamID {banSteamID} for reason {reason}";

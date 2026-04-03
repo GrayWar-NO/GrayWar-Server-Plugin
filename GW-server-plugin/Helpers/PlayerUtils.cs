@@ -51,7 +51,7 @@ public static class PlayerUtils
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
             ulong? playerSteamId;
-            if (playerId < (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+            if (playerId <= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
             {
                 GwServerPlugin.PlayerIdentifier.GetPlayerById((int)playerId, out playerSteamId);
             }

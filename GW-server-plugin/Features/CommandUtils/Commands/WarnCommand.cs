@@ -53,7 +53,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var target = args[0];
         var reason = string.Join(" ", args.Skip(1)); 
         ulong warnSteamID;
-        if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             warnSteamID = targetID;
             response = $"Warned player with steamID {warnSteamID} for reason {reason}";
