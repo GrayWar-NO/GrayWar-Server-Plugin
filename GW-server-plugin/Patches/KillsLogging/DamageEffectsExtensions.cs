@@ -27,27 +27,27 @@ public static class DamageEffectExtensions
         PersistentID dealerID,
         string weaponName)
     {
-        var num = 0;
+        var ctr = 0;
         var start = position;
-        var vector3 = velocity;
+        var vel = velocity;
         if (blastDamage > 0.0)
             BlastFrag(blastDamage, position, dealerID, PersistentID.None, weaponName);
         for (;
-             num < 10 && Physics.Linecast(start, start + vector3 * 0.1f, out var hitInfo, -8193) &&
-             vector3.sqrMagnitude > muzzleVelocity * (double)muzzleVelocity * 0.10000000149011612;
-             start = hitInfo.point + 0.1f * vector3.normalized)
+             ctr < 10 && Physics.Linecast(start, start + vel * 0.1f, out var hitInfo, -8193) &&
+             vel.sqrMagnitude > muzzleVelocity * (double)muzzleVelocity * 0.10000000149011612;
+             start = hitInfo.point + 0.1f * vel.normalized)
         {
-            ++num;
+            ++ctr;
             var component = hitInfo.collider.gameObject.GetComponent<IDamageable>();
             if (component == null)
                 break;
-            var pierceDamage1 = (float)(Mathf.Max(Vector3.Dot(vector3.normalized, -hitInfo.normal), 0.5f) *
-                                        (double)pierceDamage * (vector3.magnitude / (double)muzzleVelocity));
+            var pierceDamage1 = (float)(Mathf.Max(Vector3.Dot(vel.normalized, -hitInfo.normal), 0.5f) *
+                                        (double)pierceDamage * (vel.magnitude / (double)muzzleVelocity));
             component.TakeDamage(pierceDamage1, 1f, 0.0f, 0.0f, 0.0f, dealerID, weaponName);
             var armorProperties = component.GetArmorProperties();
             if (pierceDamage1 <= (double)armorProperties.pierceArmor)
                 break;
-            vector3 *= (pierceDamage1 - armorProperties.pierceArmor * 2f) / pierceDamage1;
+            vel *= (pierceDamage1 - armorProperties.pierceArmor * 2f) / pierceDamage1;
         }
     }
 

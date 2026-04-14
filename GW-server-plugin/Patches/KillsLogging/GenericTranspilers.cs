@@ -533,3 +533,69 @@ public static class TakeShockwaveTranspiler
         }
     }
 }
+
+/// <summary>
+/// Instance transpiler that changes the behaviour of HasShockwaveReached calls.
+/// </summary>
+public static class HasShockwaveReachedTranspiler
+{
+    private static readonly Type[] OriginalParameters =
+    [
+        typeof(Vector3),
+        typeof(float),
+        typeof(float),
+        typeof(float),
+        typeof(float),
+        typeof(PersistentID)
+    ];
+
+    private static readonly Type[] NewParameters =
+    [
+        typeof(Shockwave.InfluencedObject),
+        typeof(Vector3),
+        typeof(float),
+        typeof(float),
+        typeof(float),
+        typeof(float),
+        typeof(PersistentID),
+        typeof(string)
+    ];
+
+    private static readonly MethodInfo Original =
+        AccessTools.Method(typeof(Shockwave.InfluencedObject), nameof(Shockwave.InfluencedObject.HasShockwaveReached), OriginalParameters);
+
+    private static readonly MethodInfo Replacement =
+        AccessTools.Method(typeof(MissileExtensions), nameof(MissileExtensions.HasShockwaveReached),
+            NewParameters);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="instructions"></param>
+    /// <param name="loadWeaponName"></param>
+    /// <returns></returns>
+    public static IEnumerable<CodeInstruction> Inject(
+        IEnumerable<CodeInstruction> instructions,
+        IEnumerable<CodeInstruction> loadWeaponName)
+    {
+        var instrList = instructions.ToList();
+        var loader = loadWeaponName.ToList();
+        var rtList = new List<CodeInstruction>();
+        foreach (var instruction in instrList)
+        {
+            if (instruction.Calls(Original))
+            {
+                rtList.AddRange(loader.Select(emit => emit.Clone()));
+                rtList.Add(new CodeInstruction(instruction.opcode, Replacement));
+                var index = rtList.Count - 1;
+                while (rtList[index].opcode != OpCodes.Ldloca_S) { index--; }
+                rtList[index].opcode = OpCodes.Ldloc_S;
+            }
+            else
+            {
+                rtList.Add(instruction);
+            }
+        }
+        return rtList;
+    }
+}

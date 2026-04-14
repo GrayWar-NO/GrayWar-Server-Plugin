@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnityEngine;
+using OpCodes = System.Reflection.Emit.OpCodes;
 
 // ReSharper disable UnusedMember.Local
 
@@ -348,6 +349,27 @@ class PatchExplosionSimForce
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         return TakeShockwaveTranspiler.Inject(instructions, "Unknown Codepath Explosion.SimulateForce");
+    }
+}
+
+[HarmonyPatch(typeof(Shockwave), nameof(Shockwave.Update))]
+class PatchShockwaveUpdate
+{
+    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+    {
+        
+        var storageField = typeof(GwServerPlugin).GetField(nameof(GwServerPlugin.ShockwaveWeaponStorage), BindingFlags.Static | BindingFlags.Public);
+        var getMethod = typeof(ShockwaveWeaponTypeStorage).GetMethod(nameof(ShockwaveWeaponTypeStorage.Get));
+        var wpnNameField = typeof(ShockwaveWeaponTypeLog).GetField(nameof(ShockwaveWeaponTypeLog.WeaponName));
+
+        var loader = new[]
+        {
+            new CodeInstruction(OpCodes.Ldsfld, storageField),
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Callvirt, getMethod),
+            new CodeInstruction(OpCodes.Ldfld, wpnNameField)
+        };
+        return HasShockwaveReachedTranspiler.Inject(instructions, loader);
     }
 }
 

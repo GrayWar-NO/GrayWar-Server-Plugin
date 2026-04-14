@@ -97,7 +97,7 @@ public static class TakeDamageExtensions
         if (missile.hitpoints > 0.0)
             return;
         if (UnitRegistry.TryGetPersistentUnit(dealerID, out var dealerUnit) &&
-            (UnityEngine.Object)dealerUnit.GetHQ() != (UnityEngine.Object)missile.NetworkHQ)
+            dealerUnit.GetHQ() != missile.NetworkHQ)
         {
             missile.RecordDamage(dealerID, 1000f, weaponName);
             missile.ReportKilled();

@@ -20,7 +20,7 @@ public static class MissileExtensions
     /// <param name="ownerID"></param>
     /// <param name="weaponName"></param>
     /// <returns></returns>
-    private static bool HasShockwaveReached(
+    public static bool HasShockwaveReached(
         this Shockwave.InfluencedObject influencedObject,
         Vector3 blastOrigin,
         float blastPropagation,
@@ -55,59 +55,7 @@ public static class MissileExtensions
         influencedObject.rb.AddForceAtPosition((influencedObject.collider.bounds.center - blastOrigin).normalized * forceMagnitude, influencedObject.collider.bounds.center, ForceMode.Impulse);
         return true;
     }
-
-    /// <summary>
-    /// Replacement Update function for Shockwave
-    /// </summary>
-    /// <param name="shockwave"></param>
-    public static void Update(this Shockwave shockwave)
-    {
-            shockwave.blastPropagation += 340f * Time.deltaTime;
-    shockwave.blastTime += Time.deltaTime;
-    if (shockwave.groundDecal != null && shockwave.decalProjector != null)
-      shockwave.decalProjector.material.SetFloat(Shockwave.id_shockwaveExpansion, 1f * shockwave.blastRadius / shockwave.blastPropagation);
-    if ((double) shockwave.blastPropagation > shockwave.blastRadius)
-    {
-      shockwave.dustOpacity -= Time.deltaTime * 0.1f;
-      if (shockwave.decalProjector != null)
-        shockwave.decalProjector.material.SetFloat(Shockwave.id_opacity, shockwave.dustOpacity);
-      if (shockwave.dustOpacity <= 0.0)
-      {
-        Object.Destroy(shockwave.groundDecal);
-        Object.Destroy(shockwave);
-      }
-      if (shockwave.vaporCloud != null && shockwave.cloudAlpha <= 0.0)
-        Object.Destroy(shockwave.vaporCloud);
-    }
-    var num1 = Mathf.Max(shockwave.blastPropagation / shockwave.blastPower, 1f);
-    var overpressure = (float) (25000.0 / (num1 * (double) num1 * num1));
-    if (overpressure > 0.5)
-    {
-      for (var index = shockwave.influencedObjects.Count - 1; index >= 0; --index)
-      {
-          var weaponName = GwServerPlugin.ShockwaveWeaponStorage.Get(shockwave).WeaponName;
-        if (shockwave.influencedObjects[index].HasShockwaveReached(shockwave.transform.position, shockwave.blastPropagation, overpressure, shockwave.yieldKilotons * 1000000f, shockwave.blastPower, shockwave.ownerID, weaponName)) 
-          shockwave.influencedObjects.RemoveAt(index);
-      }
-    }
-    else
-      shockwave.influencedObjects.Clear();
-    if (!(shockwave.vaporCloud != null))
-      return;
-    shockwave.vaporCloud.transform.LookAt(SceneSingleton<CameraStateManager>.i.transform.position);
-    shockwave.vaporCloud.transform.localScale = Vector3.one * shockwave.blastPropagation;
-    shockwave.cloudAlpha = shockwave.vaporCloudAlpha.Evaluate(shockwave.blastTime);
-    var num2 = !(shockwave.vaporCloudEmissiveLight != null) || !shockwave.vaporCloudEmissiveLight.isActiveAndEnabled ? 0.0f : shockwave.vaporCloudEmissiveLight.intensity * shockwave.vaporCloudEmissiveFactor;
-    shockwave.vaporCloudMat.SetFloat(Shockwave.id_ShockwaveAlpha, shockwave.cloudAlpha);
-    if (num2 > 0.0)
-      shockwave.vaporCloudMat.SetFloat(Shockwave.id_Emission, num2);
-    shockwave.vaporCloudMat.SetFloat(Shockwave.id_Size, shockwave.blastPropagation / shockwave.vaporCloudDetailScale);
-    shockwave.vaporCloudMat.SetFloat(Shockwave.id_ShockwaveSoftness, 4f / shockwave.vaporCloud.transform.localScale.x);
-    if (shockwave.cloudAlpha > 0.0)
-      return;
-    Object.Destroy(shockwave.vaporCloud);
-    }
-
+    
     /// <summary>
     /// Missile.Warhead.Detonate override
     /// </summary>

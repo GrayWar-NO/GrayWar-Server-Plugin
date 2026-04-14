@@ -65,7 +65,6 @@ public static class WeaponLoggingExtensions
     /// </summary>
     public static void ReportKilled(this Unit unit)
     {
-        var killerID = PersistentID.None;
         if (!UnitRegistry.TryGetPersistentUnit(unit.persistentID, out var killedUnit))
             return;
         // ReSharper disable once InconsistentNaming
@@ -74,6 +73,7 @@ public static class WeaponLoggingExtensions
         var totalReceivedDamage = 0.0f;
         var state = GwServerPlugin.WeaponStorage.Get(unit);
         var weaponCredit = state.WeaponCredit;
+        var killerID = PersistentID.None;
         if (unit.damageCredit != null)
 
         {
