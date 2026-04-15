@@ -122,7 +122,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
-        
+
+        TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
     }
 
     private static void PatchAll()

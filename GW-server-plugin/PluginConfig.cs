@@ -12,6 +12,7 @@ public static class PluginConfig
 {
     internal const string GeneralSection = "General";
     internal const string IpcSection = "IPCSection";
+    internal const string BroadcastSection = "Broadcasts";
     
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
@@ -43,8 +44,15 @@ public static class PluginConfig
 
     internal static ConfigEntry<bool>? EnableTeamDamageAutoWarning;
     internal const bool DefaultEnableTeamDamageAutoWarning = true;
-    
 
+
+    internal static ConfigEntry<uint>? NBroadcastMessages;
+    internal const uint DefaultNBroadcastMessages = 0;
+
+    internal static List<ConfigEntry<string>> BroadcastMessages = [];
+    internal const string DefaultMessageContent = "";
+
+    
     internal static ConfigEntry<string>? Moderators;
     internal const string DefaultModerators = "";
     
@@ -96,6 +104,16 @@ public static class PluginConfig
             DefaultEnableTeamDamageAutoWarning);
         
 
+        NBroadcastMessages = config.Bind(BroadcastSection, "Number of broadcast messages", DefaultNBroadcastMessages,
+            "Number of broadcast messages. \nAfter this setting, use Message0, Message1 ... Message(this-1) to define this message.");
+
+        for (uint i = 0; i < NBroadcastMessages.Value; i++)
+        {
+            BroadcastMessages.Add(
+                    config.Bind(BroadcastSection, $"Message{i}", DefaultMessageContent)
+                );
+        }
+        GwServerPlugin.Logger.LogDebug($"Loaded Broadcast messages");
         
         IpcEnable = config.Bind(IpcSection, "Enable IPC", DefaultIpcEnable);
         GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcEnable}");
