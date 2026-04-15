@@ -266,6 +266,7 @@ public class GwServerPlugin : BaseUnityPlugin
             Channel = LogChannel.Warn
         };
         LoggingOutBox.Add(warnLogPacket);
+        if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
         WarnService.AddWarn(killer.SteamID);
     }
 }
