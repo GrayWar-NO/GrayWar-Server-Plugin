@@ -1,3 +1,4 @@
+using System.Xml.Schema;
 using NuclearOption.SavedMission;
 using UnityEngine;
 
@@ -42,21 +43,16 @@ public static class TakeDamageExtensions
                 cargo.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID,
                     weaponName);
                 break;
-            case Pilot pilot:
-                pilot.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
-                break;
-            case PilotDismounted pilot:
-                pilot.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
-                break;
-            case SoftBodyRotor rotor:
-                rotor.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
-                break;
-            case SwashRotor rotor:
-                rotor.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
+            case Turbofan turbofan:
+                turbofan.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID,
+                    weaponName);
                 break;
             case UnitPart part:
                 part.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID,
                     weaponName);
+                break;
+            default:
+                component.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
                 break;
         }
     }
@@ -104,6 +100,35 @@ public static class TakeDamageExtensions
         }
 
         missile.Detonate(missile.rb.velocity, false, false);
+    }
+
+    private static void TakeDamage(
+        this Turbofan turbofan,
+        float pierceDamage,
+        float blastDamage,
+        float amountAffected,
+        float fireDamage,
+        float impactDamage,
+        PersistentID dealerID,
+        string weaponName)
+    {
+        if (!turbofan.aircraft.IsServer)
+        {
+            Debug.LogWarning($"TakeDamage called on {turbofan} but it is not spawned on server");
+        }
+        else
+        {
+            var pierceAfterArmor = Mathf.Max(pierceDamage - turbofan.armorProperties.pierceArmor, 0.0f) / Mathf.Max(turbofan.armorProperties.pierceTolerance, 0.01f);
+            var blastAfterArmor = blastDamage * amountAffected / Mathf.Max(turbofan.armorProperties.blastTolerance, 0.01f);
+            var fireAfterArmor = Mathf.Max(fireDamage - turbofan.armorProperties.fireArmor, 0.0f) / Mathf.Max(turbofan.armorProperties.fireTolerance, 0.01f);
+            var totalDmg = pierceAfterArmor + blastAfterArmor + fireAfterArmor + impactDamage;
+            if (totalDmg <= 0.0 || turbofan.aircraft == null)
+                return;
+            if (dealerID.IsValid && dealerID != turbofan.aircraft.persistentID)
+                turbofan.aircraft.RecordDamage(dealerID, totalDmg, weaponName);
+            turbofan.aircraft.RpcDamage(turbofan.damageIndex, new DamageInfo(pierceAfterArmor, blastAfterArmor, fireAfterArmor, impactDamage));
+        }
+   
     }
 
     private static void TakeDamage(
