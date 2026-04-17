@@ -36,8 +36,8 @@ public class UnitPatches
         ChatService.SendPrivateChatMessage($"You have been warned for damaging teammate {hitUnit.player.PlayerName}", damagerUnit.player);
         var warnLogPacket = new LogEntryPacket
         {
-            LogText = $"{damagerUnit.player.SteamID}:{hitUnit.player.SteamID}",
-            Channel = LogChannel.Teamkill
+            LogText = $"{damagerUnit.player.SteamID}:Teamkilled {hitUnit.player.SteamID}",
+            Channel = LogChannel.Warn
         };
         GwServerPlugin.LoggingOutBox.Add(warnLogPacket);
     }
