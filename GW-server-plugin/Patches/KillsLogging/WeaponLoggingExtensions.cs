@@ -162,18 +162,18 @@ public static class WeaponLoggingExtensions
         }
 
         string killedName;
-        if (killedSteamID != null && killedUnit.unitName.IndexOf('[') != -1)
+        if (killedSteamID != null && killedUnit.unitName.LastIndexOf('[') != -1)
         {
             var s = killedUnit.unitName;
-            killedName = s.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+            killedName = s.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killedName = killedUnit.unitName;
         
         string? killerName;
-        if (killerSteamID != null && killerPUnit?.unitName.IndexOf('[') != -1)
+        if (killerSteamID != null && killerPUnit?.unitName.LastIndexOf('[') != -1)
         {
             var s = killerPUnit?.unitName;
-            killerName = s?.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+            killerName = s?.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killerName = killerPUnit?.unitName;
         
