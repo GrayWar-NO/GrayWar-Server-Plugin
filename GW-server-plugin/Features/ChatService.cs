@@ -98,7 +98,7 @@ public static class ChatService
     public static void SendPrivateChatMessage(string message, Player targetPlayer, string sender)
     {
         var actualMessage = message.PreProcessMessage(targetPlayer);
-        if (sender != null) actualMessage = sender.Length > 0 ? $"{sender} whispered: {actualMessage}" : actualMessage;
+        actualMessage = sender.Length > 0 ? $"{sender} whispered: {actualMessage}" : actualMessage;
         
         if (!CanSend(actualMessage, ignoreRateLimit: true))
         {
