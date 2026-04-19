@@ -7,7 +7,7 @@ using NuclearOption.Networking;
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
-/// Tells something to everyone on the server
+/// Sends a private message to a specific player.
 /// </summary>
 /// <param name="config"></param>
 public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config)
@@ -36,17 +36,32 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
     /// <inheritdoc />
     public override bool Execute(Player player, string[] args, out string? response)
     {
-        var result = Execute(args, out var resp);
-        response = resp;
-        return result;
+        var found = PlayerUtils.TryFindPlayer(args[0], out var target);
+        if (!found || !target)
+        {
+            response = $"Could not identify a player by \"{args[0]}\".";
+            return true;
+        }
+        
+        var message = $"${player.PlayerName} whispered: \n";
+        message += string.Join(" ", args.Skip(1));
+        ChatService.SendPrivateChatMessage(message, target!);
+        response = $"Message sent to {target}:  {message}";
+        return true;
     }
 
     /// <inheritdoc />
     public override bool Execute(string[] args, out string? response)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var target);
-        if (!found || !target) response = $"Could not identify a player by \"{args[0]}\".";
-        var message = string.Join(" ", args.Skip(1));
+        if (!found || !target)
+        {
+            response = $"Could not identify a player by \"{args[0]}\".";
+            return true;
+        }
+        
+        var message = $"$A server moderator whispered: \n";
+        message += string.Join(" ", args.Skip(1));
         ChatService.SendPrivateChatMessage(message, target!);
         response = $"Message sent to {target}:  {message}";
         return true;

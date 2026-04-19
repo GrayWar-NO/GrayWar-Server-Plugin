@@ -10,7 +10,7 @@ using NuclearOption.Networking;
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
-/// Command to link a steam user to their discord profile.
+/// Gives instructions on how to join the discord server
 /// </summary>
 /// <param name="config"></param>
 public class DiscordCommand(ConfigFile config): PermissionConfigurableCommand(config)

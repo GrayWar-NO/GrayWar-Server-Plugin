@@ -1,13 +1,12 @@
 ﻿using BepInEx.Configuration;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
-using Mirage;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
-/// Lists the players on the server
+/// Lists the number of players currently on the server
 /// </summary>
 /// <param name="config"></param>
 public class PlayerCountCommand(ConfigFile config) : PermissionConfigurableCommand(config)
