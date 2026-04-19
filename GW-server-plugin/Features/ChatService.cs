@@ -95,7 +95,7 @@ public static class ChatService
     /// <param name="message"> The message to send. </param>
     /// <param name="targetPlayer"> The player to send the message to. </param>
     /// <param name="sender"> The entity that sends the message. </param>
-    public static void SendPrivateChatMessage(string message, Player targetPlayer, string? sender)
+    public static void SendPrivateChatMessage(string message, Player targetPlayer, string sender)
     {
         var actualMessage = message.PreProcessMessage(targetPlayer);
         if (sender != null) actualMessage = sender.Length > 0 ? $"{sender} whispered: {actualMessage}" : actualMessage;
