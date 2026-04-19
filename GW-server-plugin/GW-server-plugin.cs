@@ -98,6 +98,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PatchAll();
         
         CommandService.AddCommand(new TellCommand(Config));
+        CommandService.AddCommand(new WhisperCommand(Config));
         CommandService.AddCommand(new HelpCommand(Config));
         CommandService.AddCommand(new ListPlayersCommand(Config));
         CommandService.AddCommand(new SetPermissionLevelCommand(Config));
@@ -120,8 +121,6 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new LinkmeCommand(Config));
         CommandService.AddCommand(new DiscordCommand(Config));
-        CommandService.AddCommand(new WhisperCommand(Config));
-        CommandService.AddCommand(new PlayerCountCommand(Config));
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;

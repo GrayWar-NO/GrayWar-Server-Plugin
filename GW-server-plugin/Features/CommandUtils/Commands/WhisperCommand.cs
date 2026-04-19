@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
+using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -43,10 +44,17 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             return true;
         }
         
-        var message = $"${player.PlayerName} whispered: \n";
-        message += string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!);
+        var message = string.Join(" ", args.Skip(1));
+        ChatService.SendPrivateChatMessage(message, target!, player.PlayerName);
         response = $"Message sent to {target}:  {message}";
+        
+        var outPacket = new ChatLogPacket
+        {
+            SteamID = player.SteamID,
+            ChatName = $"whisper({player.SteamID}:{target?.SteamID})",
+            LogText = message
+        };
+        GwServerPlugin.LoggingOutBox.Add(outPacket);
         return true;
     }
 
@@ -60,10 +68,17 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             return true;
         }
         
-        var message = $"$A server moderator whispered: \n";
-        message += string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!);
+        var message = string.Join(" ", args.Skip(1));
+        ChatService.SendPrivateChatMessage(message, target!, "A moderator");
         response = $"Message sent to {target}:  {message}";
+        
+        var outPacket = new ChatLogPacket
+        {
+            SteamID = 0,
+            ChatName = $"whisper({0}:{target?.SteamID})",
+            LogText = message
+        };
+        GwServerPlugin.LoggingOutBox.Add(outPacket);
         return true;
     }
 

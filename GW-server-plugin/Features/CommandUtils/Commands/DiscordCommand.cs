@@ -24,7 +24,7 @@ public class DiscordCommand(ConfigFile config): PermissionConfigurableCommand(co
     public override bool Validate(Player player, string[] args) => args.Length == 0;
 
     /// <inheritdoc />
-    public override bool Validate(string[] args) => true; // not valid if from console
+    public override bool Validate(string[] args) => false; // not valid if from console
 
     /// <inheritdoc />
     public override bool Execute(Player player, string[] args, out string? response)
