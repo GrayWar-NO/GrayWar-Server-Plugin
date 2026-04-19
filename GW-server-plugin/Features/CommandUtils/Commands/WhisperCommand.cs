@@ -19,7 +19,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
     public override string Description { get; } = "Send a private message to a specified user.";
     
     /// <inheritdoc />
-    public override string Usage { get; } = "tell <user / userID> <message>";
+    public override string Usage { get; } = "whisper <user / userID> <message>";
 
     /// <inheritdoc />
     public override bool Validate(Player player, string[] args)
