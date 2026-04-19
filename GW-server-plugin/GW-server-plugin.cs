@@ -119,6 +119,7 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new UnbanCommand(Config));
         
         CommandService.AddCommand(new LinkmeCommand(Config));
+        CommandService.AddCommand(new DiscordCommand(Config));
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
