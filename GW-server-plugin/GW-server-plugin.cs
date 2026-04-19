@@ -120,6 +120,7 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new LinkmeCommand(Config));
         CommandService.AddCommand(new DiscordCommand(Config));
+        CommandService.AddCommand(new WhisperCommand(Config));
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
