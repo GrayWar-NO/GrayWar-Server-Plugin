@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
-using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -34,7 +29,7 @@ public class DiscordCommand(ConfigFile config): PermissionConfigurableCommand(co
     /// <inheritdoc />
     public override bool Execute(Player player, string[] args, out string? response)
     {
-        response = $"Discord join code: zfMMZD4kHE \nor go to www.graywar.no";
+        response = $"Discord join code: zfMMZD4kHE \nor go to graywar.no";
         return true;
     }
 
