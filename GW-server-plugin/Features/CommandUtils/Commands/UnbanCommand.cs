@@ -43,7 +43,7 @@ public class UnbanCommand(ConfigFile config): PermissionConfigurableCommand(conf
     {
         var target = args[0];
         ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) && targetID >= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             banSteamID = targetID;
             response = $"Unbanned player with steamID {banSteamID}";

@@ -122,7 +122,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
-        
+
+        TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
     }
 
     private static void PatchAll()
@@ -266,6 +267,7 @@ public class GwServerPlugin : BaseUnityPlugin
             Channel = LogChannel.Warn
         };
         LoggingOutBox.Add(warnLogPacket);
+        if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
         WarnService.AddWarn(killer.SteamID);
     }
 }

@@ -43,7 +43,7 @@ public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(conf
     public override bool Execute(string[] args, out string? response)
     {
         var message = string.Join(" ", args);
-        ChatService.SendChatMessage(message);
+        ChatService.SendChatMessageAsServer(message);
         response = null;
         return true;
     }

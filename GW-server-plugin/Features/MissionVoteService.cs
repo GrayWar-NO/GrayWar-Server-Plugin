@@ -47,10 +47,10 @@ internal sealed class MissionVoteService(ConfigFile config)
         DefaultMissionVote ??= Missions[0]; // Here in case GetNextMissionOption fails.
         _missionVotes.Clear();
         RTVs.Clear();
-        ChatService.SendChatMessage("-- Rock-The-Vote --");
-        ChatService.SendChatMessage("Mission voting has started!");
-        ChatService.SendChatMessage("Use /rtv vote for changing the mission.");
-        ChatService.SendChatMessage("Use /help rtv for more info.");
+        ChatService.SendChatMessageAsServer("-- Rock-The-Vote --");
+        ChatService.SendChatMessageAsServer("Mission voting has started!");
+        ChatService.SendChatMessageAsServer("Use /rtv vote for changing the mission.");
+        ChatService.SendChatMessageAsServer("Use /help rtv for more info.");
         RtvActive = true;
         WaitForVoteEnd();
     }
@@ -101,7 +101,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         var connectedPlayers = Globals.AuthenticatedPlayers.Count - 1;
         var minLimit = Math.Ceiling((double)connectedPlayers / 2f);
         if (connectedPlayers % 2 == 0) minLimit++; // make it absolute majority.
-        ChatService.SendChatMessage($"RTV: {RTVs.Count} / {minLimit} ");
+        ChatService.SendChatMessageAsServer($"RTV: {RTVs.Count} / {minLimit} ");
         if (RTVs.Count >= minLimit)
         {
             ExecuteRtv();
@@ -129,8 +129,8 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void ExecuteRtv()
     {
         MapVoteWinner = GetVoteWinner();
-        ChatService.SendChatMessage("RTV has succeeded!");
-        ChatService.SendChatMessage($"Mission will switch to {MapVoteWinner.Key.Name} in {MapSwitchDelay.Value} seconds.");
+        ChatService.SendChatMessageAsServer("RTV has succeeded!");
+        ChatService.SendChatMessageAsServer($"Mission will switch to {MapVoteWinner.Key.Name} in {MapSwitchDelay.Value} seconds.");
         WaitBeforeMapSwitch();
         ResetRtv();
     }
@@ -140,7 +140,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         try
         {
             await Task.Delay(MapSwitchDelay.Value * 1000);
-            ChatService.SendChatMessage($"Switching map now!");
+            ChatService.SendChatMessageAsServer($"Switching map now!");
             _ = MissionService.StartMission(MapVoteWinner);
         }
         catch (Exception e)
@@ -152,8 +152,8 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void EndVote()
     {
         ResetRtv();
-        ChatService.SendChatMessage("Mission vote has failed!");
-        ChatService.SendChatMessage("Mission will not switch.");
+        ChatService.SendChatMessageAsServer("Mission vote has failed!");
+        ChatService.SendChatMessageAsServer("Mission will not switch.");
     }
 
     private async void WaitForVoteEnd()

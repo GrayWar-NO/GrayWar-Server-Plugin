@@ -65,7 +65,6 @@ public static class WeaponLoggingExtensions
     /// </summary>
     public static void ReportKilled(this Unit unit)
     {
-        var killerID = PersistentID.None;
         if (!UnitRegistry.TryGetPersistentUnit(unit.persistentID, out var killedUnit))
             return;
         // ReSharper disable once InconsistentNaming
@@ -74,6 +73,7 @@ public static class WeaponLoggingExtensions
         var totalReceivedDamage = 0.0f;
         var state = GwServerPlugin.WeaponStorage.Get(unit);
         var weaponCredit = state.WeaponCredit;
+        var killerID = PersistentID.None;
         if (unit.damageCredit != null)
 
         {
@@ -162,18 +162,18 @@ public static class WeaponLoggingExtensions
         }
 
         string killedName;
-        if (killedSteamID != null && killedUnit.unitName.IndexOf('[') != -1)
+        if (killedSteamID != null && killedUnit.unitName.LastIndexOf('[') != -1)
         {
             var s = killedUnit.unitName;
-            killedName = s.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+            killedName = s.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killedName = killedUnit.unitName;
         
         string? killerName;
-        if (killerSteamID != null && killerPUnit?.unitName.IndexOf('[') != -1)
+        if (killerSteamID != null && killerPUnit?.unitName.LastIndexOf('[') != -1)
         {
             var s = killerPUnit?.unitName;
-            killerName = s?.Substring(s.IndexOf('[') + 1, s.IndexOf(']') - (s.IndexOf('[') + 1));
+            killerName = s?.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killerName = killerPUnit?.unitName;
         

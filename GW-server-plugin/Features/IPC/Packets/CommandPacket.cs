@@ -32,7 +32,7 @@ public class CommandPacket: CommunicationPacket
     /// </summary>
     public override CommunicationPacket? Process()
     {
-        GwServerPlugin.Logger.LogDebug($"command {CommandName} recieved with args: {string.Join("; ", Arguments)}");
+        GwServerPlugin.Logger.LogInfo($"command {CommandName} recieved with args: {string.Join("; ", Arguments)}");
         CommandService.TryExecuteCommand(CommandName, Arguments, out var response);
         if (response is null) response = $"Command {CommandName} executed successfully.";
         return Result ? new ResponsePacket { ResponseText = response } : null;

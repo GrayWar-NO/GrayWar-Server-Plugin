@@ -69,7 +69,7 @@ public static class ChatService
     /// </summary>
     /// <param name="message"> The message to send. </param>
     /// <param name="player"> Player to use for chat message variables </param>
-    public static void SendChatMessage(string message, Player? player = null)
+    public static void SendChatMessageAsServer(string message, Player? player = null)
     {
         var actualMessage = "{server_broadcast_name} " + message;
         actualMessage = actualMessage.PreProcessMessage(player);
