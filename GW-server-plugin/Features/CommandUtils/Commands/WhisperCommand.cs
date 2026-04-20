@@ -35,52 +35,39 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
-    {
-        var found = PlayerUtils.TryFindPlayer(args[0], out var target);
-        if (!found || !target)
-        {
-            response = $"Could not identify a player by \"{args[0]}\".";
-            return true;
-        }
-        
-        var message = string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!, player.PlayerName);
-        response = $"Message sent to {target}:  {message}";
-        
-        var outPacket = new ChatLogPacket
-        {
-            SteamID = player.SteamID,
-            ChatName = $"whisper({player.SteamID}:{target?.SteamID})",
-            LogText = message
-        };
-        GwServerPlugin.LoggingOutBox.Add(outPacket);
-        return true;
-    }
+    public override bool Execute(Player player, string[] args, out string? response) =>
+        Behaviour(player, args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public override bool Execute(string[] args, out string? response) =>
+        Behaviour(null, args, out response);
+            
+
+    private bool Behaviour(Player? sender, string[] args, out string response)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var target);
         if (!found || !target)
         {
             response = $"Could not identify a player by \"{args[0]}\".";
-            return true;
+            return false;
         }
         
         var message = string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!, "A moderator");
+        ChatService.SendPrivateChatMessage(message, target!, sender?.PlayerName ?? PluginConfig.ServerBroadcastName!.Value);
         response = $"Message sent to {target}:  {message}";
+        
+        var senderSteamId = sender?.SteamID ?? 0;
         
         var outPacket = new ChatLogPacket
         {
-            SteamID = 0,
-            ChatName = $"whisper({0}:{target?.SteamID})",
+            SteamID = senderSteamId,
+            ChatName = $"whisper({senderSteamId}:{target?.SteamID})",
             LogText = message
         };
         GwServerPlugin.LoggingOutBox.Add(outPacket);
         return true;
     }
+    
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
