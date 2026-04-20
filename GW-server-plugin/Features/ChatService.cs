@@ -23,7 +23,8 @@ public static class ChatService
             if (Globals.ChatManagerInstance == null)
             {
             }
-        } catch (NullReferenceException)
+        }
+        catch (NullReferenceException)
         {
             GwServerPlugin.Logger.LogWarning("Chat manager instance is null.");
             return false;
@@ -31,7 +32,7 @@ public static class ChatService
 
         if (ignoreRateLimit)
             return true;
-        
+
         try
         {
             return ChatManager.CanSend(message, true, true);
@@ -73,7 +74,7 @@ public static class ChatService
     {
         var actualMessage = "{server_broadcast_name} " + message;
         actualMessage = actualMessage.PreProcessMessage(player);
-        
+
         if (!CanSend(actualMessage, ignoreRateLimit: true))
         {
             GwServerPlugin.Logger.LogWarning("Cannot send chat message.");
@@ -85,24 +86,27 @@ public static class ChatService
             Globals.ChatManagerInstance.RpcServerMessage(actualMessage.Substring(0, 128), false);
             actualMessage = actualMessage.Substring(128);
         }
-        
+
         Globals.ChatManagerInstance.RpcServerMessage(actualMessage, false);
     }
 
     /// <summary>
-    ///     Sends a private chat message to a player.
+    ///     Sends a private chat message to a player (sender visible).
     /// </summary>
     /// <param name="message"> The message to send. </param>
     /// <param name="targetPlayer"> The player to send the message to. </param>
-    public static void SendPrivateChatMessage(string message, Player targetPlayer)
+    /// <param name="sender"> The entity that sends the message. </param>
+    public static void SendPrivateChatMessage(string message, Player targetPlayer, string? sender)
     {
         var actualMessage = message.PreProcessMessage(targetPlayer);
-        
+        actualMessage = (sender?.Length ?? 0) > 0 ? $"{sender} whispered: {actualMessage}" : actualMessage;
+
         if (!CanSend(actualMessage, ignoreRateLimit: true))
         {
             GwServerPlugin.Logger.LogWarning("Cannot send private chat message.");
             return;
         }
+
         while (actualMessage.Length > 128)
         {
             Globals.ChatManagerInstance.TargetReceiveMessage(targetPlayer.Owner, actualMessage, targetPlayer, true);
@@ -112,4 +116,12 @@ public static class ChatService
         Globals.ChatManagerInstance.TargetReceiveMessage(targetPlayer.Owner, actualMessage, targetPlayer, true);
         GwServerPlugin.Logger.LogInfo($"Sent private message to {targetPlayer.PlayerName}: {actualMessage}");
     }
+    
+    /// <summary>
+    ///     Sends a private system message to a player (no "sender").
+    /// </summary>
+    /// <param name="message"> The message to send. </param>
+    /// <param name="targetPlayer"> The player to send the message to. </param>
+    public static void SendPrivateChatMessage(string message, Player targetPlayer) =>
+        SendPrivateChatMessage(message, targetPlayer, null);
 }
