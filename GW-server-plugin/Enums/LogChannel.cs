@@ -40,5 +40,9 @@ public enum LogChannel
     /// <summary>
     /// Log when a player is warned.
     /// </summary>
-    Warn
+    Warn,
+    /// <summary>
+    /// Log when a player donates to another player.
+    /// </summary>
+    Donate
 }
