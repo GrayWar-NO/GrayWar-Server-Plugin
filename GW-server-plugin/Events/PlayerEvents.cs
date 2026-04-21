@@ -27,4 +27,15 @@ public static class PlayerEvents
     {
         PlayerLeft?.Invoke(e);
     }
+    
+    /// <summary>
+    /// Event handler for when a player joins a faction
+    /// </summary>
+    public static event Action<Player, FactionHQ>? PlayerJoinedFaction;
+
+    internal static void OnPlayerJoinFaction(Player p, FactionHQ f)
+    {
+        PlayerJoinedFaction?.Invoke(p, f);
+    }
+
 }

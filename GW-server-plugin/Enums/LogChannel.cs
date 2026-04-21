@@ -10,6 +10,10 @@ public enum LogChannel
     /// </summary>
     JoinLeave,
     /// <summary>
+    /// Players joining a faction.
+    /// </summary>
+    FactionJoin,
+    /// <summary>
     /// Missions starting and stopping, and general mission-related logging.
     /// </summary>
     MissionStatus,
