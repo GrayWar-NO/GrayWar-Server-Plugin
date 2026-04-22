@@ -54,7 +54,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         
         var message = string.Join(" ", args.Skip(1));
         ChatService.SendPrivateChatMessage(message, target!, sender?.PlayerName ?? PluginConfig.ServerBroadcastName!.Value);
-        response = $"Message sent to {target}:  {message}";
+        response = $"Message sent to {target!.PlayerName}:  {message}";
         
         var senderSteamId = sender?.SteamID ?? 0;
         
