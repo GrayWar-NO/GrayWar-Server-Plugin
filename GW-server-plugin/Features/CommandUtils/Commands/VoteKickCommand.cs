@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Votekick command for players to vote for kicking someone.
 /// </summary>
 /// <param name="config"></param>
-public class VoteKickCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class VoteKickCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "votekick";
@@ -21,16 +21,13 @@ public class VoteKickCommand(ConfigFile config): PermissionConfigurableCommand(c
     public override string Usage { get; } = "votekick <player (by name or ID tag)>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(Player player, string[] args)
     {
         return args.Length == 1 && PlayerUtils.TryFindPlayer(args[0], out _);
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
         if (targetPlayer! == player)
@@ -42,14 +39,7 @@ public class VoteKickCommand(ConfigFile config): PermissionConfigurableCommand(c
         response = $"Successfully voted to kick {targetPlayer.PlayerName}.";
         return true;
     }
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
-    {
-        response = "Cannot use votekick from the console, use kick instead.";
-        return false;
-    }
-
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
 }

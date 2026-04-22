@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
-public class UnbanCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "unban";
@@ -27,19 +27,19 @@ public class UnbanCommand(ConfigFile config): PermissionConfigurableCommand(conf
     public override string Usage { get; } = "unban <Player (by name, steamID or playerID)>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var target = args[0];
         ulong banSteamID;

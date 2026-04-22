@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command for switching the currently active mission on the server.
 /// </summary>
 /// <param name="config"></param>
-public class NextMissionCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class NextMissionCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "nextmission";
@@ -20,10 +20,10 @@ public class NextMissionCommand(ConfigFile config): PermissionConfigurableComman
     public override string Usage { get; } = "nextmission <int MissionIndex?> (omitting mission index will use the mission rotation instead)";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         if (args.Length > 1) return false;
         if (args.Length == 0) return true;
@@ -31,10 +31,10 @@ public class NextMissionCommand(ConfigFile config): PermissionConfigurableComman
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         response = "Called NextMission asynchronously, no result is available.";
         if (args.Length == 0)

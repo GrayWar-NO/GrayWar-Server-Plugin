@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to vote on changing the mission.
 /// </summary>
 /// <param name="config"></param>
-public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "rtv";
@@ -20,18 +20,15 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Usage { get; } = "rtv <Optional int missionID>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(Player player, string[] args)
     {
         if (args.Length == 0) return true;
-        if (args.Length < 1) return false;
+        if (args.Length > 1) return false;
         return int.TryParse(args[0], out _);
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         int? missionID;
         if (args.Length == 0) missionID = null;    
@@ -42,14 +39,7 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
         response = result ? $"You have successfully voted for the {missionText}." : "Your mission vote was unsuccessful.";
         return result;
     }
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
-    {
-        response = "RTV is not available from the console. Please use nextmission instead.";
-        return true;
-    }
-
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
 }

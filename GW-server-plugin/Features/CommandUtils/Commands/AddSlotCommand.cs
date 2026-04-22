@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to add a slot to the server.
 /// </summary>
 /// <param name="config"></param>
-public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name =>  "addslot";
@@ -20,19 +20,13 @@ public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(co
     public override string Usage => "addslot (takes no arguments)";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 0;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         StaffSlotService.AddStaffSlot();
         response = "Successfully added a slot to the server.";

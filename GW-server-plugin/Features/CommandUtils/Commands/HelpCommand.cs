@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command for getting help
 /// </summary>
 /// <param name="config"></param>
-public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "help";
@@ -23,23 +23,23 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
     public override string Usage { get; } = "help [command name]";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args)
+    public bool Validate(Player player, string[] args)
     {
         return Validate(args);
     }
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length <= 1;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         if (args.Length == 0)
         {
-            var accessibleCommands = CommandService.GetCommands()
+            var accessibleCommands = CommandService.GetGameCommands()
                 .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
             var commandNames = accessibleCommands.Select(c => c.Name).ToList();
             response = $"You have access to the following commands: {string.Join(", ", commandNames)}";
@@ -50,11 +50,11 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         if (args.Length == 0)
         {
-            var commandNames = CommandService.GetCommands().Select(c => c.Name).ToList();
+            var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
             response = $"Available commands: {string.Join(", ", commandNames)}";
             return true;
         }

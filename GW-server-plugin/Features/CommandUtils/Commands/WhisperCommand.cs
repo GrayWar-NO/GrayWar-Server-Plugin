@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Sends a private message to a specific player.
 /// </summary>
 /// <param name="config"></param>
-public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config)
+public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "whisper";
@@ -23,23 +23,23 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
     public override string Usage { get; } = "whisper <user / userID> <message>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args)
+    public bool Validate(Player player, string[] args)
     {
         return Validate(args);
     }
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length > 1;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) =>
+    public bool Execute(Player player, string[] args, out string? response) =>
         Behaviour(player, args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response) =>
+    public bool Execute(string[] args, out string? response) =>
         Behaviour(null, args, out response);
             
 

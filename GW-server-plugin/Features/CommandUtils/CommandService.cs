@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -18,6 +19,19 @@ public static class CommandService
     /// </summary>
     /// <returns> All registered commands, Read only.</returns>
     public static IEnumerable<ICommand> GetCommands() => Commands.AsReadOnly();
+
+
+    /// <summary>
+    ///     Get all registered in-game callable commands.
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<IGameCommand> GetGameCommands() => Commands.AsReadOnly().OfType<IGameCommand>();
+    
+    /// <summary>
+    ///     Get all registered console commands.
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<IConsoleCommand> GetConsoleCommands() => Commands.AsReadOnly().OfType<IConsoleCommand>();
     
     /// <summary>
     ///     Add a command
@@ -89,16 +103,21 @@ public static class CommandService
     /// <returns></returns>
     public static bool TryExecuteCommand(ICommand command, string[] args, Player player, out string? response)
     {
-        if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < command.PermissionLevel)
+        if (command is not IGameCommand gameCommand)
+        {
+            response = $"Command {command.Name} is not a valid in-game command.";
+            return false;
+        }
+        if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < gameCommand.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning($"Player {player.PlayerName} does not have permission to execute command {command.Name}");
             response = $"You are not authorized to execute command {command.Name}";
             return false;
         }
 
-        if (command.Validate(player, args))
+        if (gameCommand.Validate(player, args))
         {
-            if (command.Execute(player, args, out response))
+            if (gameCommand.Execute(player, args, out response))
             {
                 GwServerPlugin.Logger.LogInfo(
                     $"Command {command.Name} executed successfully by {player.PlayerName} with argument(s): {string.Join(", ", args)}"
@@ -127,6 +146,11 @@ public static class CommandService
     /// <returns></returns>
     public static bool TryExecuteCommand(ICommand command, string[] args, out string? response)
     {
+        if (command is not IConsoleCommand consoleCommand)
+        {
+            response = $"Command {command.Name} is not a valid console command.";
+            return false;
+        }
         PermissionLevelUtils.TryParsePermissionLevel(PluginConfig.IpcCommandPermissionLevel!.Value, out var level);
         if (level < command.PermissionLevel)
         {
@@ -135,9 +159,9 @@ public static class CommandService
             return false;
         }
 
-        if (command.Validate(args))
+        if (consoleCommand.Validate(args))
         {
-            if (command.Execute(args, out response))
+            if (consoleCommand.Execute(args, out response))
             {
                 GwServerPlugin.Logger.LogInfo(
                     $"Command {command.Name} executed successfully by remote process with argument(s): {string.Join(", ", args)}"

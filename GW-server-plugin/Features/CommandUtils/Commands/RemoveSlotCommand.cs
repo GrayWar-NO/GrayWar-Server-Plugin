@@ -8,7 +8,7 @@ using NuclearOption.Networking;
 /// Command to remove a slot from the server.
 /// </summary>
 /// <param name="config"></param>
-public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name =>  "rmslot";
@@ -18,21 +18,15 @@ public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand
 
     /// <inheritdoc />
     public override string Usage => "rmslot (takes no arguments)";
-
+    
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 0;
     }
-
+    
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var r = StaffSlotService.RemoveStaffSlot();
         if (!r)

@@ -17,7 +17,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
-public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "warn";
@@ -29,16 +29,16 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
     public override string Usage { get; } = "warn <Player (by name, steamID or playerID)> <Reason>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
@@ -48,7 +48,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var target = args[0];
         var reason = string.Join(" ", args.Skip(1)); 

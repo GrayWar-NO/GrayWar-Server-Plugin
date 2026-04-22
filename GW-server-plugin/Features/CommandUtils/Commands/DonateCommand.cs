@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
@@ -12,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Donate a specified sum in millions to a player
 /// </summary>
 /// <param name="config"></param>
-public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
 
     /// <inheritdoc />
@@ -25,13 +24,10 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
     public override string Usage => "/donate <target / targetID> <sum in millions (eg. 10 = 10 million)>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => args.Length == 2;
-
+    public bool Validate(Player player, string[] args) => args.Length == 2;
+    
     /// <inheritdoc />
-    public override bool Validate(string[] args) => false; // not valid if from console
-
-    /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
         if (!found || targetPlayer == null)
@@ -102,14 +98,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         GwServerPlugin.LoggingOutBox.Add(donatePacket);
         return true;
     }
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
-    {
-        response = "This command can not be called from the console and has therefore no effect.";
-        return true;
-    }
-
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }
