@@ -126,6 +126,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
+        PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
     }
@@ -248,6 +249,16 @@ public class GwServerPlugin : BaseUnityPlugin
             LogText = $"0:{player.SteamID}:{Math.Round(player.PlayerScore, 2)}"
         };
         LoggingOutBox.Add(leavePacket);
+    }
+
+    private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
+    {
+        var factionJoinPacket = new LogEntryPacket
+        {
+            Channel = LogChannel.FactionJoin,
+            LogText = $"{player.SteamID}:{HQ.faction.name}"
+        };
+        LoggingOutBox.Add(factionJoinPacket);
     }
 
     private static bool CheckOwnerBanned(Player player)
