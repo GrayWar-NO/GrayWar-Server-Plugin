@@ -18,6 +18,11 @@ framework, and hence requires a BepInEx installation to run.
 5. Go to BepInEx/config and edit the GrayWar.ServerPlugin.cfg file to your liking.
 6. After configuring the server, run the script whenever you want to start the server
 
+## IPC
+This plugin has an IPC that can be disabled in config. It binds the port 10042 by default, and pushes one-line json-formatted data.
+It is also able to receive commands in the same format.
+This enables remote moderation of the server with [external tools](#Notes).
+
 ## Support
 
 To get support on how to use this, you can come to the [GrayWar Discord server](https://discord.gg/R7kv2j6qnr)
