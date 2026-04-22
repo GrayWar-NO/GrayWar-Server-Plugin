@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to kick a player from the server
 /// </summary>
 /// <param name="config"></param>
-public class KickCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class KickCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "kick";
@@ -22,16 +22,16 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
     public override string Usage { get; } = "kick <player (by name, steamID or ID tag)> <reason>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
@@ -41,7 +41,7 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var target = args[0];
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))

@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command for setting the permission level of a player.
 /// </summary>
 /// <param name="config"></param>
-public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurableCommand(config)
+public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "setpermissionlevel";
@@ -21,10 +21,7 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
     public override string Usage { get; } = "setpermissionlevel <player (by steamID)> <permission_level>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(Player player, string[] args) 
     {
         return args.Length == 2 &&
                PermissionLevelUtils.TryParsePermissionLevel(args[1], out _) &&
@@ -32,21 +29,13 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var targetSteamID = ulong.Parse(args[0]);
         _ = PermissionLevelUtils.TryParsePermissionLevel(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID, level);
         response = $"Successfully set permission level to {level}";
         return true;
-    }
-
-
-    /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
-    {
-        response = "You cannot set permission levels from the console for security reasons";
-        return false;
     }
 
     /// <inheritdoc />

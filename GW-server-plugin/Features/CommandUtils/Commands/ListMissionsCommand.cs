@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to list missions on the server
 /// </summary>
 /// <param name="config"></param>
-public class ListMissionsCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class ListMissionsCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "missions";
@@ -21,22 +21,22 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
     public override string Usage { get; } = "missions (takes no arguments)";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args)
+    public bool Validate(Player player, string[] args)
     {
         return Validate(args);
     }
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 0;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         if (missions.Length == 0)

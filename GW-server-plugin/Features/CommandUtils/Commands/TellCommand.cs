@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Tells something to everyone on the server
 /// </summary>
 /// <param name="config"></param>
-public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(config)
+public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "tell";
@@ -20,19 +20,16 @@ public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(conf
     public override string Usage { get; } = "tell <message>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args)
-    {
-        return Validate(args);
-    }
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length > 0;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var result = Execute(args, out var resp);
         response = resp;
@@ -40,7 +37,7 @@ public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(conf
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var message = string.Join(" ", args);
         ChatService.SendChatMessageAsServer(message);

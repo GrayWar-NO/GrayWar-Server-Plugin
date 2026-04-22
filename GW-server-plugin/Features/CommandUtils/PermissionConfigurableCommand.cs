@@ -1,6 +1,5 @@
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils;
 
@@ -19,19 +18,7 @@ public abstract class PermissionConfigurableCommand : ICommand
 
     /// <inheritdoc />
     public abstract string Usage { get; }
-
-    /// <inheritdoc />
-    public abstract bool Validate(Player player, string[] args);
-
-    /// <inheritdoc />
-    public abstract bool Validate(string[] args);
-
-    /// <inheritdoc />
-    public abstract bool Execute(Player player, string[] args, out string? response);
     
-    /// <inheritdoc />
-    public abstract bool Execute(string[] args, out string? response);
-
     /// <inheritdoc />
     public PermissionLevel PermissionLevel => PermissionLevelConfig.Value;
 

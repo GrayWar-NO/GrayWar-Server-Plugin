@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Lists the players on the server
 /// </summary>
 /// <param name="config"></param>
-public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableCommand(config)
+public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "listplayers";
@@ -22,22 +22,22 @@ public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableComma
     public override string Usage { get; } = "listplayers (takes no arguments)";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args)
+    public bool Validate(Player player, string[] args)
     {
         return Validate(args);
     }
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 0;
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         var players = Globals.AuthenticatedPlayers;
         var playerNames = "";

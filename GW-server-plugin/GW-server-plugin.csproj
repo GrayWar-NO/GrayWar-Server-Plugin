@@ -8,7 +8,7 @@
 	<PackageId>Graywar.ServerPlugin</PackageId>
         <Title>ServerPlugin</Title>
         <Description>A flexible and powerful dedicated server management solution for Nuclear Option.</Description>
-        <Version>0.33.1.0</Version>
+        <Version>0.33.2.1</Version>
         <Authors>Pauel3312</Authors>
         <PackageTags>nuclear;option;bepinex</PackageTags>
 

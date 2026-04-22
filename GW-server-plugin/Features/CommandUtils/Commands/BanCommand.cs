@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
-public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "ban";
@@ -22,17 +22,17 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length is >= 1 and <= 3 &&
                (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response)
+    public bool Execute(Player player, string[] args, out string? response)
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
@@ -42,7 +42,7 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     }
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response) => Behaviour(args, true, out response);
+    public bool Execute(string[] args, out string? response) => Behaviour(args, true, out response);
     
     
     private bool Behaviour(string[] args, bool comesFromIpc, out string? response ){

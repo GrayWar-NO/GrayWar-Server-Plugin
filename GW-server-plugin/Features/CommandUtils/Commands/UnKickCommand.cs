@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to kick a player from the server
 /// </summary>
 /// <param name="config"></param>
-public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(config)
+public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "unkick";
@@ -23,19 +23,19 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     public override string Usage { get; } = "unkick <player (by steamID only)>";
 
     /// <inheritdoc />
-    public override bool Validate(Player player, string[] args) => Validate(args);
+    public bool Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public override bool Validate(string[] args)
+    public bool Validate(string[] args)
     {
         return args.Length == 1 && ulong.TryParse(args[0], out _);
     }
 
     /// <inheritdoc />
-    public override bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
 
     /// <inheritdoc />
-    public override bool Execute(string[] args, out string? response)
+    public bool Execute(string[] args, out string? response)
     {
         UnKickPlayer(ulong.Parse(args[0]));
         response = $"Unkicked player with steamID {args[0]}";
