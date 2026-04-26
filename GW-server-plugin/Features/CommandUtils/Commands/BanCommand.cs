@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
-public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "ban";
@@ -19,7 +19,8 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Description { get; } = "Bans a player from the server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
+    public override string Usage { get; } =
+        "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
 
     /// <inheritdoc />
     public bool Validate(Player player, string[] args) => Validate(args);
@@ -36,16 +37,14 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Behaviour(args, false, out response);
+        if (targetPlayer != player) return Execute(args, out response);
         response = "You cannot ban yourself!";
         return false;
     }
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response) => Behaviour(args, true, out response);
-    
-    
-    private bool Behaviour(string[] args, bool comesFromIpc, out string? response ){
+    public bool Execute(string[] args, out string? response)
+    {
         var target = args[0];
         var reason = args.Length > 1 ? args[1] : "Unknown reason";
         string? duration = null;
@@ -53,8 +52,10 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
         {
             duration = args[2];
         }
+
         ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ulong.TryParse(target, out var targetID) &&
+            targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             banSteamID = targetID;
             response = $"Banned player with steamID {banSteamID} for reason {reason}";
@@ -79,14 +80,12 @@ public class BanCommand(ConfigFile config): PermissionConfigurableCommand(config
             response += $" for {duration}.";
         }
 
-        PlayerUtils.BanPlayer(banSteamID, reason, duration, comesFromIpc);
+        PlayerUtils.BanPlayer(banSteamID, reason, duration);
         if (!GwServerPlugin.FamilySharingBorrowers.TryGetValue(banSteamID, out var ownerSteamID)) return true;
-        if (ownerSteamID != banSteamID)
-        {
-            PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}",
-                duration, comesFromIpc);
-            response += $"\tBanned Owner with steamID {ownerSteamID} as well";
-        }
+        if (ownerSteamID == banSteamID) return true;
+        PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}",
+            duration);
+        response += $"\tBanned Owner with steamID {ownerSteamID} as well";
         return true;
     }
 
