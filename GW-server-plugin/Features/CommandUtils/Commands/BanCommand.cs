@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
-public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(config)
+public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "ban";
