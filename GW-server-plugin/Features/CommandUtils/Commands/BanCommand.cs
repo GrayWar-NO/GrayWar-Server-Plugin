@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
@@ -28,8 +30,8 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
     /// <inheritdoc />
     public bool Validate(string[] args)
     {
-        return args.Length is >= 1 and <= 3 &&
-               (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) ||
+                                    ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
@@ -46,12 +48,25 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
     public bool Execute(string[] args, out string? response)
     {
         var target = args[0];
-        var reason = args.Length > 1 ? args[1] : "Unknown reason";
         string? duration = null;
-        if (args.Length == 3)
+        string reason;
+        if (args.Length > 1)
         {
-            duration = args[2];
+            var tmp = args[args.Length - 1].Last();
+            duration = tmp is 'd' or 'h' ? args[args.Length - 1] : null;
+            var reasonEnum = args.Skip(1).ToList();
+            if (duration is not null)
+            {
+                reasonEnum.RemoveAt(reasonEnum.Count - 1);
+            }
+
+            reason = string.Join(" ", reasonEnum);
         }
+        else
+        {
+            reason = "Unknown reason";
+        }
+
 
         ulong banSteamID;
         if (ulong.TryParse(target, out var targetID) &&

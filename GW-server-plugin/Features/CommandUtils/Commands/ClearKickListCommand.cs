@@ -34,7 +34,7 @@ public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCom
     /// <inheritdoc />
     public bool Execute(string[] args, out string? response)
     {
-        Globals.NetworkManagerNuclearOptionInstance.Authenticator.ClearKickList();
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Clear();
         response = "Kick list cleared successfully!";
         return true;
     }
