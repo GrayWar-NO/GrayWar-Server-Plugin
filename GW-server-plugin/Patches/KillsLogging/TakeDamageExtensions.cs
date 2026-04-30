@@ -32,9 +32,6 @@ public static class TakeDamageExtensions
     {
         switch (component)
         {
-            case MapBuilding bdg:
-                bdg.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID);
-                break;
             case Missile missile:
                 missile.TakeDamage(pierceDamage, blastDamage, amountAffected, fireDamage, impactDamage, dealerID,
                     weaponName);
