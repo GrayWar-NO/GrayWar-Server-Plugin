@@ -129,6 +129,8 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
+        
+        TimeService.Initialize();
     }
 
     private static void PatchAll()
