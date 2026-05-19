@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -46,13 +47,10 @@ internal sealed class PlayerIdentificationService
 
     public void GetPlayerById(int id, out ulong? player)
     {
-        foreach (var keyValuePair in _players)
+        foreach (var keyValuePair in _players.Where(keyValuePair => keyValuePair.Value == id))
         {
-            if (keyValuePair.Value == id)
-            {
-                player = keyValuePair.Key;
-                return;
-            }
+            player = keyValuePair.Key;
+            return;
         }
 
         player = null;

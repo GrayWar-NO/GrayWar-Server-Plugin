@@ -1,7 +1,6 @@
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using HarmonyLib;
-using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Patches;

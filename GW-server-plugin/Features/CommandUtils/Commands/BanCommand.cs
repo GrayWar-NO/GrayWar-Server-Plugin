@@ -76,7 +76,8 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
             response = $"Banned player with steamID {banSteamID} for reason {reason}";
             if (PlayerUtils.TryFindPlayerBySteamId(banSteamID, out var targetPlayer))
             {
-                Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(targetPlayer);
+                Globals.NetworkManagerNuclearOptionInstance
+                    .KickPlayerAsync(targetPlayer!, $"Banned for reason: {reason}").Forget();
             }
         }
         else
@@ -86,7 +87,8 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
                 throw new VerificationException(
                     $"Could not find player {target}: validation was not called properly.");
             banSteamID = player!.SteamID;
-            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player);
+            Globals.NetworkManagerNuclearOptionInstance
+                .KickPlayerAsync(player, $"Banned for reason: {reason}").Forget();
             response = $"Banned player {player.PlayerName} for reason {reason}";
         }
 
