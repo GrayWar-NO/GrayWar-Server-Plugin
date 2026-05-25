@@ -124,6 +124,9 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new DonateCommand(Config));
         CommandService.AddCommand(new GiveCommand(Config));
+        
+        CommandService.AddCommand(new PlayerInfoCommand(Config));
+        
 #if DEBUG
         CommandService.AddCommand(new DebugCmd(Config));
 #endif        
