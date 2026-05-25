@@ -124,6 +124,9 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new DonateCommand(Config));
         CommandService.AddCommand(new GiveCommand(Config));
+#if DEBUG
+        CommandService.AddCommand(new DebugCmd(Config));
+#endif        
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
