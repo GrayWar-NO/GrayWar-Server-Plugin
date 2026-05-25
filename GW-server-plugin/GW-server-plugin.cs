@@ -123,6 +123,7 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new DiscordCommand(Config));
         
         CommandService.AddCommand(new DonateCommand(Config));
+        CommandService.AddCommand(new GiveCommand(Config));
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerJoined += OnPlayerJoin;
