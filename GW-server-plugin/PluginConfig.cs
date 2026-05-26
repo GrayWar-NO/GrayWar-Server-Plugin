@@ -17,10 +17,7 @@ public static class PluginConfig
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
 
-
-    internal static ConfigEntry<bool>? EnableWeatherRandomizer;
-    internal const bool DefaultWeatherRandomizer = true;    
-
+    
     internal static ConfigEntry<int>? IpcPort;
     internal const int DefaultIpcPort = 10042;
 
@@ -91,9 +88,6 @@ public static class PluginConfig
         StaffPrefix = config.Bind(GeneralSection, "StaffPrefix", DefaultStaffPrefix,
             "The prefix added in-front of the usernames of Moderators, Admins and the Owner.");
         GwServerPlugin.Logger.LogDebug($"StaffTag: {StaffPrefix.Value}");
-
-        EnableWeatherRandomizer = config.Bind(GeneralSection, "Enable weather randomizer", DefaultWeatherRandomizer);
-        GwServerPlugin.Logger.LogDebug($"Weather randomizer {(EnableWeatherRandomizer.Value ? "enabled" : "disabled")}.");
         
         
         ServerBroadcastName = config.Bind(GeneralSection, "ServerBroadcastName", DefaultServerBroadcastName,

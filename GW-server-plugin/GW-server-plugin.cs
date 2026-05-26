@@ -39,6 +39,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static VoteKickService VoteKickService { get; private set; } = null!;
 
+    internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
+
     internal static WarnService WarnService { get; private set; } = null!;
 
     /// <summary>
@@ -71,6 +73,9 @@ public class GwServerPlugin : BaseUnityPlugin
         
         WarnService = new WarnService(Config);
         Logger.LogInfo("Loaded WarnService");
+        
+        WeatherRandomizer = new WeatherRandomizer(Config);
+        Logger.LogInfo("Loaded WeatherRandomizer");
         
         VoteKickService = new VoteKickService();
         Logger.LogInfo("Loaded VoteKick");
