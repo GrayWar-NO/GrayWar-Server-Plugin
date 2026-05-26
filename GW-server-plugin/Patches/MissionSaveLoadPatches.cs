@@ -32,8 +32,8 @@ public class MissionSaveLoadPatches
         if (mission == null) return;
         if (!PluginConfig.EnableWeatherRandomizer!.Value) return;
         var rnd = new Random();
-        mission.environment.timeOfDay = rnd.Next(3, 21);
-        mission.environment.timeFactor = rnd.Next(1, 3); // TIME FACTOR goes from -2 to 3, values are [0, 0.5, 1, 10, 30, 60]
+        mission.environment.timeOfDay = rnd.Next(2, 10);
+        mission.environment.timeFactor = 1f; // TIME FACTOR goes from -2 to 3, values are [0, 0.5, 1, 10, 30, 60]
         mission.environment.weatherIntensity = (float)rnd.NextDouble();
         mission.environment.cloudAltitude = (float)(200 + rnd.NextDouble() * 1000);
         mission.environment.windSpeed = (float)(rnd.NextDouble() * 10); // in m/s (10m/s is 36kph)
