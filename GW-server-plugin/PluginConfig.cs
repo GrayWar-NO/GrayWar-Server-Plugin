@@ -13,10 +13,18 @@ public static class PluginConfig
     internal const string GeneralSection = "General";
     internal const string IpcSection = "IPCSection";
     internal const string BroadcastSection = "Broadcasts";
+
+    internal static ConfigEntry<bool>? ForceLowWreckDespawn;
+    internal const bool DefaultForceLowWreckDespawn = true;
+
+    internal static ConfigEntry<int>? MaxWrecks;
+    internal const int DefaultMaxWrecks = 100;
+
+    internal static ConfigEntry<float>? WrecksDecay;
+    internal const float DefaultWrecksDecay = 300;
     
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
-
     
     internal static ConfigEntry<int>? IpcPort;
     internal const int DefaultIpcPort = 10042;
@@ -48,7 +56,6 @@ public static class PluginConfig
 
     internal static List<ConfigEntry<string>> BroadcastMessages = [];
     internal const string DefaultMessageContent = "";
-
     
     internal static ConfigEntry<string>? Moderators;
     internal const string DefaultModerators = "";
@@ -68,6 +75,13 @@ public static class PluginConfig
     internal static void InitSettings(ConfigFile config)
     {
         GwServerPlugin.Logger.LogDebug("Loading Settings...");
+
+        ForceLowWreckDespawn = config.Bind(GeneralSection, "Force wrecks to despawn", DefaultForceLowWreckDespawn);
+        GwServerPlugin.Logger.LogDebug($"ForceLowWreckDespawn: {ForceLowWreckDespawn.Value}");
+        MaxWrecks = config.Bind(GeneralSection, "Maximum number of wrecks",  DefaultMaxWrecks);
+        GwServerPlugin.Logger.LogDebug($"MaxWrecks: {MaxWrecks.Value}");
+        WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time",  DefaultWrecksDecay);
+        GwServerPlugin.Logger.LogDebug($"WrecksDecay: {WrecksDecay.Value}");
 
         CommandPrefix = config.Bind(GeneralSection, "CommandPrefix", DefaultCommandPrefix, "What to use as the command prefix (the character at the start of a command).");
         GwServerPlugin.Logger.LogDebug($"CommandPrefix: {CommandPrefix.Value}");
@@ -108,6 +122,8 @@ public static class PluginConfig
                 );
         }
         GwServerPlugin.Logger.LogDebug($"Loaded Broadcast messages");
+        
+        
         
         IpcEnable = config.Bind(IpcSection, "Enable IPC", DefaultIpcEnable);
         GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcEnable}");

@@ -30,7 +30,8 @@ public class MissionSaveLoadPatches
     
     private static void ForceLowWreckDespawn(ref Mission mission)
     {
-        mission.missionSettings.wrecksMaxNumber = 100;
-        mission.missionSettings.wrecksDecayTime = 300;
+        if (!PluginConfig.ForceLowWreckDespawn!.Value) return;        
+        mission.missionSettings.wrecksMaxNumber = PluginConfig.MaxWrecks!.Value;
+        mission.missionSettings.wrecksDecayTime = PluginConfig.WrecksDecay!.Value;
     }
 }
