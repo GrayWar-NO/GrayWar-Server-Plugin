@@ -111,18 +111,9 @@ public static class WeaponLoggingExtensions
                 damageDealer.Key.HQ.ReportKillAction(damageDealer.Key, unit, damageDealer.Value);
         }
 
-        ulong? killedSteamID;
-        Aircraft? killedAircraft;
-        if (killedUnit.unit is Aircraft killedAircraftUnit)
-        {
-            killedAircraft = killedAircraftUnit;
-            killedSteamID = killedAircraft.Player?.SteamID;
-        }
-        else
-        {
-            killedAircraft = null;
-            killedSteamID = killedUnit.player?.SteamID;
-        }
+        var killedAircraft = killedUnit.unit as Aircraft;
+        var killedSteamID = killedAircraft != null ? killedAircraft.Player?.SteamID : killedUnit.player?.SteamID;
+        
         ulong? killerSteamID;
         Aircraft? killerAircraft;
 

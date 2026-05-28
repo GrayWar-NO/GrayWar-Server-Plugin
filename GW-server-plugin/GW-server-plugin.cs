@@ -289,7 +289,6 @@ public class GwServerPlugin : BaseUnityPlugin
     /// <param name="weaponName"></param>
     public static void OnTeamkill(Player killer, Player killed, string weaponName)
     {
-        if (weaponName.Contains("kt")) return;// if weapon is a nuke
         var warnLogPacket = new LogEntryPacket
         {
             LogText = $"{killer.SteamID}:Teamkilled player {killed.PlayerName} with weapon {weaponName}",
