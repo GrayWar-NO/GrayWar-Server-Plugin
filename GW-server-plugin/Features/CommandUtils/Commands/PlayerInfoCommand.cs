@@ -33,7 +33,7 @@ public class PlayerInfoCommand(ConfigFile config): PermissionConfigurableCommand
             response = $"Player for steamID {steamID} not found";
             return false;
         }
-        response = player!.name;
+        response = player!.PlayerName;
         return true;
     }
 }
