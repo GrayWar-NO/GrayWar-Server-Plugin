@@ -100,6 +100,8 @@ public class GwServerPlugin : BaseUnityPlugin
             StartLoggingSender();
         }
         
+        RestartWarningService.ScheduleWarnings();
+        
         PatchAll();
         
         CommandService.AddCommand(new TellCommand(Config));
