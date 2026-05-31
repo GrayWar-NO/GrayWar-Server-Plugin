@@ -66,16 +66,9 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
                     $"Could not find player {target}: validation was not called properly.");
             warnSteamID = player!.SteamID;
             response = $"Warned player {player.PlayerName} for reason {reason}";
-            ChatService.SendPrivateChatMessage($"You have been warned for {reason}", player);
         }
 
-        var warnLogPacket = new LogEntryPacket
-        {
-            LogText = $"{warnSteamID}:{reason}",
-            Channel = LogChannel.Warn
-        };
-        GwServerPlugin.LoggingOutBox.Add(warnLogPacket);
-        return GwServerPlugin.WarnService.AddWarn(warnSteamID);
+        return GwServerPlugin.WarnService.AddWarn(warnSteamID, reason);
     }
 
     /// <inheritdoc />

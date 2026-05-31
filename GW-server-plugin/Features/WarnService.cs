@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
+using GW_server_plugin.Enums;
+using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Features;
@@ -23,8 +25,14 @@ public class WarnService(ConfigFile config)
     /// </summary>
     /// <param name="steamID">The player's steamID</param>
     /// <returns></returns>
-    public bool AddWarn(ulong steamID)
+    public bool AddWarn(ulong steamID, string reason)
     {
+        var warnLogPacket = new LogEntryPacket
+        {
+            LogText = $"{steamID}:{reason}",
+            Channel = LogChannel.Warn
+        };
+        GwServerPlugin.LoggingOutBox.Add(warnLogPacket);
         if (!_playerWarnCount.Keys.Contains(steamID))
         {
             _playerWarnCount[steamID] = 1;
@@ -33,6 +41,8 @@ public class WarnService(ConfigFile config)
         _playerWarnCount[steamID]++;
         if (_playerWarnCount[steamID] < WarnsToKickConfig.Value || !WarnsToKickOnConfig.Value) return true;
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player)) return false;
+        ChatService.SendPrivateChatMessage($"You have been warned for {reason}", player);
+
         PlayerUtils.KickPlayer(player!, "Too many warnings!");
         return true;
     }

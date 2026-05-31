@@ -293,13 +293,8 @@ public class GwServerPlugin : BaseUnityPlugin
     /// <param name="weaponName"></param>
     public static void OnTeamkill(Player killer, Player killed, string weaponName)
     {
-        var warnLogPacket = new LogEntryPacket
-        {
-            LogText = $"{killer.SteamID}:Teamkilled player {killed.PlayerName} with weapon {weaponName}",
-            Channel = LogChannel.Warn
-        };
-        LoggingOutBox.Add(warnLogPacket);
         if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
-        WarnService.AddWarn(killer.SteamID);
+        var reason = $"Teamkilled player {killed.PlayerName} with weapon {weaponName}";
+        WarnService.AddWarn(killer.SteamID, reason);
     }
 }
