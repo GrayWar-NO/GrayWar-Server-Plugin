@@ -259,6 +259,7 @@ public class GwServerPlugin : BaseUnityPlugin
         MissionVote.RemoveVoter(player.SteamID);
         VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
+        MissionBalanceService.CheckAndApplyBalance();
         var leavePacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
@@ -269,6 +270,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
     {
+        MissionBalanceService.CheckAndApplyBalance();
         var factionJoinPacket = new LogEntryPacket
         {
             Channel = LogChannel.FactionJoin,

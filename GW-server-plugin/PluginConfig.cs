@@ -22,6 +22,9 @@ public static class PluginConfig
 
     internal static ConfigEntry<float>? WrecksDecay;
     internal const float DefaultWrecksDecay = 300;
+
+    internal static ConfigEntry<int>? MaxFactionPlayerCountDiff;
+    internal const int DefaultMaxPlayerCountDiff = 2;
     
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
@@ -82,6 +85,10 @@ public static class PluginConfig
         GwServerPlugin.Logger.LogDebug($"MaxWrecks: {MaxWrecks.Value}");
         WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time",  DefaultWrecksDecay);
         GwServerPlugin.Logger.LogDebug($"WrecksDecay: {WrecksDecay.Value}");
+
+        MaxFactionPlayerCountDiff =
+            config.Bind(GeneralSection, "Max faction player count difference", DefaultMaxPlayerCountDiff);
+        GwServerPlugin.Logger.LogDebug($"MaxFactionPlayerCountDiff: {MaxFactionPlayerCountDiff.Value}");
 
         CommandPrefix = config.Bind(GeneralSection, "CommandPrefix", DefaultCommandPrefix, "What to use as the command prefix (the character at the start of a command).");
         GwServerPlugin.Logger.LogDebug($"CommandPrefix: {CommandPrefix.Value}");
