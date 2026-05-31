@@ -251,6 +251,12 @@ public class GwServerPlugin : BaseUnityPlugin
             LogText = $"1:{player.SteamID}:{originalName}"
         };
         LoggingOutBox.Add(joinPacket);
+
+        var saveData = player.GetAuthData().SaveData;
+        if (saveData == null || saveData.Faction == null) return;
+        player.HQ = saveData.Faction;
+        player.HQ.AddPlayer(player);
+        player.HQ.RequestTrackingStates(player);
     }
 
     private static void OnPlayerLeave(Player player)
