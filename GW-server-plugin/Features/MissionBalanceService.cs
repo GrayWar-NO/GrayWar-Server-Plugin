@@ -1,5 +1,6 @@
 using System.Linq;
 using NuclearOption.Networking;
+using NuclearOption.SavedMission;
 
 namespace GW_server_plugin.Features;
 
@@ -7,6 +8,8 @@ internal static class MissionBalanceService
 {
     internal static void CheckAndApplyBalance()
     {
+        if (MissionManager.CurrentMission.missionSettings.Tags.Contains(MissionTag.PVE)) return;
+        
         var factionMinPlayers = MissionManager.CurrentMission.factions
             .Select(faction => faction.FactionHQ.GetPlayers(false).Count).Min();
         foreach (var faction in MissionManager.CurrentMission.factions)
