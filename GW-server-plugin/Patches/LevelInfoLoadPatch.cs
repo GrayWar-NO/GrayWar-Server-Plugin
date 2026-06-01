@@ -5,12 +5,15 @@ using UnityEngine;
 namespace GW_server_plugin.Patches;
 
 
+/// <summary>
+/// Fixes time of day progression
+/// </summary>
 [HarmonyPatch(typeof(LevelInfo))]
 public class LevelInfoLoadPatch
 {
     [HarmonyPrefix]
     [HarmonyPatch(nameof(LevelInfo.Update))]
-    public static void UpdatePostfix(LevelInfo __instance)
+    internal static void UpdatePostfix(LevelInfo __instance)
     {
         if (GameManager.ShowEffects) return;
 

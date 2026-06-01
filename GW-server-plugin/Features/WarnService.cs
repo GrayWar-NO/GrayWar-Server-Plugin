@@ -24,6 +24,7 @@ public class WarnService(ConfigFile config)
     /// Adds a warning to the designated player.
     /// </summary>
     /// <param name="steamID">The player's steamID</param>
+    /// <param name="reason">Reason for the warning</param>
     /// <returns></returns>
     public bool AddWarn(ulong steamID, string reason)
     {
@@ -41,7 +42,7 @@ public class WarnService(ConfigFile config)
         _playerWarnCount[steamID]++;
         if (_playerWarnCount[steamID] < WarnsToKickConfig.Value || !WarnsToKickOnConfig.Value) return true;
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player)) return false;
-        ChatService.SendPrivateChatMessage($"You have been warned for {reason}", player);
+        ChatService.SendPrivateChatMessage($"You have been warned for {reason}", player!);
 
         PlayerUtils.KickPlayer(player!, "Too many warnings!");
         return true;

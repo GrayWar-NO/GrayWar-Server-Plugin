@@ -4,6 +4,10 @@ using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
+/// <summary>
+///     Command to get player name and ID from their steamID.
+/// </summary>
+/// <param name="config"></param>
 public class PlayerInfoCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />

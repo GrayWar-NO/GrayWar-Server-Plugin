@@ -4,7 +4,10 @@ using NuclearOption.SavedMission;
 
 namespace GW_server_plugin.Events;
 
-public class MissionEvents
+/// <summary>
+///     Mission-related events
+/// </summary>
+public static class MissionEvents
 {
     /// <summary>
     ///     Event handler for when a mission starts.

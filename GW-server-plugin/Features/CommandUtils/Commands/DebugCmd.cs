@@ -7,6 +7,10 @@ using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
+/// <summary>
+/// Command to use exclusively for debugging. Change this implementation to debug whatever you're working on.
+/// </summary>
+/// <param name="config"></param>
 public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
