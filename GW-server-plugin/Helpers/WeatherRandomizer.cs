@@ -14,7 +14,7 @@ public class WeatherRandomizer(ConfigFile config)
 
     private readonly ConfigEntry<bool> _enable = config.Bind(WeatherRandomizerSection, "Enable", true);
     private readonly ConfigEntry<int> _minTimeOfDay = config.Bind(WeatherRandomizerSection, "Minimum time of day", 2);
-    private readonly ConfigEntry<int> _maxTimeOfDay = config.Bind(WeatherRandomizerSection, "Maximum time of day", 2);
+    private readonly ConfigEntry<int> _maxTimeOfDay = config.Bind(WeatherRandomizerSection, "Maximum time of day", 10);
 
     private readonly ConfigEntry<float> _timeFactor = config.Bind(WeatherRandomizerSection, "time factor", 1f,
         "time factor goes from -2 to 3, values are [0, 0.5, 1, 10, 30, 60]");
@@ -45,7 +45,7 @@ public class WeatherRandomizer(ConfigFile config)
         _minWindHeading = config.Bind(WeatherRandomizerSection, "Minimum wind heading", 0);
 
     private readonly ConfigEntry<int>
-        _maxWindRandomChange = config.Bind(WeatherRandomizerSection, "Maximum wind random offset (exclusive)", 0);
+        _maxWindRandomChange = config.Bind(WeatherRandomizerSection, "Maximum wind random offset (exclusive)", 90);
     private readonly ConfigEntry<int>
         _minWindRandomChange = config.Bind(WeatherRandomizerSection, "Minimum wind random offset", 0);
 
