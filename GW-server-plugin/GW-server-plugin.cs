@@ -153,6 +153,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
 
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
+        MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         

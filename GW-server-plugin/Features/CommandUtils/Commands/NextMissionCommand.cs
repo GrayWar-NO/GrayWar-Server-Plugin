@@ -39,6 +39,7 @@ public class NextMissionCommand(ConfigFile config): PermissionConfigurableComman
         response = "Called NextMission asynchronously, no result is available.";
         if (args.Length == 0)
         {
+            GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
             _ = MissionService.StartNextMission();
             return true;
         }
