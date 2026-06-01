@@ -27,6 +27,8 @@ namespace GW_server_plugin;
 [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 public class GwServerPlugin : BaseUnityPlugin
 {
+    internal static GwServerPlugin Instance { get; private set; } = null!;
+    
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
 
@@ -67,6 +69,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     private void Awake()
     {
+        Instance = this;
         Logger = base.Logger;
         
         PluginConfig.InitSettings(Config);
@@ -137,6 +140,7 @@ public class GwServerPlugin : BaseUnityPlugin
         CommandService.AddCommand(new GiveCommand(Config));
         
         CommandService.AddCommand(new PlayerInfoCommand(Config));
+        CommandService.AddCommand(new ReloadConfigCommand(Config));
         
 #if DEBUG
         CommandService.AddCommand(new DebugCmd(Config));
