@@ -1,14 +1,15 @@
 using System.Linq;
-using NuclearOption.Networking;
 using NuclearOption.SavedMission;
 
 namespace GW_server_plugin.Features;
 
-internal static class MissionBalanceService
+internal class MissionBalanceService
 {
-    internal static void CheckAndApplyBalance()
+    private bool _isCurrentMissionPvE;
+    
+    internal void CheckAndApplyBalance()
     {
-        if (MissionManager.CurrentMission.missionSettings.Tags.Contains(MissionTag.PVE)) return;
+        if (_isCurrentMissionPvE) return;
         
         var factionMinPlayers = MissionManager.CurrentMission.factions
             .Select(faction => faction.FactionHQ.GetPlayers(false).Count).Min();
@@ -32,4 +33,12 @@ internal static class MissionBalanceService
             GwServerPlugin.Logger.LogDebug($"Can join {faction.factionName}: {!faction.FactionHQ.NetworkpreventJoin}");
         }
     }
+
+    internal void OnMissionLoad(Mission mission)
+    {
+        var c = mission.factions.Count(fac => !fac.preventJoin);
+        GwServerPlugin.Logger.LogDebug(c);
+        _isCurrentMissionPvE = c <= 1;
+    }
+    
 }

@@ -26,6 +26,7 @@ public class MissionSaveLoadPatches
         if (mission == null) return;
         GwServerPlugin.WeatherRandomizer.Apply(ref mission);
         ForceLowWreckDespawn(ref mission);
+        MissionEvents.OnMissionLoad(mission);
     }
     
     private static void ForceLowWreckDespawn(ref Mission mission)

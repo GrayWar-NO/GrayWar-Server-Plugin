@@ -41,6 +41,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
 
+    private static MissionBalanceService MissionBalance { get; set; } = null!;
+
     internal static WarnService WarnService { get; private set; } = null!;
 
     /// <summary>
@@ -76,6 +78,8 @@ public class GwServerPlugin : BaseUnityPlugin
         
         WeatherRandomizer = new WeatherRandomizer(Config);
         Logger.LogInfo("Loaded WeatherRandomizer");
+
+        MissionBalance = new MissionBalanceService();
         
         VoteKickService = new VoteKickService();
         Logger.LogInfo("Loaded VoteKick");
@@ -136,11 +140,15 @@ public class GwServerPlugin : BaseUnityPlugin
         
 #if DEBUG
         CommandService.AddCommand(new DebugCmd(Config));
-#endif        
+#endif
 
         PlayerEvents.PlayerLeft += OnPlayerLeave;
+        PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
         PlayerEvents.PlayerJoined += OnPlayerJoin;
         PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
+        PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
+
+        MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
@@ -265,7 +273,6 @@ public class GwServerPlugin : BaseUnityPlugin
         MissionVote.RemoveVoter(player.SteamID);
         VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
-        MissionBalanceService.CheckAndApplyBalance();
         var leavePacket = new LogEntryPacket
         {
             Channel = LogChannel.JoinLeave,
@@ -276,7 +283,6 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
     {
-        MissionBalanceService.CheckAndApplyBalance();
         var factionJoinPacket = new LogEntryPacket
         {
             Channel = LogChannel.FactionJoin,
