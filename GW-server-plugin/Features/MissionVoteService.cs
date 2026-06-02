@@ -35,8 +35,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     private readonly HashSet<ulong> _yesVotes = [];
     private readonly HashSet<ulong> _noVotes = [];
 
-    private readonly Dictionary<int, List<ulong>> _missionVotes =
-        new Dictionary<int, List<ulong>>();
+    private readonly Dictionary<int, List<ulong>> _missionVotes = new();
 
     private MissionOptions[] Missions { get; set; } = null!;
     private int DefaultMissionIndex { get; set; }
@@ -50,14 +49,14 @@ internal sealed class MissionVoteService(ConfigFile config)
     private string? _rtvInhibitReason;
 
 
-    internal void Inhibit(string reason)
+    public void Inhibit(string reason)
     {
         ResetRtv();
         _rtvInhibited = true;
         _rtvInhibitReason = reason;
     }
 
-    internal void ClearInhibit()
+    public void ClearInhibit()
     {
         _rtvInhibited = false;
     }
@@ -93,8 +92,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         Missions = MissionService.GetAllAvailableMissionOptions();
         DefaultMissionIndex = Array.IndexOf(Missions, MissionService.GetNextMissionOptions() ?? Missions[0]);
         if (DefaultMissionIndex == -1) DefaultMissionIndex = 0;
-        _missionVotes.Clear();
-        _yesVotes.Clear();
+        ResetRtv();
         ChatService.SendChatMessageAsServer("-- Rock-The-Vote --");
         ChatService.SendChatMessageAsServer("Mission voting has started!");
         ChatService.SendChatMessageAsServer("Use /rtv vote to change the mission.");
@@ -114,7 +112,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     }
 
 
-    internal void RemoveVoter(ulong steamid)
+    public void RemoveVoter(ulong steamid)
     {
         if (_noVotes.Remove(steamid)) return;
         if (!_yesVotes.Remove(steamid)) return;
@@ -150,16 +148,8 @@ internal sealed class MissionVoteService(ConfigFile config)
         var autoPassLimit = Math.Ceiling((double)connectedPlayers / 2f);
         if (connectedPlayers % 2 == 0) autoPassLimit++; // make it absolute majority.
         ChatService.SendChatMessageAsServer($"RTV: Yes: {nYesVotes}/{autoPassLimit}\tNo: {nNoVotes}/{autoPassLimit}");
-        if (nYesVotes >= autoPassLimit)
-        {
-            PassVote();
-            GwServerPlugin.Logger.LogInfo("RTV Success!");
-        }
-        else if (nNoVotes >= autoPassLimit)
-        {
-            FailVote();
-            GwServerPlugin.Logger.LogInfo("RTV Failed!");
-        }
+        if (nYesVotes >= autoPassLimit) { PassVote(); }
+        else if (nNoVotes >= autoPassLimit) { FailVote(); }
     }
 
     private MissionOptions GetVoteWinner()
@@ -200,12 +190,10 @@ internal sealed class MissionVoteService(ConfigFile config)
         if (nYesVotes >= autoPassLimit || (nYesVotes >= MinVoteValidity.Value && nYesVotes > nNoVotes))
         {
             PassVote();
-            GwServerPlugin.Logger.LogInfo("RTV Success!");
         }
         else
         {
             FailVote();
-            GwServerPlugin.Logger.LogInfo("RTV Failed!");
         }
     }
     
@@ -215,6 +203,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         ChatService.SendChatMessageAsServer("RTV has succeeded!");
         ChatService.SendChatMessageAsServer($"Mission will switch to {MapVoteWinner.Key.Name} in {MapSwitchDelay.Value} seconds.");
         WaitBeforeMapSwitch();
+        GwServerPlugin.Logger.LogInfo("RTV Success!");
         ResetRtv();
     }
 
@@ -223,6 +212,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         ResetRtv();
         ChatService.SendChatMessageAsServer("RTV has failed!");
         ChatService.SendChatMessageAsServer("Mission will not switch.");
+        GwServerPlugin.Logger.LogInfo("RTV Failed!");
     }
 
     private async void VoteOngoing()
