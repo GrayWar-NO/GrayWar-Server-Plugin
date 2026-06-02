@@ -50,6 +50,7 @@ public class NextMissionCommand(ConfigFile config): PermissionConfigurableComman
             response = "Mission not found.";
             return false;
         }
+        GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
         _ = MissionService.StartMission(missionOption.Value);
         return true;
     }

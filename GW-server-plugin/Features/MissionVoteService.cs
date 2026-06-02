@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features;
 internal sealed class MissionVoteService(ConfigFile config)
 {
     
-    private CancellationTokenSource _voteCancelled = null!;
+    private CancellationTokenSource? _voteCancelled;
     
     private const string RtvCommandSection = "RTV";
 
@@ -108,7 +108,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         _noVotes.Clear();
         _missionVotes.Clear();
         _rtvActive = false;
-        _voteCancelled.Cancel();
+        _voteCancelled?.Cancel();
     }
 
 
@@ -219,7 +219,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     {
         try
         {
-            var ct = _voteCancelled.Token;
+            var ct = _voteCancelled!.Token;
             var timeRemaining = VoteLength.Value;
             while (timeRemaining > ReminderInterval.Value)
             {
