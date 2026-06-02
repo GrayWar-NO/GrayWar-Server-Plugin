@@ -49,7 +49,7 @@ public class ReloadConfigCommand(ConfigFile config)
     /// <inheritdoc />
     public bool Execute(string[] args, out string? response)
     {
-        switch (args[0])
+        switch (args[0].ToLowerInvariant())
         {
             case "bepinex":
                 GwServerPlugin.Instance.Config.Reload();
