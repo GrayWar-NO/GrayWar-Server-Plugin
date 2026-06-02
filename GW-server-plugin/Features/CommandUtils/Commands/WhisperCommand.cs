@@ -14,13 +14,13 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "whisper";
+    public override string Name => "whisper";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Send a private message to a specified user.";
-    
+    public override string Description => "Send a private message to a specified user.";
+
     /// <inheritdoc />
-    public override string Usage { get; } = "whisper <user / userID> <message>";
+    public override string Usage => "whisper <user Name/ID> <message>";
 
     /// <inheritdoc />
     public bool Validate(Player player, string[] args)
@@ -43,7 +43,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         Behaviour(null, args, out response);
             
 
-    private bool Behaviour(Player? sender, string[] args, out string response)
+    private static bool Behaviour(Player? sender, string[] args, out string response)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var target);
         if (!found || !target)
@@ -53,7 +53,8 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         }
         
         var message = string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!, sender?.PlayerName ?? PluginConfig.ServerBroadcastName!.Value);
+        message = $"(whisper): {message}";
+        ChatService.SendPrivateChatMessage(message, target!, sender);
         response = $"Message sent to {target!.PlayerName}:  {message}";
         
         var senderSteamId = sender?.SteamID ?? 0;
@@ -70,8 +71,5 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
     
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
-    
-    
-    
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }
