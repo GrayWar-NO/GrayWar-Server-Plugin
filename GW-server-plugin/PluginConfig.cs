@@ -54,7 +54,9 @@ public static class PluginConfig
     internal const bool DefaultEnableTeamDamageAutoWarning = true;
 
     internal static ConfigEntry<string>? UnitsForAutoWarn;
-    internal const string DefaultUnitsForAutoWarn = "StratoLance;Hardened;Ammo;Helipad;Munitions;Radar";
+
+    internal const string DefaultUnitsForAutoWarn =
+        "StratoLance;Hardened;Ammo;Helipad;Munitions;Radar;factory;Corvette;Carrier;Frigate;Boltstrike";
 
     internal static ConfigEntry<uint>? NBroadcastMessages;
     internal const uint DefaultNBroadcastMessages = 0;
