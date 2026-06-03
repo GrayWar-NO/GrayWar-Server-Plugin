@@ -25,16 +25,16 @@ public static class PluginConfig
 
     internal static ConfigEntry<int>? MaxFactionPlayerCountDiff;
     internal const int DefaultMaxPlayerCountDiff = 2;
-    
+
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
-    
+
     internal static ConfigEntry<int>? IpcPort;
     internal const int DefaultIpcPort = 10042;
 
     internal static ConfigEntry<string>? IpcHost;
     internal const string DefaultIpcHost = "127.0.0.1";
-    
+
     internal static ConfigEntry<string>? IpcCommandPermissionLevel;
     internal const string DefaultIpcCommandPermissionLevel = "admin";
 
@@ -53,25 +53,32 @@ public static class PluginConfig
     internal static ConfigEntry<bool>? EnableTeamDamageAutoWarning;
     internal const bool DefaultEnableTeamDamageAutoWarning = true;
 
+    internal static ConfigEntry<string>? UnitsForAutoWarn;
+    internal const string DefaultUnitsForAutoWarn = "StratoLance;Hardened;Ammo;Helipad;Munitions;Radar";
 
     internal static ConfigEntry<uint>? NBroadcastMessages;
     internal const uint DefaultNBroadcastMessages = 0;
 
     internal static List<ConfigEntry<string>> BroadcastMessages = [];
     internal const string DefaultMessageContent = "";
-    
+
     internal static ConfigEntry<string>? Moderators;
     internal const string DefaultModerators = "";
-    
+
     internal static ConfigEntry<string>? Admins;
     internal const string DefaultAdmins = "";
-    
+
     internal static ConfigEntry<string>? Owner;
     internal const string DefaultOwner = "";
 
-    internal static List<string> ModeratorsList => Moderators!.Value.Split(';').Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
-    
-    internal static List<string> AdminsList => Admins!.Value.Split(';').Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+    internal static List<string> ModeratorsList =>
+        Moderators!.Value.Split(';').Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
+
+    internal static List<string> AdminsList =>
+        Admins!.Value.Split(';').Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+
+    internal static List<string> ImportantUnitsList =>
+        UnitsForAutoWarn!.Value.Split(';').Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
 
     internal static char CommandPrefixChar => CommandPrefix!.Value[0];
 
@@ -81,27 +88,31 @@ public static class PluginConfig
 
         ForceLowWreckDespawn = config.Bind(GeneralSection, "Force wrecks to despawn", DefaultForceLowWreckDespawn);
         GwServerPlugin.Logger.LogDebug($"ForceLowWreckDespawn: {ForceLowWreckDespawn.Value}");
-        MaxWrecks = config.Bind(GeneralSection, "Maximum number of wrecks",  DefaultMaxWrecks);
+        MaxWrecks = config.Bind(GeneralSection, "Maximum number of wrecks", DefaultMaxWrecks);
         GwServerPlugin.Logger.LogDebug($"MaxWrecks: {MaxWrecks.Value}");
-        WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time",  DefaultWrecksDecay);
+        WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time", DefaultWrecksDecay);
         GwServerPlugin.Logger.LogDebug($"WrecksDecay: {WrecksDecay.Value}");
 
         MaxFactionPlayerCountDiff =
             config.Bind(GeneralSection, "Max faction player count difference", DefaultMaxPlayerCountDiff);
         GwServerPlugin.Logger.LogDebug($"MaxFactionPlayerCountDiff: {MaxFactionPlayerCountDiff.Value}");
 
-        CommandPrefix = config.Bind(GeneralSection, "CommandPrefix", DefaultCommandPrefix, "What to use as the command prefix (the character at the start of a command).");
+        CommandPrefix = config.Bind(GeneralSection, "CommandPrefix", DefaultCommandPrefix,
+            "What to use as the command prefix (the character at the start of a command).");
         GwServerPlugin.Logger.LogDebug($"CommandPrefix: {CommandPrefix.Value}");
-        
-        Moderators = config.Bind(GeneralSection, "Moderators", DefaultModerators, "A list of moderators who have access to moderator commands. Separate steam IDs with a semicolon.");
+
+        Moderators = config.Bind(GeneralSection, "Moderators", DefaultModerators,
+            "A list of moderators who have access to moderator commands. Separate steam IDs with a semicolon.");
         GwServerPlugin.Logger.LogDebug($"Moderators: {Moderators.Value}");
-        
-        Admins = config.Bind(GeneralSection, "Admins", DefaultAdmins, "A list of admins who have access to admin commands. Separate steam IDs with a semicolon.");
+
+        Admins = config.Bind(GeneralSection, "Admins", DefaultAdmins,
+            "A list of admins who have access to admin commands. Separate steam IDs with a semicolon.");
         GwServerPlugin.Logger.LogDebug($"Admins: {Admins.Value}");
-        
-        Owner = config.Bind(GeneralSection, "Owner", DefaultOwner, "The Steam ID of the server owner. This player has access to all commands, and cannot be removed from the admin list.");
+
+        Owner = config.Bind(GeneralSection, "Owner", DefaultOwner,
+            "The Steam ID of the server owner. This player has access to all commands, and cannot be removed from the admin list.");
         GwServerPlugin.Logger.LogDebug($"Owner: {Owner.Value}");
-        
+
         UseStaffPrefix = config.Bind(GeneralSection, "UseStaffPrefix", DefaultUseStaffPrefix,
             "Whether to use staff prefix or not.");
         GwServerPlugin.Logger.LogDebug($"UseStaffPrefix: {UseStaffPrefix.Value}");
@@ -109,15 +120,18 @@ public static class PluginConfig
         StaffPrefix = config.Bind(GeneralSection, "StaffPrefix", DefaultStaffPrefix,
             "The prefix added in-front of the usernames of Moderators, Admins and the Owner.");
         GwServerPlugin.Logger.LogDebug($"StaffTag: {StaffPrefix.Value}");
-        
-        
+
+
         ServerBroadcastName = config.Bind(GeneralSection, "ServerBroadcastName", DefaultServerBroadcastName,
             "The name that appears in the chat when the server broadcasts a message.");
         GwServerPlugin.Logger.LogDebug($"ServerBroadcastName: {ServerBroadcastName}");
 
         EnableTeamDamageAutoWarning = config.Bind(GeneralSection, "Enable team damage automatic warning",
             DefaultEnableTeamDamageAutoWarning);
-        
+
+        UnitsForAutoWarn = config.Bind(GeneralSection, "Units for auto warn", DefaultUnitsForAutoWarn,
+            "; separated list of unit name parts.\nWith this empty, team damage warns for player on player teamkills only. If any of those strings is found within the killed unit's name, a warning will be issued regardless.");
+
 
         NBroadcastMessages = config.Bind(BroadcastSection, "Number of broadcast messages", DefaultNBroadcastMessages,
             "Number of broadcast messages. \nAfter this setting, use Message0, Message1 ... Message(this-1) to define this message.");
@@ -125,28 +139,29 @@ public static class PluginConfig
         for (uint i = 0; i < NBroadcastMessages.Value; i++)
         {
             BroadcastMessages.Add(
-                    config.Bind(BroadcastSection, $"Message{i}", DefaultMessageContent)
-                );
+                config.Bind(BroadcastSection, $"Message{i}", DefaultMessageContent)
+            );
         }
+
         GwServerPlugin.Logger.LogDebug($"Loaded Broadcast messages");
-        
-        
-        
+
+
         IpcEnable = config.Bind(IpcSection, "Enable IPC", DefaultIpcEnable);
         GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcEnable}");
 
         IpcPort = config.Bind(IpcSection, "Communication Port", DefaultIpcPort);
         GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcPort}");
-        
+
         IpcHost = config.Bind(IpcSection, "Communication Host", DefaultIpcHost);
         GwServerPlugin.Logger.LogDebug($"IpcHost: {IpcHost}");
-        
-        IpcCommandPermissionLevel = config.Bind(IpcSection, "Communication Permission Level", DefaultIpcCommandPermissionLevel);
+
+        IpcCommandPermissionLevel =
+            config.Bind(IpcSection, "Communication Permission Level", DefaultIpcCommandPermissionLevel);
         GwServerPlugin.Logger.LogDebug($"Communication Permission level: {IpcCommandPermissionLevel}");
-        
+
         GwServerPlugin.Logger.LogDebug("Loaded settings.");
     }
-    
+
     /// <summary>
     ///     Check if the given Steam ID is a moderator.
     /// </summary>
@@ -235,5 +250,4 @@ public static class PluginConfig
                 break;
         }
     }
-    
 }

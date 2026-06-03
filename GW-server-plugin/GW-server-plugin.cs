@@ -302,16 +302,21 @@ public class GwServerPlugin : BaseUnityPlugin
         return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamID));
     }
 
+    internal static void OnPlayerTeamkill(Player killer, Player killed, string weaponName)
+    {
+        OnTeamkill(killer, killed.PlayerName, weaponName);
+    }
+
     /// <summary>
-    /// Method for handling teamkills
+    /// Method for handling player teamkills
     /// </summary>
-    /// <param name="killer"></param>
-    /// <param name="killed"></param>
-    /// <param name="weaponName"></param>
-    public static void OnTeamkill(Player killer, Player killed, string weaponName)
+    /// <param name="killer">Player that teamkilled something</param>
+    /// <param name="killedName">name of the thing that was killed</param>
+    /// <param name="weaponName">name of the used weapon.</param>
+    public static void OnTeamkill(Player killer, string killedName, string weaponName)
     {
         if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
-        var reason = $"Teamkilled player {killed.PlayerName} with weapon {weaponName}";
+        var reason = $"Teamkilled player {killedName} with weapon {weaponName}";
         WarnService.AddWarn(killer.SteamID, reason);
     }
 }

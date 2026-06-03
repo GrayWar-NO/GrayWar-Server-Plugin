@@ -182,6 +182,10 @@ public static class WeaponLoggingExtensions
         {
             // if player-anything teamkill
             killPacket.Channel = LogChannel.Teamkill;
+            if (PluginConfig.ImportantUnitsList.Any(detector => killedName.Contains(detector)))
+            {
+                GwServerPlugin.OnTeamkill(killerAircraft.Player, killedName, killerWeaponName);
+            }
         } else killPacket.Channel = LogChannel.Kill;
         
         if (killedAircraft is not null &&
@@ -196,7 +200,7 @@ public static class WeaponLoggingExtensions
             killerAircraft.Player.AddScore(-Mathf.Sqrt(killedAircraft.definition.value));
             killerAircraft.Player.AddAllocation(-amount);
             killedAircraft.Player.AddAllocation(amount);
-            GwServerPlugin.OnTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
+            GwServerPlugin.OnPlayerTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
         }
         
         if (killerSteamID != null || killedSteamID != null)
