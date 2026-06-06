@@ -128,12 +128,12 @@ public static class CommandService
             GwServerPlugin.Logger.LogWarning(
                 $"Failed to execute command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
             response ??= $"Failed to execute command {command.Name}";
-            return false;
+            return command.PermissionLevel != PermissionLevel.Everyone; // Do not leak high perm commands to chat messages.
         }
 
         GwServerPlugin.Logger.LogInfo($"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
         response = $"Invalid arguments: {command.Usage}";
-        return false;
+        return command.PermissionLevel != PermissionLevel.Everyone; // Do not leak high perm commands to chat messages.
     }
     
     /// <summary>
@@ -179,6 +179,4 @@ public static class CommandService
         response = $"Invalid arguments for command {command.Name}\n{command.Usage}";
         return false;
     }
-
-    
 }

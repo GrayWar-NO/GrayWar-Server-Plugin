@@ -30,7 +30,7 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Name => "rtv";
 
     /// <inheritdoc />
-    public override string Description => "Command to vote on changing the mission.\nNeeds Absolute Majority.\nMissionIDs for voting for a specific mission can be found with /missions.\nChooses the next mission in rotation by default.";
+    public override string Description => "Command to vote on changing the mission.\nMissionIDs for voting for a specific mission can be found with /missions.\nChooses the next mission in rotation by default.";
 
     /// <inheritdoc />
     public override string Usage => "rtv <(Y)es/(N)o> <Optional int missionID>";
