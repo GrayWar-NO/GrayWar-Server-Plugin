@@ -48,6 +48,7 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     private static void UnKickPlayer(ulong steamID)
     {
         Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Remove(new CSteamID(steamID));
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Remove(new CSteamID(steamID));
         var kickLogPacket = new LogEntryPacket
         {
             LogText = $"0:{steamID}:",

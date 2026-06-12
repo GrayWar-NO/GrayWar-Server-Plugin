@@ -39,8 +39,6 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
-    internal static VoteKickService VoteKickService { get; private set; } = null!;
-
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
 
     private static MissionBalanceService MissionBalance { get; set; } = null!;
@@ -84,8 +82,6 @@ public class GwServerPlugin : BaseUnityPlugin
 
         MissionBalance = new MissionBalanceService();
         
-        VoteKickService = new VoteKickService();
-        Logger.LogInfo("Loaded VoteKick");
         try
         {
             PlayerIdentifier = new PlayerIdentificationService();
@@ -125,7 +121,6 @@ public class GwServerPlugin : BaseUnityPlugin
         
         CommandService.AddCommand(new WarnCommand(Config));
         
-        CommandService.AddCommand(new VoteKickCommand(Config));
         CommandService.AddCommand(new KickCommand(Config));
         CommandService.AddCommand(new UnKickCommand(Config));
         CommandService.AddCommand(new ClearKickListCommand(Config));
@@ -276,7 +271,6 @@ public class GwServerPlugin : BaseUnityPlugin
     {
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
-        VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
         var leavePacket = new LogEntryPacket
         {
