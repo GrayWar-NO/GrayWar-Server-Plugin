@@ -37,7 +37,6 @@ internal class MissionBalanceService
     internal void OnMissionLoad(Mission mission)
     {
         var c = mission.factions.Count(fac => !fac.preventJoin);
-        GwServerPlugin.Logger.LogDebug(c);
         _isCurrentMissionPvE = c <= 1;
     }
     

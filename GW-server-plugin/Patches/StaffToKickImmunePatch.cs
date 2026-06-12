@@ -12,7 +12,7 @@ namespace GW_server_plugin.Patches;
 [HarmonyPatch(typeof(DedicatedServerManager))]
 public class StaffToKickImmunePatch
 {
-        [HarmonyPatch(nameof(DedicatedServerManager.LoadAllowBanList))]
+        [HarmonyPatch(nameof(DedicatedServerManager.LoadAllowBanList), [])]
         [HarmonyPostfix]
         internal static void LoadBanListPostfix()
         {

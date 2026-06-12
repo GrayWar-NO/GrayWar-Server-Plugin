@@ -15,13 +15,13 @@ public class VoteKickLogger
     [HarmonyPostfix]
     [HarmonyPatch(nameof(VoteKickManager.ExecuteKick))]
     // ReSharper disable once InconsistentNaming
-    internal static void ExecuteKickPostfix(VoteKickManager __instance,ref CSteamID target, string _)
+    internal static void ExecuteKickPostfix(VoteKickManager __instance,ref CSteamID id, string playerName)
     {
         GwServerPlugin.LoggingOutBox.Add(
             new LogEntryPacket
             {
                 Channel = LogChannel.Kick,
-                LogText = $"1:{target.m_SteamID.ToString()}:Votekicked",
+                LogText = $"1:{id.m_SteamID.ToString()}:Votekicked",
             });
     }
 }
