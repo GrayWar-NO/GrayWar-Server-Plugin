@@ -239,7 +239,13 @@ public class GwServerPlugin : BaseUnityPlugin
         
         if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(player))
         {
-            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.").Forget();
+            Globals
+                .NetworkManagerNuclearOptionInstance
+                .KickPlayerAsync(
+                    player,
+                    $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.",
+                    false)
+                .Forget();
             return;
         }
         

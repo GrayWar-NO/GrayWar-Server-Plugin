@@ -215,19 +215,21 @@ public static class PlayerUtils
     /// <param name="managerNuclearOption"></param>
     /// <param name="player"></param>
     /// <param name="reason"></param>
+    /// <param name="addToKickList">if the kicked player should be added to the kick list (prevents rejoin until next mission starts</param>
     /// <exception cref="MethodInvocationException"></exception>
-    public static async UniTaskVoid KickPlayerAsync(this NetworkManagerNuclearOption managerNuclearOption, Player player, string reason)
+    public static async UniTaskVoid KickPlayerAsync(this NetworkManagerNuclearOption managerNuclearOption,
+        Player player, string reason, bool addToKickList = true)
     {
-        GwServerPlugin.Logger.LogDebug("Called new kick");
         if (!managerNuclearOption.Server.Active)
             throw new MethodInvocationException("KickPlayerAsync called when server is not active");
         var conn = player.Owner;
-        managerNuclearOption.authenticator.OnKick(conn);
+        if (addToKickList)
+            managerNuclearOption.authenticator.OnKick(conn);
         var hostName = GameManager.GetLocalPlayer<Player>(out var localPlayer) ? localPlayer.PlayerName : "server";
         player.KickReason(reason, hostName);
-        await UniTask.Delay(100);
+        await UniTask.Delay(1000); // conservative wait time to account for high-ping ppl.
         conn.Disconnect();
     }
 
-    
+
 }
