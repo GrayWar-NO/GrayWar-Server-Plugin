@@ -145,7 +145,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
         PlayerEvents.PlayerJoined += OnPlayerJoin;
         PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
-        PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
+        PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
 
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
         MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
