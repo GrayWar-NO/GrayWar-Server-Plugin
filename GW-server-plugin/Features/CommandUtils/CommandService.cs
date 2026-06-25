@@ -132,7 +132,7 @@ public static class CommandService
         }
 
         GwServerPlugin.Logger.LogInfo($"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments: {command.Usage}";
+        response = $"Invalid arguments: {PluginConfig.CommandPrefix!.Value}{command.Usage}";
         return command.PermissionLevel != PermissionLevel.Everyone; // Do not leak high perm commands to chat messages.
     }
     
@@ -176,7 +176,7 @@ public static class CommandService
         }
 
         GwServerPlugin.Logger.LogWarning($"Failed validation for command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments for command {command.Name}\n{command.Usage}";
+        response = $"Invalid arguments for command {command.Name}\n{PluginConfig.CommandPrefix!.Value}{command.Usage}";
         return false;
     }
 }

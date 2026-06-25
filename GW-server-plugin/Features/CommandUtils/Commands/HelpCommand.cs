@@ -2,6 +2,7 @@ using System.Linq;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
+using Mirage.SocketLayer;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -66,7 +67,7 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
             return true;
         }
 
-        response = $"Command '{command.Name}': {command.Description}\nUsage: {command.Usage}";
+        response = $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefix!.Value}{command.Usage}";
         return true;
     }
 
