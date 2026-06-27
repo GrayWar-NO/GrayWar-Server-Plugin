@@ -268,6 +268,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         var saveData = player.GetAuthData().SaveData;
         if (saveData == null || saveData.Faction == null) return;
+        if (player.HQ == saveData.Faction) return;
         player.HQ = saveData.Faction;
         player.HQ.AddPlayer(player);
         player.HQ.RequestTrackingStates(player);
