@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking.Lobbies;
 using NuclearOption.SavedMission;
@@ -120,7 +121,7 @@ public static class MissionService
             var dsm = Globals.DedicatedServerManagerInstance;
 
             while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
-
+            
             dsm.UpdateLobby(mission, false);
             var ok = await dsm.LoadNext(mission);
             if (!ok)
@@ -133,6 +134,7 @@ public static class MissionService
             dsm.currentMission = mission;
             dsm.currentMissionOption = missionOptions;
             LastMission = mission;
+            MissionChangeDetector.OnMissionChanged(mission);
             return true;
         }
         catch (Exception e)

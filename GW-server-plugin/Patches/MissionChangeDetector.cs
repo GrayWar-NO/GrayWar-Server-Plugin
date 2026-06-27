@@ -45,7 +45,7 @@ public class MissionChangeDetector
     /// Behaviour to run whenever a mission changes.
     /// </summary>
     /// <param name="mission"></param>
-    private static void OnMissionChanged(Mission? mission)
+    internal static void OnMissionChanged(Mission? mission)
     {
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission?.Name ?? "null"}");
         var missionChangePacket = new LogEntryPacket
