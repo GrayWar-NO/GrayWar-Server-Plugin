@@ -120,6 +120,7 @@ public static class MissionService
             await UniTask.SwitchToMainThread();
             var dsm = Globals.DedicatedServerManagerInstance;
 
+            // ReSharper disable once UsageOfDefaultStructEquality
             while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
             
             dsm.UpdateLobby(mission, false);
