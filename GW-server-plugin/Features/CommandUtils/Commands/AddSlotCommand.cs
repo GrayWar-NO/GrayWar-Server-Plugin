@@ -1,6 +1,6 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -8,6 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to add a slot to the server.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
@@ -20,17 +21,16 @@ public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(co
     public override string Usage => "addslot (takes no arguments)";
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 0;
+        return UniTask.FromResult(args.Length == 0);
     }
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         StaffSlotService.AddStaffSlot();
-        response = "Successfully added a slot to the server.";
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, "Successfully added a slot to the server."));
     }
 
     /// <inheritdoc />

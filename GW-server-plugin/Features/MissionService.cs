@@ -103,6 +103,19 @@ public static class MissionService
     }
 
     /// <summary>
+    /// Adds a mission to the rotation
+    /// </summary>
+    /// <param name="mission">The mission to add to the rotation</param>
+    public static void AddMission(MissionOptions mission)
+    {
+        var oldMr = Globals.DedicatedServerManagerInstance.missionRotation!;
+        var ml = new MissionOptions[oldMr.allMissions.Count + 1];
+        oldMr.allMissions.CopyTo(ml);
+        ml[ml.Length - 1] = mission;
+        Globals.DedicatedServerManagerInstance.ReloadMissionRotation(ml, oldMr.rotationType, false);
+    }
+
+    /// <summary>
     /// Consumes the next map in rotation without outputting it.
     /// </summary>
     public static void ConsumeNextMap()

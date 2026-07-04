@@ -1,6 +1,7 @@
 #if DEBUG
 
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -11,7 +12,8 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to use exclusively for debugging. Change this implementation to debug whatever you're working on.
 /// </summary>
 /// <param name="config"></param>
-public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+[AutoCommand]
+public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config), IAsyncGameCommand, IAsyncConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "dbg";
@@ -26,27 +28,25 @@ public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config),
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args)
+    public UniTask<bool> Validate(Player player, string[] args)
     {
-        return true;
+        return UniTask.FromResult(true);
     }
     
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return true;
+        return UniTask.FromResult(true);
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
-        var mm = Globals.MissionManagerInstance;
         var dsm = Globals.DedicatedServerManagerInstance;
-        response = $"DSMtf:{dsm.currentMission.environment.timeFactor}";
-        return true;
+        return UniTask.FromResult((true, $"DSMtf:{dsm.currentMission.environment.timeFactor}"));
     }
 }
 #endif

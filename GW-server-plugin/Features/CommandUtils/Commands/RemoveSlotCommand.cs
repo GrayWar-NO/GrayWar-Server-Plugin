@@ -1,13 +1,15 @@
+using Cysharp.Threading.Tasks;
+
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 using Enums;
 using BepInEx.Configuration;
-using NuclearOption.Networking;
 
 /// <summary>
 /// Command to remove a slot from the server.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
@@ -20,22 +22,20 @@ public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand
     public override string Usage => "rmslot (takes no arguments)";
     
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 0;
+        return UniTask.FromResult(args.Length == 0);
     }
     
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
-        var r = StaffSlotService.RemoveStaffSlot();
-        if (!r)
+        var result = StaffSlotService.RemoveStaffSlot();
+        if (!result)
         {
-            response = "Failed to remove staff slot: No staff slots left to remove.";
-            return false;
+            return UniTask.FromResult<(bool, string?)>((false, "Failed to remove staff slot: No staff slots left to remove."));
         }
-        response = "Successfully removed a slot from the server.";
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, "Successfully removed a slot from the server."));
     }
 
     /// <inheritdoc />

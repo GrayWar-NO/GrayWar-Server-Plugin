@@ -1,5 +1,7 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Mirage;
 using NuclearOption.Chat;
@@ -8,6 +10,7 @@ using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using Newtonsoft.Json;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin.Patches;
 
@@ -16,6 +19,26 @@ namespace GW_server_plugin.Patches;
 [HarmonyWrapSafe]
 internal static class ChatManagerPatches
 {
+    private static async UniTaskVoid ExecuteCommandAndRespondAsync(string commandName, string[] arguments, Player player)
+    {
+        try
+        {
+            var executionResult = await CommandService.TryExecuteCommand(commandName, arguments, player);
+            var response = executionResult.response;
+            if (!string.IsNullOrEmpty(response))
+            {
+                foreach (var s in response!.Split('\n'))
+                {
+                    ChatService.SendPrivateChatMessage(s, player);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            GwServerPlugin.Logger.LogError($"Error executing async command '{commandName}': {ex.Message}");
+        }
+    }
+    
     [HarmonyPrefix]
     [HarmonyPatch("UserCode_CmdSendChatMessage_\u002D456754112")]
     private static bool UserCode_CmdSendChatMessagePrefix(string message, bool allChat, INetworkPlayer sender)
@@ -34,16 +57,9 @@ internal static class ChatManagerPatches
 
             var commandName = arguments[0];
             arguments = arguments.Skip(1).ToArray();
-
-            var commandResult = CommandService.TryExecuteCommand(commandName, arguments, player!, out var response);
-            if (response is not null)
-            {
-                foreach (var s in response.Split('\n'))
-                {
-                    ChatService.SendPrivateChatMessage(s, player!);
-                }
-            }
-            if (commandResult) return false;
+            
+            ExecuteCommandAndRespondAsync(commandName, arguments, player!).Forget();
+            return false;
         }
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player!.PlayerName} sent message: {message}"

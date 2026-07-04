@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 
 namespace GW_server_plugin.Features.IPC.Packets;
@@ -20,9 +21,9 @@ public class PingPacket : CommunicationPacket
     /// Process method for Ping packet.
     /// orders sending of that very same packet
     /// </summary>
-    public override CommunicationPacket? Process()
+    public override UniTask<CommunicationPacket?> Process()
     {
         GwServerPlugin.Logger.LogDebug($"Ping received with data: {Data}");
-        return this;
+        return UniTask.FromResult<CommunicationPacket?>(this);
     }
 }

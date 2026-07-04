@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
@@ -17,6 +18,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
@@ -29,29 +31,29 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
     public override string Usage { get; } = "warn <Player (by name, steamID or playerID)> <Reason>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return UniTask.FromResult(args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute(args, out response);
-        response = "You cannot warn yourself!";
-        return false;
+        if (targetPlayer != player) return Execute(args);
+        return UniTask.FromResult<(bool, string?)>((false, "You cannot warn yourself!"));
     }
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var target = args[0];
-        var reason = string.Join(" ", args.Skip(1)); 
+        var reason = string.Join(" ", args.Skip(1));
+        string? response;
         ulong warnSteamID;
         if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
@@ -68,7 +70,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
             response = $"Warned player {player.PlayerName} for reason {reason}";
         }
 
-        return GwServerPlugin.WarnService.AddWarn(warnSteamID, reason);
+        return UniTask.FromResult<(bool, string?)>((GwServerPlugin.WarnService.AddWarn(warnSteamID, reason), response));
     }
 
     /// <inheritdoc />

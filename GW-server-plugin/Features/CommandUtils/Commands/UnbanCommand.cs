@@ -1,11 +1,9 @@
-using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
-using Newtonsoft.Json;
-using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
 using Steamworks;
 
@@ -15,6 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
@@ -27,20 +26,21 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
     public override string Usage { get; } = "unban <Player (by name, steamID or playerID)>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _));
+        return UniTask.FromResult(args.Length == 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
+        string? response;
         var target = args[0];
         ulong banSteamID;
         if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
@@ -68,7 +68,7 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
             Channel = LogChannel.Ban
         };
         GwServerPlugin.LoggingOutBox.Add(banLogPacket);
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, response));
     }
 
     /// <inheritdoc />

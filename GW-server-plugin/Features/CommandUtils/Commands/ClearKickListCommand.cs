@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -9,6 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// <summary>
 ///     Clear the integrated kick list.    
 /// </summary>
+[AutoCommand]
 public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
@@ -21,22 +23,22 @@ public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCom
     public override string Usage => "clearkicklist <optional 'manual' or 'vote'>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 0 ||
-               (args.Length == 1 &&
-                (StringComparer.OrdinalIgnoreCase.Equals(args[0], "manual") ||
-                 StringComparer.OrdinalIgnoreCase.Equals(args[0], "vote")));
+        return UniTask.FromResult(args.Length == 0 ||
+                                  (args.Length == 1 &&
+                                   (StringComparer.OrdinalIgnoreCase.Equals(args[0], "manual") ||
+                                    StringComparer.OrdinalIgnoreCase.Equals(args[0], "vote"))));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var mode = args.Length > 0 ? args[0] : null;
 
@@ -45,9 +47,7 @@ public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCom
 
         if (!StringComparer.OrdinalIgnoreCase.Equals(mode, "manual"))
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Clear();
-
-        response = $"{mode}Kick list cleared successfully!";
-        return true;
+        return UniTask.FromResult((true, $"{mode}Kick list cleared successfully!"));
     }
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;

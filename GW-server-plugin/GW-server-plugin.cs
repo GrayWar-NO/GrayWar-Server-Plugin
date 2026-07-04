@@ -215,13 +215,22 @@ public class GwServerPlugin : BaseUnityPlugin
             }
         });
     }
-    private void HandleJson(string msg)
+    
+    private static async void HandleJson(string msg)
     {
-        var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
-        CommunicationPacket? respPacket = packet!.Process();
-        if (respPacket is null) return;
-        LoggingOutBox.Add(respPacket);
+        try
+        {
+            var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
+            CommunicationPacket? respPacket = await packet!.Process();
+            if (respPacket is null) return;
+            LoggingOutBox.Add(respPacket);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Error when recieving Json in IPC: {e}");
+        }
     }
+    
     private static void OnPlayerJoin(Player player)
     {
         if (CheckOwnerBanned(player))

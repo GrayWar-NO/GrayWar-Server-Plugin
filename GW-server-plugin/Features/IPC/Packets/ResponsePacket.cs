@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 
 namespace GW_server_plugin.Features.IPC.Packets;
@@ -17,9 +18,9 @@ public class ResponsePacket: CommunicationPacket
 
 
     /// <inheritdoc />
-    public override CommunicationPacket? Process()
+    public override UniTask<CommunicationPacket?> Process()
     {
         GwServerPlugin.Logger.LogWarning("Tried to process an outgoing only response packet.");
-        return null;
+        return new UniTask<CommunicationPacket?>(null);
     }
 }

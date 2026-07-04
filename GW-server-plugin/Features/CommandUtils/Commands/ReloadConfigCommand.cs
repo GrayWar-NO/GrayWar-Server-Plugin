@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -11,6 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command for reloading config files.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class ReloadConfigCommand(ConfigFile config)
     : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
@@ -35,20 +37,21 @@ public class ReloadConfigCommand(ConfigFile config)
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 1 && AllowedValues.Contains(args[0]);
+        return UniTask.FromResult(args.Length == 1 && AllowedValues.Contains(args[0]));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
+        string? response;
         switch (args[0].ToLowerInvariant())
         {
             case "bepinex":
@@ -69,6 +72,6 @@ public class ReloadConfigCommand(ConfigFile config)
                 break;
         }
 
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, response));
     }
 }

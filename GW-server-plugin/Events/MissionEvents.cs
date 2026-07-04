@@ -1,5 +1,4 @@
 using System;
-using NuclearOption.Networking;
 using NuclearOption.SavedMission;
 
 namespace GW_server_plugin.Events;
@@ -12,7 +11,7 @@ public static class MissionEvents
     /// <summary>
     ///     Event handler for when a mission starts.
     /// </summary>
-    public static event Action<Mission> MissionLoaded = m => {};
+    public static event Action<Mission> MissionLoaded = _ => {};
 
     internal static void OnMissionLoad(Mission e)
     {

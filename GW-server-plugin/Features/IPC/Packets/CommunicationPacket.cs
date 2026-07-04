@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using Newtonsoft.Json;
 
@@ -18,5 +19,5 @@ public abstract class CommunicationPacket
     /// Applies it's processing to the packet.
     /// </summary>
     /// <returns> The response to send back to the peer process. </returns>
-    public abstract CommunicationPacket? Process();
+    public abstract UniTask<CommunicationPacket?> Process();
 }

@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using Mirage;
@@ -10,34 +11,30 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Lists the players on the server
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "listplayers";
+    public override string Name => "listplayers";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Returns the list of players currently on the server.";
+    public override string Description => "Returns the list of players currently on the server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "listplayers (takes no arguments)";
+    public override string Usage => "listplayers (takes no arguments)";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args)
-    {
-        return Validate(args);
-    }
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
-    {
-        return args.Length == 0;
-    }
+    public UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
+    
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var players = Globals.AuthenticatedPlayers;
         var playerNames = "";
@@ -50,9 +47,9 @@ public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableComma
                 playerNames += $"{p.PlayerName}, ";
             }
         }
-        response = $"[{players.Count - 1}] ";
+        var response = $"[{players.Count - 1}] ";
         response += playerNames;
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, response));
     }
 
     /// <inheritdoc />

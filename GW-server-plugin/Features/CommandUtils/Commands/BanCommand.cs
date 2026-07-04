@@ -1,7 +1,7 @@
-using System;
 using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -12,6 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to ban a player.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
@@ -25,27 +26,27 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
         "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length >= 1 && (PlayerUtils.TryFindPlayer(args[0], out _) ||
-                                    ulong.TryParse(args[0], out _));
+        return UniTask.FromResult(
+            args.Length >= 1 && 
+            (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute(args, out response);
-        response = "You cannot ban yourself!";
-        return false;
+        if (targetPlayer != player) return Execute(args);
+        return UniTask.FromResult<(bool, string?)>((false, "You cannot ban yourself!"));
     }
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var target = args[0];
         string? duration = null;
@@ -67,6 +68,7 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
             reason = "Unknown reason";
         }
 
+        string? response;
 
         ulong banSteamID;
         if (ulong.TryParse(target, out var targetID) &&
@@ -98,12 +100,12 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
         }
 
         PlayerUtils.BanPlayer(banSteamID, reason, duration);
-        if (!GwServerPlugin.FamilySharingBorrowers.TryGetValue(banSteamID, out var ownerSteamID)) return true;
-        if (ownerSteamID == banSteamID) return true;
+        if (!GwServerPlugin.FamilySharingBorrowers.TryGetValue(banSteamID, out var ownerSteamID)) UniTask.FromResult<(bool, string?)>((true, response));
+        if (ownerSteamID == banSteamID) return UniTask.FromResult<(bool, string?)>((true, response));
         PlayerUtils.BanPlayer(ownerSteamID, $"Owner of family shared banned account. Child banned for {reason}",
             duration);
         response += $"\tBanned Owner with steamID {ownerSteamID} as well";
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, response));
     }
 
     /// <inheritdoc />

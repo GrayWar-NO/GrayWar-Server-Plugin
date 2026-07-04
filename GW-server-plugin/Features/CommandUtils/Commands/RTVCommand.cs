@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using NuclearOption.Networking;
 
@@ -10,6 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to vote on changing the mission.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
     private static readonly HashSet<string> YesValues =
@@ -36,15 +38,15 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Usage => "rtv <(Y)es/(N)o> <Optional int missionID>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args)
+    public UniTask<bool> Validate(Player player, string[] args)
     {
-        if (args.Length is 0 or > 2) return false;
-        if (!YesValues.Contains(args[0]) && !NoValues.Contains(args[0])) return false;
-        return args.Length <= 1 || int.TryParse(args[1], out _);
+        if (args.Length is 0 or > 2 || 
+            !YesValues.Contains(args[0]) && !NoValues.Contains(args[0])) return UniTask.FromResult(false);
+        return UniTask.FromResult(args.Length <= 1 || int.TryParse(args[1], out _));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         int? missionID;
         if (args.Length == 1) missionID = null;    
@@ -54,8 +56,7 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
         var result = GwServerPlugin.MissionVote.RegisterRtv(player.SteamID, yes, missionID, out var registerResponse );
         var missionText = missionID == null ? "next mission in rotation" : $"mission with ID {missionID}";
         registerResponse ??= result ? $"You have successfully voted for the {missionText}." : "Your mission vote was unsuccessful.";
-        response = registerResponse;
-        return result;
+        return UniTask.FromResult<(bool, string?)>((result, registerResponse));
     }
     
     /// <inheritdoc />
