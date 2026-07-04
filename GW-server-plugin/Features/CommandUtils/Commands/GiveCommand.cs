@@ -41,7 +41,7 @@ public class GiveCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
         if (!found || targetPlayer == null)
         {
-            return UniTask.FromResult((false, $"Could not find a player by {args[0]}"));
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not find a player by {args[0]}"));
         }
         
         var amountText = args[1].Trim();
@@ -59,7 +59,7 @@ public class GiveCommand(ConfigFile config): PermissionConfigurableCommand(confi
                 CultureInfo.InvariantCulture,
                 out var amount) || float.IsNaN((float) amount))
         {
-            return UniTask.FromResult((false, $"Could not parse '{args[1]}' as a number."));
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not parse '{args[1]}' as a number."));
         }
 
         if (amount <= 0m)
@@ -71,7 +71,7 @@ public class GiveCommand(ConfigFile config): PermissionConfigurableCommand(confi
         targetPlayer.AddAllocation(sum);
         
         ChatService.SendPrivateChatMessage($"you were given you {sum} (million)!", targetPlayer);
-        return UniTask.FromResult((true, $"You have successfully given {sum}m to {targetPlayer.PlayerName}."));
+        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully given {sum}m to {targetPlayer.PlayerName}."));
     }
 
     /// <inheritdoc />

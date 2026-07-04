@@ -41,7 +41,7 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var accessibleCommands = CommandService.GetGameCommands()
             .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
         var commandNames = accessibleCommands.Select(c => c.Name).ToList();
-        return UniTask.FromResult((true, $"You have access to the following commands: {string.Join(", ", commandNames)}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"You have access to the following commands: {string.Join(", ", commandNames)}"));
     }
 
     /// <inheritdoc />
@@ -50,16 +50,16 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
         if (args.Length == 0)
         {
             var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
-            return UniTask.FromResult((true, $"Available commands: {string.Join(", ", commandNames)}"));
+            return UniTask.FromResult<(bool, string?)>((true, $"Available commands: {string.Join(", ", commandNames)}"));
         }
         
         var commandName = args[0];
         if (!CommandService.TryGetCommand(commandName, out var command))
         {
-            return UniTask.FromResult((false, $"Command {commandName} not found."));
+            return UniTask.FromResult<(bool, string?)>((false, $"Command {commandName} not found."));
         }
 
-        return UniTask.FromResult((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefix!.Value}{command.Usage}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefix!.Value}{command.Usage}"));
     }
 
     /// <inheritdoc />

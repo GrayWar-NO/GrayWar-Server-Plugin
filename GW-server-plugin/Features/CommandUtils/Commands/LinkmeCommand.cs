@@ -47,7 +47,7 @@ public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(con
             OneTimeCode = code
         };
         GwServerPlugin.LoggingOutBox.Add(packet);
-        return UniTask.FromResult((true, $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes."));
+        return UniTask.FromResult<(bool, string?)>((true, $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes."));
     }
     
     /// <inheritdoc />

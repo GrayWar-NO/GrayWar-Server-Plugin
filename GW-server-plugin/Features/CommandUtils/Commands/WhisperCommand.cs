@@ -12,6 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Sends a private message to a specific player.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
@@ -44,7 +45,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         var found = PlayerUtils.TryFindPlayer(args[0], out var target);
         if (!found || !target)
         {
-            return UniTask.FromResult((false, $"Could not identify a player by \"{args[0]}\"."));
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not identify a player by \"{args[0]}\"."));
         }
 
         var message = string.Join(" ", args.Skip(1));
@@ -60,7 +61,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             LogText = message
         };
         GwServerPlugin.LoggingOutBox.Add(outPacket);
-        return UniTask.FromResult((true, $"Message sent to {target!.PlayerName}:  {message}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
     }
     
 

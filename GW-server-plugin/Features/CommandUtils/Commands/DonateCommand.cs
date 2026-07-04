@@ -34,7 +34,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
         if (!found || targetPlayer == null)
         {
-            return UniTask.FromResult((false, $"Could not find a player by {args[0]}"));
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not find a player by {args[0]}"));
         }
         
         if (player == targetPlayer)
@@ -57,7 +57,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
                 CultureInfo.InvariantCulture,
                 out var amount) || float.IsNaN((float) amount))
         {
-            return UniTask.FromResult((false, $"Could not parse '{args[1]}' as a number."));
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not parse '{args[1]}' as a number."));
         }
 
         if (amount <= 0m)
@@ -69,7 +69,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
 
         if (player.Allocation < sum)
         {
-            return UniTask.FromResult((false,
+            return UniTask.FromResult<(bool, string?)>((false,
                 $"Insufficient allocation. You tried to donate {sum} (million), but only have {player.Allocation} (million) available."));
         }
         
@@ -89,7 +89,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
             LogText = $"{player.SteamID}:{targetPlayer.SteamID}:{sum}"
         };
         GwServerPlugin.LoggingOutBox.Add(donatePacket);
-        return UniTask.FromResult((true, $"You have successfully donated {sum} (million) to {targetPlayer.PlayerName}."));
+        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully donated {sum} (million) to {targetPlayer.PlayerName}."));
     }
     
     /// <inheritdoc />

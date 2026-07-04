@@ -39,7 +39,7 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         UnKickPlayer(ulong.Parse(args[0]));
-        return UniTask.FromResult((true, $"Unkicked player with steamID {args[0]}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Unkicked player with steamID {args[0]}"));
     }
 
     /// <inheritdoc />

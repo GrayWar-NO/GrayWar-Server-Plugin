@@ -47,7 +47,7 @@ public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCom
 
         if (!StringComparer.OrdinalIgnoreCase.Equals(mode, "manual"))
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Clear();
-        return UniTask.FromResult((true, $"{mode}Kick list cleared successfully!"));
+        return UniTask.FromResult<(bool, string?)>((true, $"{mode}Kick list cleared successfully!"));
     }
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;

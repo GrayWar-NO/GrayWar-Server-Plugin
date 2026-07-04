@@ -36,7 +36,7 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
         var targetSteamID = ulong.Parse(args[0]);
         _ = PermissionLevelUtils.TryParsePermissionLevel(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID, level);
-        return UniTask.FromResult((true, $"Successfully set permission level to {level}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Successfully set permission level to {level}"));
     }
 
     /// <inheritdoc />
