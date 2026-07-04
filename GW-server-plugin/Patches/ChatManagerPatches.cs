@@ -9,7 +9,6 @@ using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
-using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Patches;

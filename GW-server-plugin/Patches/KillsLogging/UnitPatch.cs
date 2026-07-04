@@ -1,11 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using HarmonyLib;
-using Newtonsoft.Json;
-using NuclearOption.Networking;
-using UnityEngine;
 
 namespace GW_server_plugin.Patches.KillsLogging;
 

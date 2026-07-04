@@ -16,6 +16,7 @@ using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
 using Steamworks;
@@ -172,6 +173,7 @@ public class GwServerPlugin : BaseUnityPlugin
         }
     }
     
+    [UsedImplicitly]
     private void UnpatchSelf()
     {
         if (Harmony == null)

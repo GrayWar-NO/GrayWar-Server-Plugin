@@ -18,7 +18,7 @@ public class MissionSaveLoadPatches
     [HarmonyPatch(nameof(MissionSaveLoad.TryLoad))]
     private static void Postfix(
         MissionKey item,
-        ref Mission mission,
+        ref Mission? mission,
         ref string error,
         ref bool __result)
     {

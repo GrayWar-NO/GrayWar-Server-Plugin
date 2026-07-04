@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using GW_server_plugin.Helpers;
@@ -9,7 +8,7 @@ namespace GW_server_plugin.Features;
 internal sealed class PlayerIdentificationService
 {
     private readonly Dictionary<ulong, int> _players  = new();
-    private readonly Stack<int> _ids =  new Stack<int>();
+    private readonly Stack<int> _ids =  new();
     private bool _idsOk;
 
     private void InitIDs()

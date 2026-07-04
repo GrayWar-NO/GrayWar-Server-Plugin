@@ -17,7 +17,7 @@ internal class MissionBalanceService
         {
             GwServerPlugin.Logger.LogDebug($"{faction.factionName}:{faction.FactionHQ.GetPlayers(false).Count}:{factionMinPlayers + PluginConfig.MaxFactionPlayerCountDiff!.Value}:{faction.FactionHQ.NetworkpreventJoin}");
             var count = faction.FactionHQ.GetPlayers(false).Count;
-            var limit = factionMinPlayers + PluginConfig.MaxFactionPlayerCountDiff!.Value; 
+            var limit = factionMinPlayers + PluginConfig.MaxFactionPlayerCountDiff.Value; 
             
             var shouldPreventJoin = count >= limit;
             if (faction.FactionHQ.NetworkpreventJoin != shouldPreventJoin)

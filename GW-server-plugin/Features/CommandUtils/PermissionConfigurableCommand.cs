@@ -40,6 +40,7 @@ public abstract class PermissionConfigurableCommand : ICommand
     /// <param name="config"> BepInEx configuration file. </param>
     protected PermissionConfigurableCommand(ConfigFile config)
     {
+        // ReSharper disable twice VirtualMemberCallInConstructor
         PermissionLevelConfig = config.Bind(CommandConfigSection, Name, DefaultPermissionLevel, $"Permission level for command {Name}");
     }
 }
