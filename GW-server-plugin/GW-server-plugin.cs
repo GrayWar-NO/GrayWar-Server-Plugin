@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
@@ -9,7 +11,6 @@ using GW_server_plugin.Enums;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
-using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
@@ -107,40 +108,32 @@ public class GwServerPlugin : BaseUnityPlugin
         
         PatchAll();
         
-        CommandService.AddCommand(new TellCommand(Config));
-        CommandService.AddCommand(new WhisperCommand(Config));
-        CommandService.AddCommand(new HelpCommand(Config));
-        CommandService.AddCommand(new ListPlayersCommand(Config));
-        CommandService.AddCommand(new SetPermissionLevelCommand(Config));
-        CommandService.AddCommand(new AddSlotCommand(Config));
-        CommandService.AddCommand(new RemoveSlotCommand(Config));
-        
-        CommandService.AddCommand(new ListMissionsCommand(Config));
-        CommandService.AddCommand(new NextMissionCommand(Config));
-        CommandService.AddCommand(new RtvCommand(Config));
-        
-        CommandService.AddCommand(new WarnCommand(Config));
-        
-        CommandService.AddCommand(new KickCommand(Config));
-        CommandService.AddCommand(new UnKickCommand(Config));
-        CommandService.AddCommand(new ClearKickListCommand(Config));
-        
-        CommandService.AddCommand(new BanCommand(Config));
-        CommandService.AddCommand(new UnbanCommand(Config));
-        
-        CommandService.AddCommand(new LinkmeCommand(Config));
-        CommandService.AddCommand(new DiscordCommand(Config));
-        
-        CommandService.AddCommand(new DonateCommand(Config));
-        CommandService.AddCommand(new GiveCommand(Config));
-        
-        CommandService.AddCommand(new PlayerInfoCommand(Config));
-        CommandService.AddCommand(new ReloadConfigCommand(Config));
-        
-#if DEBUG
-        CommandService.AddCommand(new DebugCmd(Config));
-#endif
+        // Load all Commands (Inheritors of PermissionConfigurableCommand) using Reflection.
+        {
+            var assembly = Assembly.GetExecutingAssembly();
 
+            var commandTypes = assembly.GetTypes()
+                .Where(t => t.IsClass
+                            && !t.IsAbstract
+                            && t.IsSubclassOf(typeof(PermissionConfigurableCommand)));
+
+            foreach (var type in commandTypes)
+            {
+                try
+                {
+                    var commandInstance = (PermissionConfigurableCommand)Activator.CreateInstance(type, Config);
+
+                    CommandService.AddCommand(commandInstance);
+                    Logger.LogInfo($"Loaded command {type.Name}");
+                }
+                catch (Exception ex)
+                {
+                    // It's good practice to log this in BepInEx so one broken command doesn't break them all
+                    Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
+                }
+            }
+        }
+        
         PlayerEvents.PlayerLeft += OnPlayerLeave;
         PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
         PlayerEvents.PlayerJoined += OnPlayerJoin;
