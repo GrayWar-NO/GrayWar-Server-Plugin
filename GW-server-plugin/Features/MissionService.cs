@@ -73,7 +73,7 @@ public static class MissionService
     /// Get the MissionOptions object for the next mission in rotation.
     /// </summary>
     /// <returns>the missionOptions object</returns>
-    public static MissionOptions? GetNextMissionOptions()
+    public static MissionOptions? GetNextMissionOptions(bool consume = true)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
         if (dsm == null)
@@ -89,8 +89,25 @@ public static class MissionService
             return null;
         }
 
-        return mr.GetNext();
+        if (consume) return mr.GetNext();
 
+        if (mr.NextOverride.HasValue)
+            return mr.NextOverride.Value;
+        return mr.rotationType switch
+        {
+            RotationType.PureRandom => mr.GetNext(),
+            RotationType.RandomQueue => mr.randomQueue[mr._nextIndex % mr.randomQueue.Count],
+            RotationType.Sequence => mr.allMissions[mr._nextIndex % mr.allMissions.Count],
+            _ => throw new ArgumentOutOfRangeException(nameof(mr.rotationType))
+        };
+    }
+
+    /// <summary>
+    /// Consumes the next map in rotation without outputting it.
+    /// </summary>
+    public static void ConsumeNextMap()
+    {
+        Globals.DedicatedServerManagerInstance.missionRotation.GetNext();
     }
     
     

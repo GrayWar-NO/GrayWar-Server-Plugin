@@ -69,7 +69,15 @@ internal sealed class MissionVoteService(ConfigFile config)
             return false;
         }
 
-        if (!_rtvActive) StartRtv();
+        if (!_rtvActive)
+        {
+            if (!yes)
+            {
+                result = "Cannot start a vote by voting no.";
+                return false;
+            }
+            StartRtv();
+        }
         missionIndex ??= DefaultMissionIndex;
         RemoveVoter(steamid);
         if (yes)
@@ -90,7 +98,8 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void StartRtv()
     {
         Missions = MissionService.GetAllAvailableMissionOptions();
-        DefaultMissionIndex = Array.IndexOf(Missions, MissionService.GetNextMissionOptions() ?? Missions[0]);
+        // ReSharper disable once UsageOfDefaultStructEquality
+        DefaultMissionIndex = Array.IndexOf(Missions, MissionService.GetNextMissionOptions(false) ?? Missions[0]);
         if (DefaultMissionIndex == -1) DefaultMissionIndex = 0;
         ResetRtv();
         ChatService.SendChatMessageAsServer("-- Rock-The-Vote --");
@@ -170,6 +179,7 @@ internal sealed class MissionVoteService(ConfigFile config)
             await Task.Delay(MapSwitchDelay.Value * 1000);
             ClearInhibit();
             ChatService.SendChatMessageAsServer($"Switching map now!");
+            MissionService.ConsumeNextMap();
             _ = MissionService.StartMission(MapVoteWinner);
         }
         catch (Exception e)
