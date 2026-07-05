@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
+using GW_server_plugin.Patches;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -45,7 +46,10 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
         var response = "Available missions:\n";
         for (var i = 0; i < missions.Length; i++)
         {
-            response += $"[{i}] {missions[i].Key.Name}\n";
+            var name = missions[i].Key.Name;
+            if (ulong.TryParse(name, out var id))
+                name = MissionNameFix.GetMissionName(id);
+            response += $"[{i}] {name}\n";
         }
         return UniTask.FromResult<(bool, string?)>((true, response));
     }
