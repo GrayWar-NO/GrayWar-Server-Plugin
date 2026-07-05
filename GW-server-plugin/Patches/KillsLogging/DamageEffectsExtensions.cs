@@ -8,6 +8,8 @@ namespace GW_server_plugin.Patches.KillsLogging;
 /// </summary>
 public static class DamageEffectExtensions
 {
+    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+
     /// <summary>
     /// Replacement for DamageEffects.ArmorPenetrate
     /// </summary>
@@ -126,7 +128,7 @@ public static class DamageEffectExtensions
                     var gameObject =
                         NetworkSceneSingleton<Spawner>.i.SpawnLocal(GameAssets.i.debugArrow, debugTransform);
                     gameObject.GetComponent<MeshRenderer>().material
-                        .SetColor("_EmissionColor", new Color(1f, 0.5f, 0.0f, 1f));
+                        .SetColor(EmissionColor, new Color(1f, 0.5f, 0.0f, 1f));
                     gameObject.transform.position = origin;
                     gameObject.transform.rotation = Quaternion.LookRotation(hitInfo.point - origin);
                     gameObject.transform.localScale = new Vector3(0.5f, 0.5f, distanceTraveled);
@@ -164,7 +166,7 @@ public static class DamageEffectExtensions
                 ? nearestUnit.transform
                 : Datum.origin;
             var gameObject = NetworkSceneSingleton<Spawner>.i.SpawnLocal(GameAssets.i.blastRadiusDebug, transform);
-            gameObject.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", new Color(1f, 0.5f, 0.0f, 1f));
+            gameObject.GetComponent<MeshRenderer>().material.SetColor(EmissionColor, new Color(1f, 0.5f, 0.0f, 1f));
             gameObject.transform.position = blastPosition;
             gameObject.transform.localScale = Vector3.one * blastPower;
             NetworkSceneSingleton<Spawner>.i.DestroyLocal(gameObject, 10f);

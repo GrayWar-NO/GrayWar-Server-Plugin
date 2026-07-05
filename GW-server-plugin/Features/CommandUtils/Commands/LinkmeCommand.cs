@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
-using Newtonsoft.Json;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -13,11 +12,12 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to link a steam user to their discord profile.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
 
     private HashSet<int> _usedCodes = []; 
-    private Random _rnd = new Random();
+    private Random _rnd = new();
     
     /// <inheritdoc />
     public override string Name => "linkme";
@@ -29,10 +29,10 @@ public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(con
     public override string Usage => "/linkme (takes no arguments)";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => args.Length == 0;
+    public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);
     
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var steamID = player.SteamID;
         var code = _rnd.Next(1000000);
@@ -41,14 +41,13 @@ public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(con
             code = _rnd.Next(1000000);
         }
         _usedCodes.Add(code);
-        response = $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes.";
         var packet = new LinkPacket
         {
             SteamID = steamID,
             OneTimeCode = code
         };
         GwServerPlugin.LoggingOutBox.Add(packet);
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes."));
     }
     
     /// <inheritdoc />

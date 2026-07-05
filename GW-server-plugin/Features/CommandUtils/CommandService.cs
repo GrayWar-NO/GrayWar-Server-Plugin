@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using GW_server_plugin.Enums;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -58,18 +58,19 @@ public static class CommandService
     /// <param name="player"> The player executing the command. </param>
     /// <param name="commandName"> The name of the command. </param>
     /// <param name="args"> The arguments for the command. </param>
-    /// <param name="response"> The command response as a string. </param>
     /// <returns></returns>
-    public static bool TryExecuteCommand(string commandName, string[] args, Player player, out string? response)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(string commandName, string[] args, Player player)
     {
         if (!TryGetCommand(commandName, out var command))
         {
             GwServerPlugin.Logger.LogWarning($"Failed to execute command '{commandName}': Not found.");
-            response = $"Did not find a command called '{commandName}'.";
-            return false;
+            return (false, $"Did not find a command called '{commandName}'."); 
         }
-
-        return TryExecuteCommand(command, args, player, out response);
+        if (command is not IGameCommand gameCommand)
+        {
+            return (false, $"{commandName} is not a valid command."); 
+        }
+        return await TryExecuteCommand(gameCommand, args, player);
     }
     
     /// <summary>
@@ -78,62 +79,62 @@ public static class CommandService
     /// </summary>
     /// <param name="commandName"> The name of the command. </param>
     /// <param name="args"> The arguments for the command. </param>
-    /// <param name="response"> The command response as a string. </param>
     /// <returns></returns>
-    public static bool TryExecuteCommand(string commandName, string[] args, out string? response)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(string commandName, string[] args)
     {
         if (!TryGetCommand(commandName, out var command))
         {
             GwServerPlugin.Logger.LogWarning($"Failed to execute command '{commandName}': Not found.");
-            response = $"Did not find a command called '{commandName}'.";
-            return false;
+            return (false, $"Did not find a command called '{commandName}'."); 
         }
-
-        return TryExecuteCommand(command, args, out response);
+        if (command is not IConsoleCommand consoleCommand)
+        {
+            return (false, $"{commandName} is not a valid console command."); 
+        }
+        return await TryExecuteCommand(consoleCommand, args);
     }
 
 
     /// <summary>
     ///     Try to execute a command from an <see cref="ICommand"/>.
     /// </summary>
-    /// <param name="player"> The player executing the command. </param>
     /// <param name="command"> The command to execute. </param>
     /// <param name="args"> The arguments for the command. </param>
-    /// <param name="response"> The command response </param>
+    /// <param name="player"> The player executing the command. </param>
     /// <returns></returns>
-    public static bool TryExecuteCommand(ICommand command, string[] args, Player player, out string? response)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(
+        IGameCommand command,
+        string[] args,
+        Player player)
     {
-        if (command is not IGameCommand gameCommand)
-        {
-            response = $"Command {command.Name} is not a valid in-game command.";
-            return false;
-        }
-        if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < gameCommand.PermissionLevel)
+        if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < command.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning($"Player {player.PlayerName} does not have permission to execute command {command.Name}");
-            response = $"You are not authorized to execute command {command.Name}";
-            return false;
+            return (false, $"You are not authorized to execute command {command.Name}");
         }
-
-        if (gameCommand.Validate(player, args))
+        string? response;
+        if (await command.Validate(player, args))
         {
-            if (gameCommand.Execute(player, args, out response))
+            var executionResult = await command.Execute(player, args);
+            response = executionResult.response;
+            if (executionResult.success)
             {
                 GwServerPlugin.Logger.LogInfo(
                     $"Command {command.Name} executed successfully by {player.PlayerName} with argument(s): {string.Join(", ", args)}"
-                    );
-                return true;
+                );
+                return (true, response);
             }
 
             GwServerPlugin.Logger.LogWarning(
                 $"Failed to execute command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
             response ??= $"Failed to execute command {command.Name}";
-            return false;
+            return (false, response);
         }
 
-        GwServerPlugin.Logger.LogInfo($"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments: {command.Usage}";
-        return false;
+        GwServerPlugin.Logger.LogInfo(
+            $"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
+        response = $"Invalid arguments: {PluginConfig.CommandPrefix!.Value}{command.Usage}";
+        return (false, response);
     }
     
     /// <summary>
@@ -142,43 +143,39 @@ public static class CommandService
     /// </summary>
     /// <param name="command"> The command to execute. </param>
     /// <param name="args"> The arguments for the command. </param>
-    /// <param name="response"> The command response </param>
     /// <returns></returns>
-    public static bool TryExecuteCommand(ICommand command, string[] args, out string? response)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(IConsoleCommand command, string[] args)
     {
-        if (command is not IConsoleCommand consoleCommand)
-        {
-            response = $"Command {command.Name} is not a valid console command.";
-            return false;
-        }
+        
         PermissionLevelUtils.TryParsePermissionLevel(PluginConfig.IpcCommandPermissionLevel!.Value, out var level);
         if (level < command.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning($"The remote process does not have permission to execute command {command.Name}");
-            response = $"You are not authorized to execute command {command.Name}";
-            return false;
+            return (false, $"You are not authorized to execute command {command.Name}");
         }
 
-        if (consoleCommand.Validate(args))
+        string? response;
+        if (await command.Validate(args))
         {
-            if (consoleCommand.Execute(args, out response))
+            var executionResult = await command.Execute(args);
+            response = executionResult.response;
+            if (executionResult.success)
             {
                 GwServerPlugin.Logger.LogInfo(
                     $"Command {command.Name} executed successfully by remote process with argument(s): {string.Join(", ", args)}"
                 );
-                return true;
+                return (true, response);
             }
 
             GwServerPlugin.Logger.LogWarning(
                 $"Failed to execute command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
             response ??= $"Failed to execute command {command.Name}";
-            return false;
+            return (false, response);
         }
 
-        GwServerPlugin.Logger.LogWarning($"Failed validation for command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments for command {command.Name}\n{command.Usage}";
-        return false;
+        GwServerPlugin.Logger.LogWarning(
+            $"Failed validation for command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
+        response = $"Invalid arguments for command {command.Name}\n{PluginConfig.CommandPrefix!.Value}{command.Usage}";
+        return (false, response);
     }
-
-    
 }

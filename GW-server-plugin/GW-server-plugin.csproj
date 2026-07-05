@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
 	    <NUCLEAR_OPTION_SERVER_REFERENCES></NUCLEAR_OPTION_SERVER_REFERENCES>
+        <ReleaseDestination>/home/pauel</ReleaseDestination>
         <!-- General Project Information -->
         <TargetFramework>net48</TargetFramework>
         <AssemblyName>GrayWar.ServerPlugin</AssemblyName>
@@ -83,7 +84,24 @@
         <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all"/>
     </ItemGroup>
 
-    <Target Name="PostBuild" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(ModDestination)' != ''">
+    <Target Name="CopyRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(ReleaseDestination)' != ''">
+        <!-- Create an item for all .dll files in the output directory -->
+        <CreateItem Include="$(OutDir)*.dll">
+            <Output TaskParameter="Include" ItemName="DllFiles"/>
+        </CreateItem>
+
+        <!-- Copy the build output -->
+        <Message Text="Copying build output assemblies from $(OutDir)*.dll to $(ReleaseDestination)\$(AssemblyName)" Importance="high"/>
+        <Copy SourceFiles="@(DllFiles)" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
+
+        <!-- Copy README & CHANGELOG -->
+        <Message Text="Copying README from $(ProjectDir)..\README.md to $(ReleaseDestination)\$(AssemblyName)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\README.md" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
+        <Message Text="Copying CHANGELOG from $(ProjectDir)..\CHANGELOG.md to $(ReleaseDestination)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\CHANGELOG.md" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
+    </Target>
+
+    <Target Name="CopyDebug" AfterTargets="Build" Condition="'$(ModDestination)' != ''">
         <!-- Create an item for all .dll files in the output directory -->
         <CreateItem Include="$(OutDir)*.dll">
             <Output TaskParameter="Include" ItemName="DllFiles"/>

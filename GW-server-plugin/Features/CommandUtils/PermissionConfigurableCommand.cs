@@ -1,5 +1,7 @@
+using System;
 using BepInEx.Configuration;
 using GW_server_plugin.Enums;
+using JetBrains.Annotations;
 
 namespace GW_server_plugin.Features.CommandUtils;
 
@@ -38,6 +40,14 @@ public abstract class PermissionConfigurableCommand : ICommand
     /// <param name="config"> BepInEx configuration file. </param>
     protected PermissionConfigurableCommand(ConfigFile config)
     {
+        // ReSharper disable twice VirtualMemberCallInConstructor
         PermissionLevelConfig = config.Bind(CommandConfigSection, Name, DefaultPermissionLevel, $"Permission level for command {Name}");
     }
 }
+
+/// <summary>
+/// Attribute to mark a command as implicitly used by the Reflection discovery in the base plugin class.
+/// </summary>
+[MeansImplicitUse]
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class AutoCommandAttribute : Attribute;

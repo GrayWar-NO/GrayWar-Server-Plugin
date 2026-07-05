@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using NuclearOption.Networking;
 
@@ -8,46 +9,38 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Tells something to everyone on the server
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class TellCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "tell";
+    public override string Name => "tell";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Broadcast a message to everyone on the server.";
-    
-    /// <inheritdoc />
-    public override string Usage { get; } = "tell <message>";
+    public override string Description => "Broadcast a message to everyone on the server.";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public override string Usage => "tell <message>";
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
+
+    /// <inheritdoc />
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length > 0;
+        return UniTask.FromResult(args.Length > 0);
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response)
-    {
-        var result = Execute(args, out var resp);
-        response = resp;
-        return result;
-    }
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var message = string.Join(" ", args);
         ChatService.SendChatMessageAsServer(message);
-        response = null;
-        return true;
+        return new UniTask<(bool success, string? response)>((true, null));
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
-    
-    
-    
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

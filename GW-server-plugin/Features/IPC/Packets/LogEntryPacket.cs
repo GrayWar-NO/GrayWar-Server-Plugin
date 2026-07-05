@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 
 namespace GW_server_plugin.Features.IPC.Packets;
@@ -22,9 +23,9 @@ public class LogEntryPacket: CommunicationPacket
     public string LogText { get; set; } = null!;
 
     /// <inheritdoc />
-    public override CommunicationPacket? Process()
+    public override UniTask<CommunicationPacket?> Process()
     {
         GwServerPlugin.Logger.LogWarning("Tried to process out-only LogEntry type packet.");
-        return null;
+        return new UniTask<CommunicationPacket?>(null);
     }
 }

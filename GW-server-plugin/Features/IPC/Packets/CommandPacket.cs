@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.CommandUtils;
 
@@ -30,10 +31,11 @@ public class CommandPacket: CommunicationPacket
     /// Process method for Command packet.
     /// orders running the command in question
     /// </summary>
-    public override CommunicationPacket? Process()
+    public override async UniTask<CommunicationPacket?> Process()
     {
         GwServerPlugin.Logger.LogInfo($"command {CommandName} recieved with args: {string.Join("; ", Arguments)}");
-        CommandService.TryExecuteCommand(CommandName, Arguments, out var response);
+        var executionResult = await CommandService.TryExecuteCommand(CommandName, Arguments);
+        var response = executionResult.response;
         if (response is null) response = $"Command {CommandName} executed successfully.";
         return Result ? new ResponsePacket { ResponseText = response } : null;
     }

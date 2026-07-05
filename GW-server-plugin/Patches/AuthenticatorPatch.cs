@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HarmonyLib;
 using NuclearOption.Networking.Authentication;
 using Steamworks;

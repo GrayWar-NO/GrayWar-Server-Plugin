@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
@@ -9,12 +11,12 @@ using GW_server_plugin.Enums;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
-using GW_server_plugin.Features.CommandUtils.Commands;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using NuclearOption.Networking;
 using Steamworks;
@@ -27,6 +29,8 @@ namespace GW_server_plugin;
 [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 public class GwServerPlugin : BaseUnityPlugin
 {
+    internal static GwServerPlugin Instance { get; private set; } = null!;
+    
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
 
@@ -37,7 +41,9 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
-    internal static VoteKickService VoteKickService { get; private set; } = null!;
+    internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
+
+    private static MissionBalanceService MissionBalance { get; set; } = null!;
 
     internal static WarnService WarnService { get; private set; } = null!;
 
@@ -63,6 +69,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     private void Awake()
     {
+        Instance = this;
         Logger = base.Logger;
         
         PluginConfig.InitSettings(Config);
@@ -72,8 +79,11 @@ public class GwServerPlugin : BaseUnityPlugin
         WarnService = new WarnService(Config);
         Logger.LogInfo("Loaded WarnService");
         
-        VoteKickService = new VoteKickService();
-        Logger.LogInfo("Loaded VoteKick");
+        WeatherRandomizer = new WeatherRandomizer(Config);
+        Logger.LogInfo("Loaded WeatherRandomizer");
+
+        MissionBalance = new MissionBalanceService();
+        
         try
         {
             PlayerIdentifier = new PlayerIdentificationService();
@@ -95,38 +105,44 @@ public class GwServerPlugin : BaseUnityPlugin
             StartLoggingSender();
         }
         
+        RestartWarningService.ScheduleWarnings();
+        
         PatchAll();
         
-        CommandService.AddCommand(new TellCommand(Config));
-        CommandService.AddCommand(new WhisperCommand(Config));
-        CommandService.AddCommand(new HelpCommand(Config));
-        CommandService.AddCommand(new ListPlayersCommand(Config));
-        CommandService.AddCommand(new SetPermissionLevelCommand(Config));
-        CommandService.AddCommand(new AddSlotCommand(Config));
-        CommandService.AddCommand(new RemoveSlotCommand(Config));
-        
-        CommandService.AddCommand(new ListMissionsCommand(Config));
-        CommandService.AddCommand(new NextMissionCommand(Config));
-        CommandService.AddCommand(new RtvCommand(Config));
-        
-        CommandService.AddCommand(new WarnCommand(Config));
-        
-        CommandService.AddCommand(new VoteKickCommand(Config));
-        CommandService.AddCommand(new KickCommand(Config));
-        CommandService.AddCommand(new UnKickCommand(Config));
-        CommandService.AddCommand(new ClearKickListCommand(Config));
-        
-        CommandService.AddCommand(new BanCommand(Config));
-        CommandService.AddCommand(new UnbanCommand(Config));
-        
-        CommandService.AddCommand(new LinkmeCommand(Config));
-        CommandService.AddCommand(new DiscordCommand(Config));
-        
-        CommandService.AddCommand(new DonateCommand(Config));
+        // Load all Commands (Inheritors of PermissionConfigurableCommand) using Reflection.
+        {
+            var assembly = Assembly.GetExecutingAssembly();
 
+            var commandTypes = assembly.GetTypes()
+                .Where(t => t.IsClass
+                            && !t.IsAbstract
+                            && t.IsSubclassOf(typeof(PermissionConfigurableCommand)));
+
+            foreach (var type in commandTypes)
+            {
+                try
+                {
+                    var commandInstance = (PermissionConfigurableCommand)Activator.CreateInstance(type, Config);
+
+                    CommandService.AddCommand(commandInstance);
+                    Logger.LogInfo($"Loaded command {type.Name}");
+                }
+                catch (Exception ex)
+                {
+                    // It's good practice to log this in BepInEx so one broken command doesn't break them all
+                    Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
+                }
+            }
+        }
+        
         PlayerEvents.PlayerLeft += OnPlayerLeave;
+        PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
         PlayerEvents.PlayerJoined += OnPlayerJoin;
         PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
+        PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
+
+        MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
+        MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
@@ -157,6 +173,7 @@ public class GwServerPlugin : BaseUnityPlugin
         }
     }
     
+    [UsedImplicitly]
     private void UnpatchSelf()
     {
         if (Harmony == null)
@@ -200,13 +217,22 @@ public class GwServerPlugin : BaseUnityPlugin
             }
         });
     }
-    private void HandleJson(string msg)
+    
+    private static async void HandleJson(string msg)
     {
-        var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
-        CommunicationPacket? respPacket = packet!.Process();
-        if (respPacket is null) return;
-        LoggingOutBox.Add(respPacket);
+        try
+        {
+            var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
+            CommunicationPacket? respPacket = await packet!.Process();
+            if (respPacket is null) return;
+            LoggingOutBox.Add(respPacket);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Error when recieving Json in IPC: {e}");
+        }
     }
+    
     private static void OnPlayerJoin(Player player)
     {
         if (CheckOwnerBanned(player))
@@ -217,7 +243,13 @@ public class GwServerPlugin : BaseUnityPlugin
         
         if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(player))
         {
-            Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.").Forget();
+            Globals
+                .NetworkManagerNuclearOptionInstance
+                .KickPlayerAsync(
+                    player,
+                    $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.",
+                    false)
+                .Forget();
             return;
         }
         
@@ -237,13 +269,19 @@ public class GwServerPlugin : BaseUnityPlugin
             LogText = $"1:{player.SteamID}:{originalName}"
         };
         LoggingOutBox.Add(joinPacket);
+
+        var saveData = player.GetAuthData().SaveData;
+        if (saveData == null || saveData.Faction == null) return;
+        if (player.HQ == saveData.Faction) return;
+        player.HQ = saveData.Faction;
+        player.HQ.AddPlayer(player);
+        player.HQ.RequestTrackingStates(player);
     }
 
     private static void OnPlayerLeave(Player player)
     {
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
-        VoteKickService.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
         var leavePacket = new LogEntryPacket
         {
@@ -269,22 +307,21 @@ public class GwServerPlugin : BaseUnityPlugin
         return Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList.Contains(new CSteamID(ownerSteamID));
     }
 
-    /// <summary>
-    /// Method for handling teamkills
-    /// </summary>
-    /// <param name="killer"></param>
-    /// <param name="killed"></param>
-    /// <param name="weaponName"></param>
-    public static void OnTeamkill(Player killer, Player killed, string weaponName)
+    internal static void OnPlayerTeamkill(Player killer, Player killed, string weaponName)
     {
-        if (weaponName.Contains("kt")) return;// if weapon is a nuke
-        var warnLogPacket = new LogEntryPacket
-        {
-            LogText = $"{killer.SteamID}:Teamkilled player {killed.PlayerName} with weapon {weaponName}",
-            Channel = LogChannel.Warn
-        };
-        LoggingOutBox.Add(warnLogPacket);
+        OnTeamkill(killer, killed.PlayerName, weaponName);
+    }
+
+    /// <summary>
+    /// Method for handling player teamkills
+    /// </summary>
+    /// <param name="killer">Player that teamkilled something</param>
+    /// <param name="killedName">name of the thing that was killed</param>
+    /// <param name="weaponName">name of the used weapon.</param>
+    public static void OnTeamkill(Player killer, string killedName, string weaponName)
+    {
         if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
-        WarnService.AddWarn(killer.SteamID);
+        var reason = $"Teamkilled player {killedName} with weapon {weaponName}";
+        WarnService.AddWarn(killer.SteamID, reason);
     }
 }

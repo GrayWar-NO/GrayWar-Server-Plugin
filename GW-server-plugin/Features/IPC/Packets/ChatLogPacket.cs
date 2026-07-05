@@ -1,5 +1,4 @@
 using GW_server_plugin.Enums;
-using Mirage;
 
 namespace GW_server_plugin.Features.IPC.Packets;
 

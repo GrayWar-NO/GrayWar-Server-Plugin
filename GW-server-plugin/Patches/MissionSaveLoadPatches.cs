@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using GW_server_plugin.Features;
+﻿using GW_server_plugin.Events;
 using HarmonyLib;
 using NuclearOption.SavedMission;
 
@@ -20,20 +18,21 @@ public class MissionSaveLoadPatches
     [HarmonyPatch(nameof(MissionSaveLoad.TryLoad))]
     private static void Postfix(
         MissionKey item,
-        ref Mission mission,
+        ref Mission? mission,
         ref string error,
         ref bool __result)
     {
-        if (!__result || mission == null)
-            return;
-        if (!PluginConfig.EnableWeatherRandomizer!.Value) return;
-        var rnd = new Random();
-        mission.environment.timeOfDay = rnd.Next(5, 18);
-        mission.environment.timeFactor = 8f;
-        mission.environment.weatherIntensity = (float)(rnd.NextDouble() * 0.8);
-        mission.environment.cloudAltitude = (float)(500 + rnd.NextDouble() * 1000);
-        mission.environment.windSpeed = (float)(rnd.NextDouble() * 4);
-        mission.environment.windTurbulence = (float)rnd.NextDouble();
-        mission.environment.windHeading = rnd.Next(0, 360);
+        if (!__result) return;
+        if (mission == null) return;
+        GwServerPlugin.WeatherRandomizer.Apply(ref mission);
+        ForceLowWreckDespawn(ref mission);
+        MissionEvents.OnMissionLoad(mission);
+    }
+    
+    private static void ForceLowWreckDespawn(ref Mission mission)
+    {
+        if (!PluginConfig.ForceLowWreckDespawn!.Value) return;        
+        mission.missionSettings.wrecksMaxNumber = PluginConfig.MaxWrecks!.Value;
+        mission.missionSettings.wrecksDecayTime = PluginConfig.WrecksDecay!.Value;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
@@ -11,50 +12,45 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Sends a private message to a specific player.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "whisper";
+    public override string Name => "whisper";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Send a private message to a specified user.";
-    
-    /// <inheritdoc />
-    public override string Usage { get; } = "whisper <user / userID> <message>";
+    public override string Description => "Send a private message to a specified user.";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args)
+    public override string Usage => "whisper <user Name/ID> <message>";
+
+    /// <inheritdoc />
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
+
+    /// <inheritdoc />
+    public UniTask<bool> Validate(string[] args)
     {
-        return Validate(args);
+        return UniTask.FromResult(args.Length > 1);
     }
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
-    {
-        return args.Length > 1;
-    }
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Behaviour(player, args);
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) =>
-        Behaviour(player, args, out response);
-
-    /// <inheritdoc />
-    public bool Execute(string[] args, out string? response) =>
-        Behaviour(null, args, out response);
+    public UniTask<(bool success, string? response)> Execute(string[] args) => Behaviour(null, args);
             
 
-    private bool Behaviour(Player? sender, string[] args, out string response)
+    private static UniTask<(bool success, string? response)> Behaviour(Player? sender, string[] args)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var target);
         if (!found || !target)
         {
-            response = $"Could not identify a player by \"{args[0]}\".";
-            return false;
+            return UniTask.FromResult<(bool, string?)>((false, $"Could not identify a player by \"{args[0]}\"."));
         }
-        
+
         var message = string.Join(" ", args.Skip(1));
-        ChatService.SendPrivateChatMessage(message, target!, sender?.PlayerName ?? PluginConfig.ServerBroadcastName!.Value);
-        response = $"Message sent to {target!.PlayerName}:  {message}";
+        message = $"(whisper): {message}";
+        ChatService.SendPrivateChatMessage(message, target!, sender);
         
         var senderSteamId = sender?.SteamID ?? 0;
         
@@ -65,13 +61,10 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             LogText = message
         };
         GwServerPlugin.LoggingOutBox.Add(outPacket);
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
     }
     
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
-    
-    
-    
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

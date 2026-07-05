@@ -2,7 +2,6 @@ using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using HarmonyLib;
-using Newtonsoft.Json;
 using NuclearOption.DedicatedServer;
 using NuclearOption.SavedMission;
 
@@ -45,7 +44,7 @@ public class MissionChangeDetector
     /// Behaviour to run whenever a mission changes.
     /// </summary>
     /// <param name="mission"></param>
-    private static void OnMissionChanged(Mission? mission)
+    internal static void OnMissionChanged(Mission? mission)
     {
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission?.Name ?? "null"}");
         var missionChangePacket = new LogEntryPacket

@@ -1,4 +1,4 @@
-using GW_server_plugin.Enums;
+using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils;
@@ -14,14 +14,13 @@ public interface IGameCommand: ICommand
     /// <param name="player"> The player executing the command. </param>
     /// <param name="args"> The command arguments. </param>
     /// <returns> Whether the command arguments are valid. </returns>
-    bool Validate(Player player, string[] args);
+    UniTask<bool> Validate(Player player, string[] args);
     
     /// <summary>
     ///     The command action executed by a player.
     /// </summary>
     /// <param name="player"> The player executing the command. </param>
     /// <param name="args"> The command arguments. </param>
-    /// <param name="response"> The command response. </param>
-    /// <returns> Whether the command was executed successfully. </returns>
-    bool Execute(Player player, string[] args, out string? response);
+    /// <returns> Whether the command was executed successfully, as well as the command response string </returns>
+    UniTask<(bool success, string? response)> Execute(Player player, string[] args);
 }

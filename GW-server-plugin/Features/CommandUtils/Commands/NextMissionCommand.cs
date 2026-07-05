@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using NuclearOption.Networking;
 
@@ -8,49 +9,55 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command for switching the currently active mission on the server.
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class NextMissionCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "nextmission";
+    public override string Name => "nextmission";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Starts the next mission, or a selected mission from index";
+    public override string Description => "Starts the next mission, or a selected mission from index";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "nextmission <int MissionIndex?> (omitting mission index will use the mission rotation instead)";
+    public override string Usage => "nextmission <int MissionIndex?> (omitting mission index will use the mission rotation instead)";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        if (args.Length > 1) return false;
-        if (args.Length == 0) return true;
-        return int.TryParse(args[0], out _);
+        return UniTask.FromResult(args.Length switch
+        {
+            > 1 => false,
+            0 => true,
+            _ => int.TryParse(args[0], out _)
+        });
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public async UniTask<(bool success, string? response)> Execute(string[] args)
     {
-        response = "Called NextMission asynchronously, no result is available.";
         if (args.Length == 0)
         {
-            _ = MissionService.StartNextMission();
-            return true;
+            GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
+            if (await MissionService.StartNextMission())
+                return (true, "Next mission started successfully.");
+            return (false, "Failed to start next mission.");
         }
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
         if (missionOption == null)
         {
-            response = "Mission not found.";
-            return false;
+            return (false,  "Mission not found.");
         }
-        _ = MissionService.StartMission(missionOption.Value);
-        return true;
+        GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
+        if (await MissionService.StartMission(missionOption.Value))
+            return (true, $"Started mission {missionOption.Value.Key.Name} successfully.");
+        return (false, "Failed to start next mission.");
     }
 
     /// <inheritdoc />

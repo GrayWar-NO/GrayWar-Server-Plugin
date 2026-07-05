@@ -1,8 +1,8 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
-using Newtonsoft.Json;
 using NuclearOption.Networking;
 using Steamworks;
 
@@ -11,43 +11,44 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Command to kick a player from the server
 /// </summary>
 /// <param name="config"></param>
+[AutoCommand]
 public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "unkick";
+    public override string Name => "unkick";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Unkicks a player from the  server.";
+    public override string Description => "Unkicks a player from the  server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "unkick <player (by steamID only)>";
+    public override string Usage => "unkick <player (by steamID only)>";
 
     /// <inheritdoc />
-    public bool Validate(Player player, string[] args) => Validate(args);
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
-    public bool Validate(string[] args)
+    public UniTask<bool> Validate(string[] args)
     {
-        return args.Length == 1 && ulong.TryParse(args[0], out _);
+        return UniTask.FromResult(args.Length == 1 && ulong.TryParse(args[0], out _));
     }
 
     /// <inheritdoc />
-    public bool Execute(Player player, string[] args, out string? response) => Execute(args, out response);
+    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public bool Execute(string[] args, out string? response)
+    public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         UnKickPlayer(ulong.Parse(args[0]));
-        response = $"Unkicked player with steamID {args[0]}";
-        return true;
+        return UniTask.FromResult<(bool, string?)>((true, $"Unkicked player with steamID {args[0]}"));
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     private static void UnKickPlayer(ulong steamID)
     {
         Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Remove(new CSteamID(steamID));
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Remove(new CSteamID(steamID));
         var kickLogPacket = new LogEntryPacket
         {
             LogText = $"0:{steamID}:",

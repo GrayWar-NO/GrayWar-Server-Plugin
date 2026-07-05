@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking.Lobbies;
 using NuclearOption.SavedMission;
@@ -72,7 +73,7 @@ public static class MissionService
     /// Get the MissionOptions object for the next mission in rotation.
     /// </summary>
     /// <returns>the missionOptions object</returns>
-    public static MissionOptions? GetNextMissionOptions()
+    public static MissionOptions? GetNextMissionOptions(bool consume = true)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
         if (dsm == null)
@@ -88,8 +89,38 @@ public static class MissionService
             return null;
         }
 
-        return mr.GetNext();
+        if (consume) return mr.GetNext();
 
+        if (mr.NextOverride.HasValue)
+            return mr.NextOverride.Value;
+        return mr.rotationType switch
+        {
+            RotationType.PureRandom => mr.GetNext(),
+            RotationType.RandomQueue => mr.randomQueue[mr._nextIndex % mr.randomQueue.Count],
+            RotationType.Sequence => mr.allMissions[mr._nextIndex % mr.allMissions.Count],
+            _ => throw new ArgumentOutOfRangeException(nameof(mr.rotationType))
+        };
+    }
+
+    /// <summary>
+    /// Adds a mission to the rotation
+    /// </summary>
+    /// <param name="mission">The mission to add to the rotation</param>
+    public static void AddMission(MissionOptions mission)
+    {
+        var oldMr = Globals.DedicatedServerManagerInstance.missionRotation!;
+        var ml = new MissionOptions[oldMr.allMissions.Count + 1];
+        oldMr.allMissions.CopyTo(ml);
+        ml[ml.Length - 1] = mission;
+        Globals.DedicatedServerManagerInstance.ReloadMissionRotation(ml, oldMr.rotationType, false);
+    }
+
+    /// <summary>
+    /// Consumes the next map in rotation without outputting it.
+    /// </summary>
+    public static void ConsumeNextMap()
+    {
+        Globals.DedicatedServerManagerInstance.missionRotation.GetNext();
     }
     
     
@@ -119,8 +150,9 @@ public static class MissionService
             await UniTask.SwitchToMainThread();
             var dsm = Globals.DedicatedServerManagerInstance;
 
+            // ReSharper disable once UsageOfDefaultStructEquality
             while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
-
+            
             dsm.UpdateLobby(mission, false);
             var ok = await dsm.LoadNext(mission);
             if (!ok)
@@ -133,6 +165,7 @@ public static class MissionService
             dsm.currentMission = mission;
             dsm.currentMissionOption = missionOptions;
             LastMission = mission;
+            MissionChangeDetector.OnMissionChanged(mission);
             return true;
         }
         catch (Exception e)
