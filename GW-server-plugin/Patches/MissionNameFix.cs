@@ -17,11 +17,13 @@ internal class MissionNameFix
     {
         if (!__instance.keyValues.TryGetValue("mi", out var originalName)) return;
         if (!ulong.TryParse(originalName, out var workshopID)) return;
-        var newName = GetMissionName(new PublishedFileId_t(workshopID)) ?? originalName;
+        var newName = GetMissionName(workshopID) ?? originalName;
         __instance.keyValues["mi"] = newName;
         GwServerPlugin.Logger.LogDebug(newName);
     }
 
+    internal static string? GetMissionName(ulong workshopId) => GetMissionName(new PublishedFileId_t(workshopId));
+    
     private static string? GetMissionName(PublishedFileId_t workshopId)
     {
         SteamWorkshop.TryGetInstallFolder(workshopId, out var folder);
