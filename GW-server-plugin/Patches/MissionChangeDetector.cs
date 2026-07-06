@@ -49,7 +49,8 @@ public class MissionChangeDetector
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission?.Name ?? "null"}");
         var name = mission?.Name ?? "null";
         if (ulong.TryParse(name, out var workshopID))
-            name = MissionNameFix.GetMissionName(workshopID) ?? name;
+            if (MissionNameFix.GetMissionName(workshopID, out var workshopName))
+                name = workshopName!;
         var missionChangePacket = new LogEntryPacket
         {
             Channel = LogChannel.MissionStatus,

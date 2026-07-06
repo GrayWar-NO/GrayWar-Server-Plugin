@@ -17,24 +17,29 @@ internal class MissionNameFix
     {
         if (!__instance.keyValues.TryGetValue("mi", out var originalName)) return;
         if (!ulong.TryParse(originalName, out var workshopID)) return;
-        var newName = GetMissionName(workshopID) ?? originalName;
+        GetMissionName(workshopID, out var newName);
+        newName ??= originalName;
         __instance.keyValues["mi"] = newName;
         GwServerPlugin.Logger.LogDebug(newName);
     }
 
-    internal static string? GetMissionName(ulong workshopId) => GetMissionName(new PublishedFileId_t(workshopId));
+    internal static bool GetMissionName(ulong workshopId, out string? name) => GetMissionName(new PublishedFileId_t(workshopId), out name);
     
-    private static string? GetMissionName(PublishedFileId_t workshopId)
+    private static bool GetMissionName(PublishedFileId_t workshopId, out string? name)
     {
-        SteamWorkshop.TryGetInstallFolder(workshopId, out var folder);
+        name = null;
+        if (!SteamWorkshop.TryGetInstallFolder(workshopId, out var folder)) 
+            return false;
         var data = ModLoader.ReadMetaData<MissionGroup.MissionMetaData>(workshopId, folder!);
-        return data?.FileName;
+        name = data?.FileName;
+        return name != null;
     }
     
     [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
     public static MissionKey TranslateWorkshopName(MissionKey key)
     {
-        if (key.Group != MissionGroup.Workshop || key.WorkshopId == null) return key;
-        return new MissionKey(key.Name, GetMissionName(key.WorkshopId.Value), key.WorkshopId, MissionGroup.Workshop);
+        if (key.Group != MissionGroup.Workshop || key.WorkshopId == null ||
+            !GetMissionName(key.WorkshopId.Value, out var name)) return key;
+        return new MissionKey(key.Name, name, key.WorkshopId, MissionGroup.Workshop);
     }
 }

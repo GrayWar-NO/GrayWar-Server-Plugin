@@ -48,7 +48,8 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
         {
             var name = missions[i].Key.Name;
             if (ulong.TryParse(name, out var id))
-                name = MissionNameFix.GetMissionName(id);
+                if (MissionNameFix.GetMissionName(id, out var workshopName))
+                    name = workshopName!;
             response += $"[{i}] {name}\n";
         }
         return UniTask.FromResult<(bool, string?)>((true, response));
