@@ -35,24 +35,33 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public async UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         if (missions.Length == 0)
         {
-            return UniTask.FromResult<(bool, string?)>((true, "No available missions"));
+            return (true, "No available missions");
         }
 
         var response = "Available missions:\n";
         for (var i = 0; i < missions.Length; i++)
         {
             var name = missions[i].Key.Name;
+            GwServerPlugin.Logger.LogDebug($"1: {name}");
             if (ulong.TryParse(name, out var id))
-                if (MissionNameFix.GetMissionName(id, out var workshopName))
-                    name = workshopName!;
+            {
+                GwServerPlugin.Logger.LogDebug($"2: {id}");
+                var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
+                if (missionNameResult.success)
+                {
+                    GwServerPlugin.Logger.LogDebug($"3: {missionNameResult.name}");
+                    name = missionNameResult.name!;
+                }
+                GwServerPlugin.Logger.LogDebug($"2: {name}");
+            }
             response += $"[{i}] {name}\n";
         }
-        return UniTask.FromResult<(bool, string?)>((true, response));
+        return (true, response);
     }
 
     /// <inheritdoc />
