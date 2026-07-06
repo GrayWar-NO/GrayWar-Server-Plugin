@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config), IAsyncGameCommand, IAsyncConsoleCommand
+public class DebugCmd(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "dbg";
