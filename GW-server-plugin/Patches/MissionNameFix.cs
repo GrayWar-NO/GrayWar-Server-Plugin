@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using NuclearOption.AddressableScripts;
 using NuclearOption.DedicatedServer;
+using NuclearOption.Networking;
 using NuclearOption.Networking.Lobbies;
 using NuclearOption.SavedMission;
 using NuclearOption.Workshop;
@@ -23,6 +24,24 @@ internal class MissionNameFix
         newName ??= originalName;
         __instance.keyValues["mi"] = newName;
         GwServerPlugin.Logger.LogDebug(newName);
+    }
+
+    [HarmonyPatch(typeof(NetworkManagerNuclearOption), nameof(NetworkManagerNuclearOption.SendServerLoadingMessage))]
+    [HarmonyPrefix]
+    [HarmonyPriority(Priority.First)]
+    public static void ServerLoadingMessageFixWorkshopIDNames(
+        NetworkManagerNuclearOption __instance,
+        ref string message
+        )
+    {
+        var rt = "";
+        foreach (var s in message.Split('\n'))
+        {
+            if (!ulong.TryParse(s, out var workshopID)) continue;
+            GetMissionName(workshopID, out var name);
+            rt += name ?? s;
+        }
+        message = rt;
     }
 
     internal static bool GetMissionName(ulong workshopId, out string? name) => GetMissionName(new PublishedFileId_t(workshopId), out name);
