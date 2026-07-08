@@ -7,12 +7,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.IPC;
 using GW_server_plugin.Features.IPC.Packets;
+using GW_server_plugin.Features.Protobuf_IPC;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
@@ -148,6 +150,17 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
         TimeService.Initialize();
+
+        try
+        {
+            var grpcMgr = new GrpcClientManager(Config);
+            var grpcClient = grpcMgr.InitializeGrpc();
+            var bans = grpcClient.SubscribeToBans(new Empty());
+        }
+        catch (Exception e)
+        {
+            Logger.LogDebug($"Error initializing grpc client: {e}\n{e.StackTrace}");
+        }
     }
 
     private static void PatchAll()
