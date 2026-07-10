@@ -16,9 +16,9 @@ namespace GW_server_plugin.Features.Protobuf_IPC;
 /// </summary>
 public class GrpcClientManager
 {
-    private static ConfigEntry<string> _serverName = null!;
-    private static ConfigEntry<string> _centralHost = null!;
-    private static ConfigEntry<uint> _centralPort = null!;
+    private readonly ConfigEntry<string> _serverName;
+    private readonly ConfigEntry<string> _centralHost;
+    private readonly ConfigEntry<uint> _centralPort;
 
     internal EdgeAgentService.EdgeAgentServiceClient Client = null!;
     internal AsyncClientStreamingCall<ChatLog, Ack> ChatLogsStream = null!;
@@ -91,7 +91,8 @@ public class GrpcClientManager
             try
             {
                 _ = data.ShouldBeBanned
-                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason])
+                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason]) 
+                    // TODO not get bans logged back.
                     : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()]);
                 return Task.CompletedTask;
             }

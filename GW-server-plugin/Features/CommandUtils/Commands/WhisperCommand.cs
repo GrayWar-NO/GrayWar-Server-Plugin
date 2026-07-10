@@ -1,8 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BepInEx.Configuration;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
+using GW_server_plugin.Features.Protobuf_IPC;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -53,14 +57,16 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         ChatService.SendPrivateChatMessage(message, target!, sender);
         
         var senderSteamId = sender?.SteamID ?? 0;
-        
-        var outPacket = new ChatLogPacket
+
+        var log = new ChatLog
         {
-            SteamID = senderSteamId,
-            ChatName = $"whisper({senderSteamId}:{target?.SteamID})",
-            LogText = message
+            Message = message,
+            MessageChannel = $"whisper({senderSteamId}:{target?.SteamID})",
+            MessageSendTime = DateTime.UtcNow.ToTimestamp(),
+            SenderSteamID =  senderSteamId
         };
-        GwServerPlugin.LoggingOutBox.Add(outPacket);
+        GwServerPlugin.GrpcMgr.ChatLogsStream.RequestStream.WriteAsync(log);
+        
         return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
     }
     

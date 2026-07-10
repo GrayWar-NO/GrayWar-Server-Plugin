@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Features.IPC.Packets;
@@ -41,12 +42,13 @@ public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(con
             code = _rnd.Next(1000000);
         }
         _usedCodes.Add(code);
-        var packet = new LinkPacket
+
+        var log = new LinkUser
         {
-            SteamID = steamID,
-            OneTimeCode = code
+            OneTimeCode = (uint)code,
+            SenderSteamID = steamID,
         };
-        GwServerPlugin.LoggingOutBox.Add(packet);
+        _ = GwServerPlugin.GrpcMgr.Client.sendLinkCodeAsync(log);
         return UniTask.FromResult<(bool, string?)>((true, $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes."));
     }
     

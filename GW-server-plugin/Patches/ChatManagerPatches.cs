@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using HarmonyLib;
 using Mirage;
 using NuclearOption.Chat;
@@ -63,14 +65,15 @@ internal static class ChatManagerPatches
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player!.PlayerName} sent message: {message}"
             : $"{player!.PlayerName} sent message in {player.HQ.faction.factionName} chat: {message}");
-        
-        var outPacket = new ChatLogPacket
+
+        var log = new ChatLog
         {
-            SteamID = player.SteamID,
-            ChatName = allChat ? "all" : player.HQ.faction.factionName.ToLower(),
-            LogText = message
+            MessageChannel = allChat ? "all" : player.HQ.faction.factionName,
+            MessageSendTime = DateTime.UtcNow.ToTimestamp(),
+            Message = message,
+            SenderSteamID = player.SteamID
         };
-        GwServerPlugin.LoggingOutBox.Add(outPacket);
+        GwServerPlugin.GrpcMgr.ChatLogsStream.RequestStream.WriteAsync(log);
         return true;
     }
 }

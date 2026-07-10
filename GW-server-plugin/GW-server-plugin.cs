@@ -65,6 +65,8 @@ public class GwServerPlugin : BaseUnityPlugin
     
     internal static readonly Dictionary<ulong, ulong> FamilySharingBorrowers = new();
 
+    internal static GrpcClientManager GrpcMgr = null!;
+
 
     private Socket? _socket;
     
@@ -149,15 +151,8 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
         TimeService.Initialize();
-
-        try
-        {
-            var grpcMgr = new GrpcClientManager(Config);
-        }
-        catch (Exception e)
-        {
-            Logger.LogDebug($"Error initializing grpc client: {e}\n{e.StackTrace}");
-        }
+        
+        GrpcMgr = new GrpcClientManager(Config);
     }
 
     private static void PatchAll()
