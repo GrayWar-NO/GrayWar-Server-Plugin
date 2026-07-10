@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
-using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
@@ -154,8 +153,6 @@ public class GwServerPlugin : BaseUnityPlugin
         try
         {
             var grpcMgr = new GrpcClientManager(Config);
-            var grpcClient = grpcMgr.InitializeGrpc();
-            var bans = grpcClient.SubscribeToBans(new Empty());
         }
         catch (Exception e)
         {

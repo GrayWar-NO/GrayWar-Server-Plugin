@@ -1,8 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Grpc.Core.Utils;
+using GW_server_plugin.Features.CommandUtils;
 
 namespace GW_server_plugin.Features.Protobuf_IPC;
 
@@ -14,6 +19,11 @@ public class GrpcClientManager
     private static ConfigEntry<string> _serverName = null!;
     private static ConfigEntry<string> _centralHost = null!;
     private static ConfigEntry<uint> _centralPort = null!;
+
+    internal EdgeAgentService.EdgeAgentServiceClient Client = null!;
+    internal AsyncClientStreamingCall<ChatLog, Ack> ChatLogsStream = null!;
+    private AsyncDuplexStreamingCall<CommandResult, Command> _commandStream = null!;
+    private AsyncServerStreamingCall<BanRequest> _bansStream = null!;
 
     /// <summary>
     /// 
@@ -27,13 +37,14 @@ public class GrpcClientManager
             "Hostname or IP of the manager");
         _centralPort = config.Bind("Manager Interface", "central port", 50051u,
             new ConfigDescription("Port of the manager", new AcceptableValueRange<uint>(0, 65535)));
+        InitializeGrpc();
     }
 
     /// <summary>
     /// 
     /// </summary>
     /// <returns></returns>
-    public EdgeAgentService.EdgeAgentServiceClient InitializeGrpc()
+    private void InitializeGrpc()
     {
         ChannelCredentials creds = new SslCredentials(
             File.ReadAllText("CA/ca.crt"),
@@ -43,6 +54,51 @@ public class GrpcClientManager
             )
         );
         var channel = new Channel(_centralHost.Value, Convert.ToInt32(_centralPort.Value), creds);
-        return new EdgeAgentService.EdgeAgentServiceClient(channel);
+        Client = new EdgeAgentService.EdgeAgentServiceClient(channel);
+        ChatLogsStream = Client.SendChatLogsStream();
+        _bansStream = Client.SubscribeToBans(new Empty());
+        _commandStream = Client.SubscribeToCommands();
+        
+        BanInputBehaviour();
+        CommandBehaviour();
+
+    }
+
+    private void CommandBehaviour()
+    {
+        _commandStream.ResponseStream.ForEachAsync(async data =>
+        {
+            if (!data.Result)
+            {
+                _ = CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray());
+                return;
+            } 
+            var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray());
+            await _commandStream.RequestStream.WriteAsync(new CommandResult
+            {
+                RequestID = data.RequestID,
+                Ok = result.success,
+                Result = result.response
+            });
+
+        });
+    }
+
+    private void BanInputBehaviour()
+    {
+        _bansStream.ResponseStream.ForEachAsync(data =>
+        {
+            try
+            {
+                _ = data.ShouldBeBanned
+                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason])
+                    : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()]);
+                return Task.CompletedTask;
+            }
+            catch (Exception exception)
+            {
+                return Task.FromException(exception);
+            }
+        });
     }
 }
