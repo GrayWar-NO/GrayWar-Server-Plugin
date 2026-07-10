@@ -127,8 +127,14 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
         TimeService.Initialize();
-        
-        GrpcMgr = new GrpcClientManager(Config);
+        try
+        {
+            GrpcMgr = new GrpcClientManager(Config);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Failed to initialize GrpcClientManager: {e}\n{e.StackTrace}");
+        }
     }
 
     private static void PatchAll()
