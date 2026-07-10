@@ -1,5 +1,4 @@
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
+using Com.Graywar.NoServerManager.Proto;
 using HarmonyLib;
 using NuclearOption.Networking;
 
@@ -20,12 +19,13 @@ public class PlayerPatches
     [HarmonyPatch(nameof(Player.FlyOwnedAirframe))]
     public static void AttachPatch(Player __instance, AircraftDefinition airframe)
     {
-        var packet = new LogEntryPacket
+        var log = new sortieStatus
         {
-            Channel = LogChannel.SortieStatus,
-            LogText = $"1:{__instance.SteamID}:{airframe.unitName}"
+            Start = true,
+            SteamID = __instance.SteamID,
+            PlaneName = airframe.unitName
         };
-        GwServerPlugin.LoggingOutBox.Add(packet);
+        GwServerPlugin.GrpcMgr.Client?.SendSortieChangeAsync(log);
     }
     
     /// <summary>
@@ -37,11 +37,12 @@ public class PlayerPatches
     [HarmonyPatch(nameof(Player.RecoverAirframeInUse))]
     public static void RecoverPatch(Player __instance, AircraftDefinition airframe)
     {
-        var packet = new LogEntryPacket
+        var log = new sortieStatus
         {
-            Channel = LogChannel.SortieStatus,
-            LogText = $"0:{__instance.SteamID}:1"// GetOut:steamID:Success
+            Start = false,
+            SteamID = __instance.SteamID,
+            Killed = false
         };
-        GwServerPlugin.LoggingOutBox.Add(packet);
+        GwServerPlugin.GrpcMgr.Client?.SendSortieChangeAsync(log);
     }
 }

@@ -147,7 +147,7 @@ public static class CommandService
     public static async UniTask<(bool success, string? response)> TryExecuteCommand(IConsoleCommand command, string[] args)
     {
         
-        PermissionLevelUtils.TryParsePermissionLevel(PluginConfig.IpcCommandPermissionLevel!.Value, out var level);
+        PermissionLevelUtils.TryParsePermissionLevel(PluginConfig.ConsoleCommandPermissionLevel!.Value, out var level);
         if (level < command.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning($"The remote process does not have permission to execute command {command.Name}");

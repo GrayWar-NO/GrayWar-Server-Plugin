@@ -1,25 +1,19 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
-using GW_server_plugin.Enums;
+using Com.Graywar.NoServerManager.Proto;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
-using GW_server_plugin.Features.IPC;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Features.Protobuf_IPC;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
-using NuclearOption.Networking;
+using JetBrains.Annotations; using NuclearOption.Networking;
 using Steamworks;
 
 namespace GW_server_plugin;
@@ -34,12 +28,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
-
-    /// <summary>
-    /// Logging Outbox for the IPC communication and general logging to a file
-    /// </summary>
-    public static BlockingCollection<CommunicationPacket> LoggingOutBox = new();
-
+    
     internal static MissionVoteService MissionVote { get; private set; } = null!;
 
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
@@ -61,15 +50,10 @@ public class GwServerPlugin : BaseUnityPlugin
     private static Harmony? Harmony { get; set; }
     private static bool IsPatched { get; set; }
     
-    private CancellationTokenSource? _cts;
-    
     internal static readonly Dictionary<ulong, ulong> FamilySharingBorrowers = new();
 
     internal static GrpcClientManager GrpcMgr = null!;
 
-
-    private Socket? _socket;
-    
     private void Awake()
     {
         Instance = this;
@@ -100,14 +84,6 @@ public class GwServerPlugin : BaseUnityPlugin
         
         // TimeService.Initialize();
 
-
-        if (PluginConfig.IpcEnable!.Value) {
-            _socket = new Socket();
-            _socket.OnJson += HandleJson;
-            _socket.Start(PluginConfig.IpcHost!.Value, PluginConfig.IpcPort!.Value);
-            StartLoggingSender();
-        }
-        
         RestartWarningService.ScheduleWarnings();
         
         PatchAll();
@@ -201,43 +177,6 @@ public class GwServerPlugin : BaseUnityPlugin
 
         Logger.LogDebug("Unpatched!");
     }
-
-
-
-    private void StartLoggingSender()
-    {
-        _cts = new CancellationTokenSource();
-
-        Task.Run(() =>
-        {
-            try
-            {
-                foreach (var msg in LoggingOutBox.GetConsumingEnumerable(_cts.Token))
-                {
-                    _socket?.SendJson(JsonConvert.SerializeObject(msg)); // Null if IPC is not enabled.
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // Expected on shutdown
-            }
-        });
-    }
-    
-    private static async void HandleJson(string msg)
-    {
-        try
-        {
-            var packet = JsonConvert.DeserializeObject<CommunicationPacket>(msg);
-            CommunicationPacket? respPacket = await packet!.Process();
-            if (respPacket is null) return;
-            LoggingOutBox.Add(respPacket);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError($"Error when recieving Json in IPC: {e}");
-        }
-    }
     
     private static void OnPlayerJoin(Player player)
     {
@@ -269,12 +208,14 @@ public class GwServerPlugin : BaseUnityPlugin
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
-        var joinPacket = new LogEntryPacket
+        var log = new JoinLeaveLog
         {
-            Channel = LogChannel.JoinLeave,
-            LogText = $"1:{player.SteamID}:{originalName}"
+            SteamID = player.SteamID,
+            IsOn = true,
+            Name = originalName,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
-        LoggingOutBox.Add(joinPacket);
+        GrpcMgr.Client?.SendPlayerActivityAsync(log);
     }
 
     private static void OnPlayerLeave(Player player)
@@ -282,22 +223,25 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
-        var leavePacket = new LogEntryPacket
+        var log = new JoinLeaveLog
         {
-            Channel = LogChannel.JoinLeave,
-            LogText = $"0:{player.SteamID}:{Math.Round(player.PlayerScore, 2)}"
+            SteamID = player.SteamID,
+            IsOn = false,
+            Name = player.PlayerName,
+            Time = DateTime.UtcNow.ToTimestamp(),
+            Score = (float)Math.Round(player.PlayerScore, 2)
         };
-        LoggingOutBox.Add(leavePacket);
+        GrpcMgr.Client?.SendPlayerActivityAsync(log);
     }
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
     {
-        var factionJoinPacket = new LogEntryPacket
+        var log = new FactionLog
         {
-            Channel = LogChannel.FactionJoin,
-            LogText = $"{player.SteamID}:{HQ.faction.name}"
+            SteamID = player.SteamID,
+            Faction = HQ.faction.name
         };
-        LoggingOutBox.Add(factionJoinPacket);
+        GrpcMgr.Client?.SendPlayerJoinFacAsync(log);
     }
 
     private static bool CheckOwnerBanned(Player player)

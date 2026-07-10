@@ -20,10 +20,8 @@ public class GrpcClientManager
     private readonly ConfigEntry<string> _centralHost;
     private readonly ConfigEntry<uint> _centralPort;
 
-    internal EdgeAgentService.EdgeAgentServiceClient Client = null!;
-    internal AsyncClientStreamingCall<ChatLog, Ack> ChatLogsStream = null!;
-    private AsyncDuplexStreamingCall<CommandResult, Command> _commandStream = null!;
-    private AsyncServerStreamingCall<BanRequest> _bansStream = null!;
+    internal EdgeAgentService.EdgeAgentServiceClient? Client;
+    internal AsyncClientStreamingCall<ChatLog, Ack>? ChatLogsStream;
 
     /// <summary>
     /// 
@@ -31,13 +29,15 @@ public class GrpcClientManager
     /// <param name="config"></param>
     public GrpcClientManager(ConfigFile config)
     {
-        _serverName = config.Bind("Manager Interface", "server name", "graywar",
+        var enable = config.Bind(PluginConfig.RpcSection, "enable", true);
+        _serverName = config.Bind(PluginConfig.RpcSection, "server name", "graywar",
             "Name the server will report to the manager");
-        _centralHost = config.Bind("Manager Interface", "central hostname", "graywar.no",
+        _centralHost = config.Bind(PluginConfig.RpcSection, "central hostname", "graywar.no",
             "Hostname or IP of the manager");
-        _centralPort = config.Bind("Manager Interface", "central port", 50051u,
+        _centralPort = config.Bind(PluginConfig.RpcSection, "central port", 50051u,
             new ConfigDescription("Port of the manager", new AcceptableValueRange<uint>(0, 65535)));
-        InitializeGrpc();
+        if (enable.Value)
+            InitializeGrpc();
     }
 
     /// <summary>
@@ -56,17 +56,16 @@ public class GrpcClientManager
         var channel = new Channel(_centralHost.Value, Convert.ToInt32(_centralPort.Value), creds);
         Client = new EdgeAgentService.EdgeAgentServiceClient(channel);
         ChatLogsStream = Client.SendChatLogsStream();
-        _bansStream = Client.SubscribeToBans(new Empty());
-        _commandStream = Client.SubscribeToCommands();
+        Client.SubscribeToBans(new Empty());
         
-        BanInputBehaviour();
-        CommandBehaviour();
+        BanInputBehaviour(Client.SubscribeToBans(new Empty()));
+        CommandBehaviour(Client.SubscribeToCommands());
 
     }
 
-    private void CommandBehaviour()
+    private void CommandBehaviour(AsyncDuplexStreamingCall<CommandResult, Command> stream)
     {
-        _commandStream.ResponseStream.ForEachAsync(async data =>
+        stream.ResponseStream.ForEachAsync(async data =>
         {
             if (!data.Result)
             {
@@ -74,7 +73,7 @@ public class GrpcClientManager
                 return;
             } 
             var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray());
-            await _commandStream.RequestStream.WriteAsync(new CommandResult
+            await stream.RequestStream.WriteAsync(new CommandResult
             {
                 RequestID = data.RequestID,
                 Ok = result.success,
@@ -84,9 +83,9 @@ public class GrpcClientManager
         });
     }
 
-    private void BanInputBehaviour()
+    private void BanInputBehaviour(AsyncServerStreamingCall<BanRequest> stream)
     {
-        _bansStream.ResponseStream.ForEachAsync(data =>
+        stream.ResponseStream.ForEachAsync(data =>
         {
             try
             {

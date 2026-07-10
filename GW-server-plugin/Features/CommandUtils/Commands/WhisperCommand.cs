@@ -5,8 +5,6 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
-using GW_server_plugin.Features.Protobuf_IPC;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -42,7 +40,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(string[] args) => Behaviour(null, args);
-            
+
 
     private static UniTask<(bool success, string? response)> Behaviour(Player? sender, string[] args)
     {
@@ -55,7 +53,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         var message = string.Join(" ", args.Skip(1));
         message = $"(whisper): {message}";
         ChatService.SendPrivateChatMessage(message, target!, sender);
-        
+
         var senderSteamId = sender?.SteamID ?? 0;
 
         var log = new ChatLog
@@ -63,13 +61,13 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             Message = message,
             MessageChannel = $"whisper({senderSteamId}:{target?.SteamID})",
             MessageSendTime = DateTime.UtcNow.ToTimestamp(),
-            SenderSteamID =  senderSteamId
+            SenderSteamID = senderSteamId
         };
-        GwServerPlugin.GrpcMgr.ChatLogsStream.RequestStream.WriteAsync(log);
-        
+        GwServerPlugin.GrpcMgr.ChatLogsStream?.RequestStream.WriteAsync(log);
+
         return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
     }
-    
+
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;

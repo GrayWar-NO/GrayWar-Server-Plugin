@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
+using Com.Graywar.NoServerManager.Proto;
+using Google.Protobuf.WellKnownTypes;
 using NuclearOption.Networking;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ public static class WeaponLoggingExtensions
             GwServerPlugin.Logger.LogError("Unit is null in recordDamage!");
             return;
         }
+
         unit.damageCredit ??= new Dictionary<PersistentID, float>();
 
         unit.damageCredit.TryGetValue(lastDamagedBy, out var originalDamageAmount);
@@ -110,7 +112,7 @@ public static class WeaponLoggingExtensions
 
         var killedAircraft = killedUnit.unit as Aircraft;
         var killedSteamID = killedAircraft != null ? killedAircraft.Player?.SteamID : killedUnit.player?.SteamID;
-        
+
         ulong? killerSteamID;
         Aircraft? killerAircraft;
 
@@ -146,6 +148,7 @@ public static class WeaponLoggingExtensions
             {
                 killerWeapon = kvp;
             }
+
             killerWeaponName = killerWeapon?.Key ?? "";
         }
 
@@ -156,7 +159,7 @@ public static class WeaponLoggingExtensions
             killedName = s.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killedName = killedUnit.unitName;
-        
+
         string? killerName;
         if (killerSteamID != null && killerPUnit?.unitName.LastIndexOf('[') != -1)
         {
@@ -164,13 +167,19 @@ public static class WeaponLoggingExtensions
             killerName = s?.Substring(s.LastIndexOf('[') + 1, s.LastIndexOf(']') - (s.LastIndexOf('[') + 1));
         }
         else killerName = killerPUnit?.unitName;
-        
+
         GwServerPlugin.Logger.LogDebug($"An {killedName} was killed by {killerName} with weapon {killerWeaponName}");
-        var killPacket = new LogEntryPacket
+        var killLog = new KillLog
         {
-            LogText =
-                $"{killerSteamID?.ToString() ?? ""}:{killerName ?? ""}:{killerWeaponName}:{killedSteamID?.ToString() ?? ""}:{killedName}"
+            Weapon = killerWeaponName,
+            KilledUnit = killedName,
+            KillerUnit = killerName,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
+        if (killerSteamID != null) killLog.Killer = killerSteamID.Value;
+        if (killedSteamID != null) killLog.Killed = killedSteamID.Value;
+
+        bool isTeamKill;
 
         if (killerAircraft != null &&
             killerAircraft.Player != null &&
@@ -178,13 +187,14 @@ public static class WeaponLoggingExtensions
             totalReceivedDamage > 1.0)
         {
             // if player-anything teamkill
-            killPacket.Channel = LogChannel.Teamkill;
+            isTeamKill = true;
             if (PluginConfig.ImportantUnitsList.Any(detector => killedName.Contains(detector)))
             {
                 GwServerPlugin.OnTeamkill(killerAircraft.Player, killedName, killerWeaponName);
             }
-        } else killPacket.Channel = LogChannel.Kill;
-        
+        }
+        else isTeamKill = false;
+
         if (killedAircraft is not null &&
             killedAircraft.Player != null &&
             totalReceivedDamage > 1.0 && killerIsUnit &&
@@ -199,18 +209,23 @@ public static class WeaponLoggingExtensions
             killedAircraft.Player.AddAllocation(amount);
             GwServerPlugin.OnPlayerTeamkill(killerAircraft.Player, killedAircraft.Player, killerWeaponName);
         }
-        
+
         if (killerSteamID != null || killedSteamID != null)
-            GwServerPlugin.LoggingOutBox.Add(killPacket);
+            if (isTeamKill)
+                GwServerPlugin.GrpcMgr.Client?.SendTeamKillAsync(killLog);
+            else
+                GwServerPlugin.GrpcMgr.Client?.SendKillAsync(killLog);
 
         if (killedSteamID != null)
         {
-            var outAirframePacket = new LogEntryPacket // Log player finished sortie
+            var sortieEndLog = new sortieStatus
             {
-                Channel = LogChannel.SortieStatus,
-                LogText = $"0:{killedSteamID}:0"
+                SteamID = killedSteamID.Value,
+                Start = false,
+                Time = DateTime.UtcNow.ToTimestamp(),
+                Killed = true
             };
-            GwServerPlugin.LoggingOutBox.Add(outAirframePacket);
+            GwServerPlugin.GrpcMgr.Client?.SendSortieChangeAsync(sortieEndLog);
         }
 
         // ReSharper disable once RedundantCast

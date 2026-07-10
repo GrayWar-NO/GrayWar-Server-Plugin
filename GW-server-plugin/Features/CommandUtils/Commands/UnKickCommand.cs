@@ -1,18 +1,18 @@
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 using Steamworks;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
+
 /// <summary>
 /// Command to kick a player from the server
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class UnKickCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "unkick";
@@ -49,12 +49,5 @@ public class UnKickCommand(ConfigFile config): PermissionConfigurableCommand(con
     {
         Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Remove(new CSteamID(steamID));
         Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Remove(new CSteamID(steamID));
-        var kickLogPacket = new LogEntryPacket
-        {
-            LogText = $"0:{steamID}:",
-            Channel = LogChannel.Kick
-        };
-        GwServerPlugin.LoggingOutBox.Add(kickLogPacket);
     }
-    
 }

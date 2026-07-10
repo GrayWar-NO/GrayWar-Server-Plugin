@@ -9,7 +9,6 @@ using Mirage;
 using NuclearOption.Chat;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -73,7 +72,7 @@ internal static class ChatManagerPatches
             Message = message,
             SenderSteamID = player.SteamID
         };
-        GwServerPlugin.GrpcMgr.ChatLogsStream.RequestStream.WriteAsync(log);
+        GwServerPlugin.GrpcMgr.ChatLogsStream?.RequestStream.WriteAsync(log);
         return true;
     }
 }
