@@ -2,11 +2,9 @@ using System;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features;
-using GW_server_plugin.Features.CommandUtils;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.CritzOS;
+namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
 /// Donate a specified sum in millions to a player
