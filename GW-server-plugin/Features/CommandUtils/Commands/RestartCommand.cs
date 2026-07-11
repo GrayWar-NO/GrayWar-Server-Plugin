@@ -39,7 +39,7 @@ public class Restart(ConfigFile config): PermissionConfigurableCommand(config), 
     {
         try
         {
-            return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), $"Server restarting..."));
+            return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), "Server restarting..."));
         }
         catch (Exception e)
         {

@@ -153,6 +153,7 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every30Minutes += RestartService.AutoRestart;
         
         TimeService.Initialize();
+        RestartService.Initialize(Config);
     }
 
     private static void PatchAll()
