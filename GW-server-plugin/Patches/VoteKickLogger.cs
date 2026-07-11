@@ -1,6 +1,7 @@
+using System;
 using System.Linq;
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
+using Com.Graywar.NoServerManager.Proto;
+using Google.Protobuf.WellKnownTypes;
 using HarmonyLib;
 using NuclearOption.Networking;
 using Steamworks;
@@ -13,7 +14,6 @@ namespace GW_server_plugin.Patches;
 [HarmonyPatch(typeof(VoteKickManager))]
 public class VoteKickLogger
 {
-
     [HarmonyPrefix]
     [HarmonyPatch(nameof(VoteKickManager.ExecuteKick))]
     // ReSharper disable once InconsistentNaming
@@ -27,13 +27,14 @@ public class VoteKickLogger
 
         if (staffIds.Contains(steamId))
             return false;
-        
-        GwServerPlugin.LoggingOutBox.Add(
-            new LogEntryPacket
-            {
-                Channel = LogChannel.Kick,
-                LogText = $"1:{steamId}:Votekicked",
-            });
+
+        var log = new KickLog
+        {
+            Reason = "Votekicked",
+            SteamID = id.m_SteamID,
+            Time = DateTime.UtcNow.ToTimestamp()
+        };
+        GwServerPlugin.GrpcMgr.Client?.SendKickAsync(log);
         return true;
     }
 }

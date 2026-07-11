@@ -194,7 +194,7 @@ public static class TakeDamageTranspiler
 /// <summary>
 /// Instance transpiler that changes the behaviour of ArmorPenetrate calls.
 /// </summary>
-public static class ArmorPenetrateTranspiler // TODOw
+public static class ArmorPenetrateTranspiler
 {
     private static readonly Type[] OriginalParameters =
     [

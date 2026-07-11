@@ -54,7 +54,18 @@
         <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
         <PackageReference Include="BepInEx.Core" Version="5.*"/>
         <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Google.Protobuf" Version="3.35.1" />
+        <PackageReference Include="Google.Protobuf.Tools" Version="3.35.1" />
+        <PackageReference Include="Grpc.Core" Version="2.46.6" />
+        <PackageReference Include="Grpc.Tools" Version="2.82.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    
+    <!-- Protobuf include -->
+    <ItemGroup>
+        <Protobuf Include="Proto/NOSM.proto"/>
         <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
@@ -88,35 +99,64 @@
 
     <Target Name="CopyRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' AND '$(ReleaseDestination)' != ''">
         <!-- Create an item for all .dll files in the output directory -->
-        <CreateItem Include="$(OutDir)*.dll">
-            <Output TaskParameter="Include" ItemName="DllFiles"/>
+        <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib">
+            <Output TaskParameter="Include" ItemName="BuildDeps"/>
         </CreateItem>
-
         <!-- Copy the build output -->
         <Message Text="Copying build output assemblies from $(OutDir)*.dll to $(ReleaseDestination)\$(AssemblyName)" Importance="high"/>
-        <Copy SourceFiles="@(DllFiles)" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
+        <Copy SourceFiles="@(BuildDeps)" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
 
         <!-- Copy README & CHANGELOG -->
         <Message Text="Copying README from $(ProjectDir)..\README.md to $(ReleaseDestination)\$(AssemblyName)" Importance="high"/>
         <Copy SourceFiles="$(ProjectDir)..\README.md" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
         <Message Text="Copying CHANGELOG from $(ProjectDir)..\CHANGELOG.md to $(ReleaseDestination)" Importance="high"/>
         <Copy SourceFiles="$(ProjectDir)..\CHANGELOG.md" DestinationFolder="$(ReleaseDestination)\$(AssemblyName)"/>
-    </Target>
+
+        <!-- Create generic names for Grpc.Core native libraries -->
+        <Copy SourceFiles="$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.so"
+              DestinationFiles="$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.so"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.so')" />
+
+        <Copy SourceFiles="$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.dylib"
+              DestinationFiles="$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.dylib"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ReleaseDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.dylib')" />
+
+        <Copy SourceFiles="$(ReleaseDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll"
+              DestinationFiles="$(ReleaseDestination)\$(AssemblyName)\grpc_csharp_ext.dll"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ReleaseDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll')" />    </Target>
 
     <Target Name="CopyDebug" AfterTargets="Build" Condition="'$(ModDestination)' != ''">
         <!-- Create an item for all .dll files in the output directory -->
-        <CreateItem Include="$(OutDir)*.dll">
-            <Output TaskParameter="Include" ItemName="DllFiles"/>
+        <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib">
+            <Output TaskParameter="Include" ItemName="BuildDeps"/>
         </CreateItem>
-
         <!-- Copy the build output -->
         <Message Text="Copying build output assemblies from $(OutDir)*.dll to $(ModDestination)\$(AssemblyName)" Importance="high"/>
-        <Copy SourceFiles="@(DllFiles)" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+        <Copy SourceFiles="@(BuildDeps)" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
 
         <!-- Copy README & CHANGELOG -->
         <Message Text="Copying README from $(ProjectDir)..\README.md to $(ModDestination)\$(AssemblyName)" Importance="high"/>
         <Copy SourceFiles="$(ProjectDir)..\README.md" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
         <Message Text="Copying CHANGELOG from $(ProjectDir)..\CHANGELOG.md to $(ModDestination)" Importance="high"/>
         <Copy SourceFiles="$(ProjectDir)..\CHANGELOG.md" DestinationFolder="$(ModDestination)\$(AssemblyName)"/>
+
+        <!-- Create generic names for Grpc.Core native libraries -->
+        <Copy SourceFiles="$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.so"
+              DestinationFiles="$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.so"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.so')" />
+
+        <Copy SourceFiles="$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.dylib"
+              DestinationFiles="$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.dylib"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ModDestination)\$(AssemblyName)\libgrpc_csharp_ext.x64.dylib')" />
+
+        <Copy SourceFiles="$(ModDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll"
+              DestinationFiles="$(ModDestination)\$(AssemblyName)\grpc_csharp_ext.dll"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(ModDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll')" />
     </Target>
 </Project>

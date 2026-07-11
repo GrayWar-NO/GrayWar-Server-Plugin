@@ -1,8 +1,10 @@
+using System;
 using System.Security;
 using BepInEx.Configuration;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 using Steamworks;
@@ -31,7 +33,8 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
-        return UniTask.FromResult(args.Length == 1 && (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
+        return UniTask.FromResult(args.Length == 1 &&
+                                  (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
     }
 
     /// <inheritdoc />
@@ -43,7 +46,8 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
         string? response;
         var target = args[0];
         ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) && targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ulong.TryParse(target, out var targetID) &&
+            targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
         {
             banSteamID = targetID;
             response = $"Unbanned player with steamID {banSteamID}";
@@ -61,13 +65,14 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
         AllowBanListUtils.UnbanAndRemoveId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
-            new CSteamID(banSteamID)); 
-        var banLogPacket = new LogEntryPacket
+            new CSteamID(banSteamID));
+        var log = new BanRequest
         {
-            LogText = $"0:{banSteamID}:",
-            Channel = LogChannel.Ban
+            SteamID = banSteamID,
+            BanEnd = DateTime.UtcNow.ToTimestamp(),
+            ShouldBeBanned = false
         };
-        GwServerPlugin.LoggingOutBox.Add(banLogPacket);
+        GwServerPlugin.GrpcMgr.TrySendBan(log);
         return UniTask.FromResult<(bool, string?)>((true, response));
     }
 

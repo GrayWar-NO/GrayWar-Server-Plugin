@@ -11,7 +11,7 @@ namespace GW_server_plugin;
 public static class PluginConfig
 {
     internal const string GeneralSection = "General";
-    internal const string IpcSection = "IPCSection";
+    internal const string RpcSection = "gRPC communication";
     internal const string BroadcastSection = "Broadcasts";
 
     internal static ConfigEntry<bool>? ForceLowWreckDespawn;
@@ -29,17 +29,8 @@ public static class PluginConfig
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
 
-    internal static ConfigEntry<int>? IpcPort;
-    internal const int DefaultIpcPort = 10042;
-
-    internal static ConfigEntry<string>? IpcHost;
-    internal const string DefaultIpcHost = "127.0.0.1";
-
-    internal static ConfigEntry<string>? IpcCommandPermissionLevel;
-    internal const string DefaultIpcCommandPermissionLevel = "admin";
-
-    internal static ConfigEntry<bool>? IpcEnable;
-    internal const bool DefaultIpcEnable = true;
+    internal static ConfigEntry<string>? ConsoleCommandPermissionLevel;
+    internal const string DefaultConsoleCommandPermissionLevel = "admin";
 
     internal static ConfigEntry<bool>? UseStaffPrefix;
     internal const bool DefaultUseStaffPrefix = true;
@@ -147,19 +138,9 @@ public static class PluginConfig
 
         GwServerPlugin.Logger.LogDebug($"Loaded Broadcast messages");
 
-
-        IpcEnable = config.Bind(IpcSection, "Enable IPC", DefaultIpcEnable);
-        GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcEnable}");
-
-        IpcPort = config.Bind(IpcSection, "Communication Port", DefaultIpcPort);
-        GwServerPlugin.Logger.LogDebug($"IpcPort: {IpcPort}");
-
-        IpcHost = config.Bind(IpcSection, "Communication Host", DefaultIpcHost);
-        GwServerPlugin.Logger.LogDebug($"IpcHost: {IpcHost}");
-
-        IpcCommandPermissionLevel =
-            config.Bind(IpcSection, "Communication Permission Level", DefaultIpcCommandPermissionLevel);
-        GwServerPlugin.Logger.LogDebug($"Communication Permission level: {IpcCommandPermissionLevel}");
+        ConsoleCommandPermissionLevel =
+            config.Bind(RpcSection, "Communication Permission Level", DefaultConsoleCommandPermissionLevel);
+        GwServerPlugin.Logger.LogDebug($"Communication Permission level: {ConsoleCommandPermissionLevel}");
 
         GwServerPlugin.Logger.LogDebug("Loaded settings.");
     }

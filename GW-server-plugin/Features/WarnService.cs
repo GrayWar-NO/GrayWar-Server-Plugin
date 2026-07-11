@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
+using Com.Graywar.NoServerManager.Proto;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Features;
@@ -17,8 +18,12 @@ public class WarnService(ConfigFile config)
     private readonly Dictionary<ulong, int> _playerWarnCount = new();
 
     private const bool DefaultWarnsToKickEnabled = true;
-    private ConfigEntry<int> WarnsToKickConfig { get; } = config.Bind("Warns", "WarnsToKick", DefaultWarnsToKick, "Number of warnings per mission until player is kicked.");
-    private ConfigEntry<bool> WarnsToKickOnConfig { get; } = config.Bind("Warns", "WarnsToKick Enabled", DefaultWarnsToKickEnabled, "Do you want to kick players after x warns?");
+
+    private ConfigEntry<int> WarnsToKickConfig { get; } = config.Bind("Warns", "WarnsToKick", DefaultWarnsToKick,
+        "Number of warnings per mission until player is kicked.");
+
+    private ConfigEntry<bool> WarnsToKickOnConfig { get; } = config.Bind("Warns", "WarnsToKick Enabled",
+        DefaultWarnsToKickEnabled, "Do you want to kick players after x warns?");
 
     /// <summary>
     /// Adds a warning to the designated player.
@@ -28,17 +33,20 @@ public class WarnService(ConfigFile config)
     /// <returns></returns>
     public bool AddWarn(ulong steamID, string reason)
     {
-        var warnLogPacket = new LogEntryPacket
+        var log = new WarnLog
         {
-            LogText = $"{steamID}:{reason}",
-            Channel = LogChannel.Warn
+            SteamID = steamID,
+            Reason = reason,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
-        GwServerPlugin.LoggingOutBox.Add(warnLogPacket);
+        GwServerPlugin.GrpcMgr.Client?.SendWarnAsync(log);
+
         if (!_playerWarnCount.Keys.Contains(steamID))
         {
             _playerWarnCount[steamID] = 1;
             return true;
         }
+
         _playerWarnCount[steamID]++;
         if (_playerWarnCount[steamID] < WarnsToKickConfig.Value || !WarnsToKickOnConfig.Value) return true;
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player)) return false;
@@ -55,6 +63,4 @@ public class WarnService(ConfigFile config)
     {
         _playerWarnCount.Clear();
     }
-    
-    
 }

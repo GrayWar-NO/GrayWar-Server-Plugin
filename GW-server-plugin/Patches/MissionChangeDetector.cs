@@ -1,6 +1,7 @@
+using System;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
-using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
+using Google.Protobuf.WellKnownTypes;
 using HarmonyLib;
 using NuclearOption.DedicatedServer;
 using NuclearOption.SavedMission;
@@ -51,13 +52,13 @@ public class MissionChangeDetector
         if (ulong.TryParse(name, out var workshopID))
             if (MissionNameFix.GetMissionName(workshopID, out var workshopName))
                 name = workshopName!;
-        var missionChangePacket = new LogEntryPacket
+        var log = new missionStatus
         {
-            Channel = LogChannel.MissionStatus,
-            LogText = name
+            MissionName = name,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
+        GwServerPlugin.GrpcMgr.Client?.SendMissionChangeAsync(log);
         
-        GwServerPlugin.LoggingOutBox.Add(missionChangePacket);
         GwServerPlugin.WarnService.ClearWarns();
     }
 }   

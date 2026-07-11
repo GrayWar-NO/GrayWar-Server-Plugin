@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using Mirage;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
@@ -46,7 +47,9 @@ public static class PlayerUtils
     /// <returns></returns>
     public static bool TryFindPlayer(string playerName, out Player? playerObject)
     {
-        playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p => string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.PlayerName ?? "")), StripStaffPrefix(StripIdPrefix(playerName)), StringComparison.CurrentCultureIgnoreCase))?.GetPlayer();
+        playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p =>
+            string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.PlayerName ?? "")),
+                StripStaffPrefix(StripIdPrefix(playerName)), StringComparison.CurrentCultureIgnoreCase))?.GetPlayer();
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
             ulong? playerSteamId;
@@ -55,8 +58,10 @@ public static class PlayerUtils
                 GwServerPlugin.PlayerIdentifier.GetPlayerById((int)playerId, out playerSteamId);
             }
             else playerSteamId = playerId;
+
             TryFindPlayerBySteamId(playerSteamId ?? 0ul, out playerObject);
         }
+
         return playerObject != null;
     }
 
@@ -69,9 +74,9 @@ public static class PlayerUtils
     public static bool TryFindPlayerBySteamId(ulong steamid, out Player? playerObject)
     {
         playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p => p.GetPlayer()?.SteamID == steamid)?.GetPlayer();
-        return playerObject != null; 
+        return playerObject != null;
     }
-    
+
     /// <summary>
     ///     Utility function to strip a player name of the staff tag, if they have it.
     /// </summary>
@@ -87,7 +92,7 @@ public static class PlayerUtils
 
         return cleanName;
     }
-    
+
     /// <summary>
     /// Removes ID prefix from a player's name.
     /// </summary>
@@ -102,7 +107,7 @@ public static class PlayerUtils
 
         return Regex.Replace(playerName, pattern, "");
     }
-    
+
     /// <summary>
     /// Checks if a player is staff.
     /// </summary>
@@ -111,9 +116,10 @@ public static class PlayerUtils
     public static bool IsStaff(Player player)
     {
         return !(!PluginConfig.IsAdmin(player.SteamID) &&
-                !PluginConfig.IsOwner(player.SteamID) &&
-                !PluginConfig.IsModerator(player.SteamID));
+                 !PluginConfig.IsOwner(player.SteamID) &&
+                 !PluginConfig.IsModerator(player.SteamID));
     }
+
     /// <summary>
     ///     Apply or remove the staff tag based on player permission level.
     /// </summary>
@@ -147,9 +153,9 @@ public static class PlayerUtils
     public static void ApplyIdentificationTag(Player playerObject, int id)
     {
         var newName = $"[{id}] {playerObject.PlayerName}";
-        playerObject.PlayerName = newName; 
+        playerObject.PlayerName = newName;
     }
-    
+
     /// <summary>
     ///     Get the permission level of a player.
     /// </summary>
@@ -159,13 +165,13 @@ public static class PlayerUtils
     {
         if (PluginConfig.Owner!.Value == player.SteamID.ToString())
             return PermissionLevel.Admin;
-        
+
         if (PluginConfig.AdminsList.Contains(player.SteamID.ToString()))
             return PermissionLevel.Admin;
-        
+
         if (PluginConfig.ModeratorsList.Contains(player.SteamID.ToString()))
             return PermissionLevel.Moderator;
-        
+
         return PermissionLevel.Everyone;
     }
 
@@ -177,20 +183,21 @@ public static class PlayerUtils
     public static void KickPlayer(Player player, string reason)
     {
         Globals.NetworkManagerNuclearOptionInstance.KickPlayerAsync(player, reason).Forget();
-        var kickLogPacket = new LogEntryPacket
+        var log = new KickLog
         {
-            LogText = $"1:{player.SteamID}:{reason}",
-            Channel = LogChannel.Kick
+            Reason = reason,
+            SteamID = player.SteamID,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
-        GwServerPlugin.LoggingOutBox.Add(kickLogPacket);
+        GwServerPlugin.GrpcMgr.Client?.SendKickAsync(log);
     }
-
+    
     /// <summary>
     /// Bans a player from a steamID.
     /// </summary>
-    /// <param name="banSteamID"></param>
-    /// <param name="reason"></param>
-    /// <param name="duration"></param>
+    /// <param name="banSteamID">banned player's SteamID</param>
+    /// <param name="reason">ban reason</param>
+    /// <param name="duration">Ban duration, as format xh or xd</param>
     public static void BanPlayer(ulong banSteamID, string reason, string? duration)
     {
         AllowBanList.BanAndAppendId(
@@ -198,14 +205,34 @@ public static class PlayerUtils
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
             new CSteamID(banSteamID),
             reason
-        ); 
+        );
         
-        var banLogPacket = new LogEntryPacket
+        var now = DateTime.UtcNow;
+        
+        var banLog = new BanRequest
         {
-            LogText = $"1:{banSteamID}:{duration ?? ""}:{reason}",
-            Channel = LogChannel.Ban
+            Reason = reason,
+            SteamID = banSteamID,
+            BanStart = now.ToTimestamp(),
+            ShouldBeBanned = true
         };
-        GwServerPlugin.LoggingOutBox.Add(banLogPacket);
+        
+        if (duration != null)
+        {
+            string? amountStr = null;
+            try { amountStr = duration.Substring(0, duration.Length - 1); }
+            catch (ArgumentOutOfRangeException){}
+
+            if (amountStr != null && uint.TryParse(amountStr, out var amount))
+            {
+                if (duration.EndsWith("d", StringComparison.OrdinalIgnoreCase))
+                    banLog.BanEnd = now.AddDays(amount).ToTimestamp();
+                if (duration.EndsWith("h", StringComparison.OrdinalIgnoreCase))
+                    banLog.BanEnd = now.AddHours(amount).ToTimestamp();
+            }
+        }
+        
+        GwServerPlugin.GrpcMgr.TrySendBan(banLog);
     }
 
     /// <summary>
@@ -229,8 +256,7 @@ public static class PlayerUtils
         await UniTask.Delay(1000); // conservative wait time to account for high-ping ppl.
         conn.Disconnect();
     }
-
-
+    
     public static int GetPlayerCount()
     {
         return Globals.AuthenticatedPlayers.Count - 1; // - 1 because server itself counts as a player(?)

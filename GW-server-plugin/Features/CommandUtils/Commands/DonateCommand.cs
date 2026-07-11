@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using BepInEx.Configuration;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Enums;
-using GW_server_plugin.Features.IPC.Packets;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
@@ -83,12 +85,15 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         ChatService.SendPrivateChatMessage($"{player.PlayerName} has given you {sum} (million)!", targetPlayer);
         
         // Logging
-        var donatePacket = new LogEntryPacket
+        var log = new DonationLog
         {
-            Channel = LogChannel.Donate,
-            LogText = $"{player.SteamID}:{targetPlayer.SteamID}:{sum}"
+            AmountMillions = (uint)sum,
+            DonatorSteamID = player.SteamID,
+            ReceiverSteamID = targetPlayer.SteamID,
+            Time = DateTime.UtcNow.ToTimestamp()
         };
-        GwServerPlugin.LoggingOutBox.Add(donatePacket);
+        GwServerPlugin.GrpcMgr.Client?.sendDonationAsync(log);
+        
         return UniTask.FromResult<(bool, string?)>((true, $"You have successfully donated {sum} (million) to {targetPlayer.PlayerName}."));
     }
     
