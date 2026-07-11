@@ -191,13 +191,13 @@ public static class PlayerUtils
         };
         GwServerPlugin.GrpcMgr.Client?.SendKickAsync(log);
     }
-
+    
     /// <summary>
     /// Bans a player from a steamID.
     /// </summary>
-    /// <param name="banSteamID"></param>
-    /// <param name="reason"></param>
-    /// <param name="duration"></param>
+    /// <param name="banSteamID">banned player's SteamID</param>
+    /// <param name="reason">ban reason</param>
+    /// <param name="duration">Ban duration, as format xh or xd</param>
     public static void BanPlayer(ulong banSteamID, string reason, string? duration)
     {
         AllowBanList.BanAndAppendId(
@@ -206,15 +206,33 @@ public static class PlayerUtils
             new CSteamID(banSteamID),
             reason
         );
-
-        var log = new BanRequest
+        
+        var now = DateTime.UtcNow;
+        
+        var banLog = new BanRequest
         {
             Reason = reason,
             SteamID = banSteamID,
-            BanStart = DateTime.UtcNow.ToTimestamp(),
+            BanStart = now.ToTimestamp(),
             ShouldBeBanned = true
         };
-        GwServerPlugin.GrpcMgr.Client?.SendBanAsync(log);
+        
+        if (duration != null)
+        {
+            string? amountStr = null;
+            try { amountStr = duration.Substring(0, duration.Length - 1); }
+            catch (ArgumentOutOfRangeException){}
+
+            if (amountStr != null && uint.TryParse(amountStr, out var amount))
+            {
+                if (duration.EndsWith("d", StringComparison.OrdinalIgnoreCase))
+                    banLog.BanEnd = now.AddDays(amount).ToTimestamp();
+                if (duration.EndsWith("h", StringComparison.OrdinalIgnoreCase))
+                    banLog.BanEnd = now.AddHours(amount).ToTimestamp();
+            }
+        }
+        
+        GwServerPlugin.GrpcMgr.TrySendBan(banLog);
     }
 
     /// <summary>

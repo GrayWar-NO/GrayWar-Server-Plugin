@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +20,8 @@ public class GrpcClientManager
     private readonly ConfigEntry<string> _serverName;
     private readonly ConfigEntry<string> _centralHost;
     private readonly ConfigEntry<uint> _centralPort;
+    
+    private readonly HashSet<ulong> _logSuppressedSteamIDs = [];
 
     internal EdgeAgentService.EdgeAgentServiceClient? Client;
     internal AsyncClientStreamingCall<ChatLog, Ack>? ChatLogsStream;
@@ -91,8 +94,8 @@ public class GrpcClientManager
             {
                 _ = data.ShouldBeBanned
                     ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason]) 
-                    // TODO not get bans logged back.
                     : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()]);
+                _logSuppressedSteamIDs.Add(data.SteamID);
                 return Task.CompletedTask;
             }
             catch (Exception exception)
@@ -101,4 +104,16 @@ public class GrpcClientManager
             }
         });
     }
+    
+    internal void TrySendBan(BanRequest banLog)
+    {
+        if (Client == null) return;
+        if (_logSuppressedSteamIDs.Contains(banLog.SteamID))
+        {
+            _logSuppressedSteamIDs.Remove(banLog.SteamID);
+            return;
+        }
+        Client.SendBanAsync(banLog);
+    }
+
 }
