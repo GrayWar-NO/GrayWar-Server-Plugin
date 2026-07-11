@@ -257,6 +257,10 @@ public static class PlayerUtils
         conn.Disconnect();
     }
     
+    /// <summary>
+    ///     Gets the current player count.
+    /// </summary>
+    /// <returns></returns>
     public static int GetPlayerCount()
     {
         return Globals.AuthenticatedPlayers.Count - 1; // - 1 because server itself counts as a player(?)

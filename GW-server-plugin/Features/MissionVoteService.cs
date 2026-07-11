@@ -150,8 +150,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     
     private void DisplayRtvCount()
     {
-        var connectedPlayers = Globals.AuthenticatedPlayers.Count - 1;
-
+        var connectedPlayers = PlayerUtils.GetPlayerCount();
         var nYesVotes = _yesVotes.Count;
         var nNoVotes = _noVotes.Count;
         var autoPassLimit = Math.Ceiling((double)connectedPlayers / 2f);
@@ -191,7 +190,7 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void EndVote()
     {
         ChatService.SendChatMessageAsServer($"RTV is ending");
-        var connectedPlayers = Globals.AuthenticatedPlayers.Count - 1;
+        var connectedPlayers = PlayerUtils.GetPlayerCount();
         var nYesVotes = _yesVotes.Count;
         var nNoVotes = _noVotes.Count;
         var autoPassLimit = Math.Ceiling((double)connectedPlayers / 2f);
