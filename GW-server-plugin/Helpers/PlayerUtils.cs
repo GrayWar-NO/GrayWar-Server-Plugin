@@ -231,4 +231,8 @@ public static class PlayerUtils
     }
 
 
+    public static int GetPlayerCount()
+    {
+        return Globals.AuthenticatedPlayers.Count - 1; // - 1 because server itself counts as a player(?)
+    }
 }

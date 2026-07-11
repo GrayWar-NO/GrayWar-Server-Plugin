@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-	    <NUCLEAR_OPTION_SERVER_REFERENCES></NUCLEAR_OPTION_SERVER_REFERENCES>
+        <NUCLEAR_OPTION_SERVER_REFERENCES></NUCLEAR_OPTION_SERVER_REFERENCES>
+
         <ReleaseDestination>/home/pauel</ReleaseDestination>
         <!-- General Project Information -->
         <TargetFramework>net48</TargetFramework>
@@ -54,6 +55,7 @@
         <PackageReference Include="BepInEx.Core" Version="5.*"/>
         <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="System.Net.Http" Version="4.3.4" />
     </ItemGroup>
 
     <!-- Nuclear Option-specific Assembly References -->

@@ -63,12 +63,15 @@ public class GwServerPlugin : BaseUnityPlugin
     private CancellationTokenSource? _cts;
     
     internal static readonly Dictionary<ulong, ulong> FamilySharingBorrowers = new();
+    
+    internal static DateTime ServerStartTime; // Used to restart server over 24 hours
 
 
     private Socket? _socket;
     
     private void Awake()
     {
+        ServerStartTime = DateTime.Now;
         Instance = this;
         Logger = base.Logger;
         
@@ -146,6 +149,8 @@ public class GwServerPlugin : BaseUnityPlugin
         MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
+        
+        TimeEvents.Every30Minutes += RestartService.AutoRestart;
         
         TimeService.Initialize();
     }
@@ -236,6 +241,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     private static void OnPlayerJoin(Player player)
     {
+        RestartService.CancelRestart();
         if (CheckOwnerBanned(player))
         {
             PlayerUtils.KickPlayer(player, "The owner of this familyshared account is banned.");
@@ -283,6 +289,7 @@ public class GwServerPlugin : BaseUnityPlugin
             LogText = $"0:{player.SteamID}:{Math.Round(player.PlayerScore, 2)}"
         };
         LoggingOutBox.Add(leavePacket);
+        RestartService.CheckIfNoPlayers();
     }
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
