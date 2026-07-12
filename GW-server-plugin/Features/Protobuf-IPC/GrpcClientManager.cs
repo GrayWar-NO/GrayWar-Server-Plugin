@@ -59,7 +59,6 @@ public class GrpcClientManager
         var channel = new Channel(_centralHost.Value, Convert.ToInt32(_centralPort.Value), creds);
         Client = new EdgeAgentService.EdgeAgentServiceClient(channel);
         ChatLogsStream = Client.SendChatLogsStream();
-        Client.SubscribeToBans(new Empty());
         
         BanInputBehaviour(Client.SubscribeToBans(new Empty()));
         CommandBehaviour(Client.SubscribeToCommands());
@@ -82,7 +81,6 @@ public class GrpcClientManager
                 Ok = result.success,
                 Result = result.response
             });
-
         });
     }
 
