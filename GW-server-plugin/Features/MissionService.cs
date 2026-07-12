@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
@@ -112,7 +113,26 @@ public static class MissionService
         var ml = new MissionOptions[oldMr.allMissions.Count + 1];
         oldMr.allMissions.CopyTo(ml);
         ml[ml.Length - 1] = mission;
-        Globals.DedicatedServerManagerInstance.ReloadMissionRotation(ml, oldMr.rotationType, false);
+        var dsm = Globals.DedicatedServerManagerInstance;
+        dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
+        
+        switch (oldMr.rotationType)
+        {
+            case RotationType.RandomQueue:
+            case RotationType.Sequence:
+                var i = 0;
+                while (!dsm.missionRotation.GetNext().Key.Equals(dsm.currentMissionOption.Key))
+                {
+                    if (i >= dsm.missionRotation.allMissions.Count) break;
+                    i++;
+                }
+                break;
+            case RotationType.PureRandom:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
     }
 
     /// <summary>
