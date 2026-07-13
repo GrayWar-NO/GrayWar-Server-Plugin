@@ -14,12 +14,18 @@ import "google/protobuf/timestamp.proto";
 // Messages
 // ---------------------------------------------------------------------
 
-message StatusRequest {
-  google.protobuf.Timestamp last_heartbeat = 3;
-}
-
 message StatusResponse {
   bool ok = 1;
+  uint32 playerNumber = 2;
+  uint32 maxPlayers = 3;
+  string missionName = 4;
+  google.protobuf.Timestamp missionStart = 5;
+  google.protobuf.Timestamp lastRestart = 6;
+  string requestID = 7;
+}
+
+message StatusRequest {
+  string requestID = 1;
 }
 
 
@@ -130,7 +136,6 @@ message DonationLog{
 // ---------------------------------------------------------------------
 
 service EdgeAgentService {
-  rpc ReportStatus(StatusRequest) returns (StatusResponse);
   rpc SendBan(BanRequest) returns (Ack);
   rpc SendKick(KickLog) returns (Ack);
   rpc SendWarn(WarnLog) returns (Ack);
@@ -143,6 +148,7 @@ service EdgeAgentService {
   rpc sendLinkCode(LinkUser) returns (Ack);
   rpc sendDonation(DonationLog) returns (Ack);
 
+  rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
   rpc SendChatLogsStream(stream ChatLog) returns (Ack);
   rpc SubscribeToBans(google.protobuf.Empty) returns (stream BanRequest);
   rpc SubscribeToCommands(stream CommandResult) returns (stream Command);

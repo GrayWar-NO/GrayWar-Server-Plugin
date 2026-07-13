@@ -9,6 +9,9 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Core.Utils;
 using GW_server_plugin.Features.CommandUtils;
+using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches;
+using UnityEngine;
 
 namespace GW_server_plugin.Features.Protobuf_IPC;
 
@@ -62,6 +65,7 @@ public class GrpcClientManager
         
         BanInputBehaviour(Client.SubscribeToBans(new Empty()));
         CommandBehaviour(Client.SubscribeToCommands());
+        StatusRequestBehaviour(Client.StatusStream());
 
     }
 
@@ -101,6 +105,36 @@ public class GrpcClientManager
                 return Task.FromException(exception);
             }
         });
+    }
+    
+    private static void StatusRequestBehaviour(AsyncDuplexStreamingCall<StatusResponse, StatusRequest> stream)
+    {
+        stream.ResponseStream.ForEachAsync(async data =>
+            {
+                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name!;
+                if (ulong.TryParse(missionName, out var id))
+                {
+                    var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
+                    if (missionNameResult.success)
+                    {
+                        missionName = missionNameResult.name!;
+                    }
+                }
+                
+                var rt = new StatusResponse
+                {
+                    Ok = true,
+                    RequestID = data.RequestID,
+                    MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
+                    PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
+                    MissionName = missionName,
+                    MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
+                    LastRestart =  DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
+                };
+                
+                await stream.RequestStream.WriteAsync(rt);
+            }
+        );
     }
     
     internal void TrySendBan(BanRequest banLog)

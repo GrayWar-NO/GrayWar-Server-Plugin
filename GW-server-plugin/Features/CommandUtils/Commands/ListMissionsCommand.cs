@@ -47,17 +47,13 @@ public class ListMissionsCommand(ConfigFile config): PermissionConfigurableComma
         for (var i = 0; i < missions.Length; i++)
         {
             var name = missions[i].Key.Name;
-            GwServerPlugin.Logger.LogDebug($"1: {name}");
             if (ulong.TryParse(name, out var id))
             {
-                GwServerPlugin.Logger.LogDebug($"2: {id}");
                 var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
                 if (missionNameResult.success)
                 {
-                    GwServerPlugin.Logger.LogDebug($"3: {missionNameResult.name}");
                     name = missionNameResult.name!;
                 }
-                GwServerPlugin.Logger.LogDebug($"2: {name}");
             }
             response += $"[{i}] {name}\n";
         }
