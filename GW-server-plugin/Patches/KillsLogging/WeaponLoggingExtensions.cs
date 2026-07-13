@@ -32,11 +32,7 @@ public static class WeaponLoggingExtensions
             GwServerPlugin.Logger.LogError("Unit is null in recordDamage!");
             return;
         }
-
-        unit.damageCredit ??= new Dictionary<PersistentID, float>();
-
-        unit.damageCredit.TryGetValue(lastDamagedBy, out var originalDamageAmount);
-        unit.damageCredit[lastDamagedBy] = originalDamageAmount + damageAmount;
+        UnitPatch.OriginalRecordDamage(unit, lastDamagedBy, damageAmount);
 
         var state = GwServerPlugin.WeaponStorage.Get(unit);
         var weaponCredit = state.WeaponCredit;

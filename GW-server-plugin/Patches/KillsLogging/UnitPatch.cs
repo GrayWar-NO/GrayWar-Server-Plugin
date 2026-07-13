@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 
 namespace GW_server_plugin.Patches.KillsLogging;
@@ -32,7 +33,22 @@ public class UnitPatch
     [HarmonyPatch(nameof(Unit.RecordDamage))]
     public static bool RecordDamagePrefix(Unit __instance, PersistentID lastDamagedBy, float damageAmount)
     {
-        GwServerPlugin.Logger.LogError("THIS SHOULD NEVER HAPPEN: Original Unit.RecordDamage was called.");
-        return true;
+        __instance.RecordDamage(lastDamagedBy, damageAmount, "Unknown modded way of killing");
+        return false;
     }
+    
+    /// <summary>
+    /// Original recordDamage for calling without triggering the prefix.
+    /// </summary>
+    /// <param name="instance"></param>
+    /// <param name="lastDamagedBy"></param>
+    /// <param name="damageAmount"></param>
+    [HarmonyPatch(nameof(Unit.RecordDamage))]
+    [HarmonyReversePatch]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void OriginalRecordDamage(Unit instance, PersistentID lastDamagedBy, float damageAmount)
+    {
+        
+    }
+    
 }
