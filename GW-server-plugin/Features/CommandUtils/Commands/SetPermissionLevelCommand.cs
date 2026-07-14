@@ -1,3 +1,4 @@
+using System;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
@@ -23,10 +24,10 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
     public override string Usage => "setpermissionlevel <player (by steamID)> <permission_level>";
 
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) 
+    public UniTask<bool> Validate(Player player, string[] args)
     {
         return UniTask.FromResult(args.Length == 2 &&
-                                  PermissionLevelUtils.TryParsePermissionLevel(args[1], out _) &&
+                                  Enum.TryParse<PermissionLevel>(args[1], out _) && 
                                   ulong.TryParse(args[0], out _));
     }
 
@@ -34,7 +35,7 @@ public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurab
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var targetSteamID = ulong.Parse(args[0]);
-        _ = PermissionLevelUtils.TryParsePermissionLevel(args[1], out var level);
+        _ = Enum.TryParse<PermissionLevel>(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID, level);
         return UniTask.FromResult<(bool, string?)>((true, $"Successfully set permission level to {level}"));
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
@@ -79,8 +80,9 @@ public static class CommandService
     /// </summary>
     /// <param name="commandName"> The name of the command. </param>
     /// <param name="args"> The arguments for the command. </param>
+    /// <param name="level"> Permission level to execute the command as</param>
     /// <returns></returns>
-    public static async UniTask<(bool success, string? response)> TryExecuteCommand(string commandName, string[] args)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(string commandName, string[] args, PermissionLevel level = PermissionLevel.Everyone)
     {
         if (!TryGetCommand(commandName, out var command))
         {
@@ -91,7 +93,7 @@ public static class CommandService
         {
             return (false, $"{commandName} is not a valid console command."); 
         }
-        return await TryExecuteCommand(consoleCommand, args);
+        return await TryExecuteCommand(consoleCommand, args, level);
     }
 
 
@@ -144,10 +146,8 @@ public static class CommandService
     /// <param name="command"> The command to execute. </param>
     /// <param name="args"> The arguments for the command. </param>
     /// <returns></returns>
-    public static async UniTask<(bool success, string? response)> TryExecuteCommand(IConsoleCommand command, string[] args)
+    public static async UniTask<(bool success, string? response)> TryExecuteCommand(IConsoleCommand command, string[] args, PermissionLevel level = PermissionLevel.Everyone)
     {
-        
-        PermissionLevelUtils.TryParsePermissionLevel(PluginConfig.ConsoleCommandPermissionLevel!.Value, out var level);
         if (level < command.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning($"The remote process does not have permission to execute command {command.Name}");

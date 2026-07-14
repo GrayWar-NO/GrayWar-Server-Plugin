@@ -76,10 +76,10 @@ public class GrpcClientManager
         {
             if (!data.Result)
             {
-                _ = CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray());
+                _ = CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
                 return;
             } 
-            var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray());
+            var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
             await stream.RequestStream.WriteAsync(new CommandResult
             {
                 RequestID = data.RequestID,
@@ -96,8 +96,8 @@ public class GrpcClientManager
             try
             {
                 _ = data.ShouldBeBanned
-                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason]) 
-                    : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()]);
+                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason], PermissionLevel.Admin) 
+                    : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()], PermissionLevel.Admin);
                 _logSuppressedSteamIDs.Add(data.SteamID);
                 return Task.CompletedTask;
             }
