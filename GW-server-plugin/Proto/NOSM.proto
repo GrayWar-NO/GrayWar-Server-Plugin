@@ -44,6 +44,11 @@ message ChatLog{
   string message = 4;
 }
 
+message ChatBack{
+  string senderName = 1;
+  string message = 2;
+}
+
 message LinkUser{
   uint64 senderSteamID = 1;
   uint32 oneTimeCode = 2;
@@ -149,7 +154,7 @@ service EdgeAgentService {
   rpc sendDonation(DonationLog) returns (Ack);
 
   rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
-  rpc SendChatLogsStream(stream ChatLog) returns (Ack);
+  rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
   rpc SubscribeToBans(google.protobuf.Empty) returns (stream BanRequest);
   rpc SubscribeToCommands(stream CommandResult) returns (stream Command);
 }

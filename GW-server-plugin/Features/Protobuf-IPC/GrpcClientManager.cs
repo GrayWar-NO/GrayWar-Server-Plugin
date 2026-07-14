@@ -27,7 +27,7 @@ public class GrpcClientManager
     private readonly HashSet<ulong> _logSuppressedSteamIDs = [];
 
     internal EdgeAgentService.EdgeAgentServiceClient? Client;
-    internal AsyncClientStreamingCall<ChatLog, Ack>? ChatLogsStream;
+    internal IClientStreamWriter<ChatLog>? ChatLogStream;
 
     /// <summary>
     /// 
@@ -61,12 +61,13 @@ public class GrpcClientManager
         );
         var channel = new Channel(_centralHost.Value, Convert.ToInt32(_centralPort.Value), creds);
         Client = new EdgeAgentService.EdgeAgentServiceClient(channel);
-        ChatLogsStream = Client.SendChatLogsStream();
+        var chatStream = Client.SendChatLogsStream();
+        ChatLogStream = chatStream.RequestStream;
         
         BanInputBehaviour(Client.SubscribeToBans(new Empty()));
         CommandBehaviour(Client.SubscribeToCommands());
         StatusRequestBehaviour(Client.StatusStream());
-
+        ProcessDiscordMessages(chatStream.ResponseStream);
     }
 
     private void CommandBehaviour(AsyncDuplexStreamingCall<CommandResult, Command> stream)
@@ -133,6 +134,24 @@ public class GrpcClientManager
                 };
                 
                 await stream.RequestStream.WriteAsync(rt);
+            }
+        );
+    }
+    
+    private void ProcessDiscordMessages(IAsyncStreamReader<ChatBack> inputStream)
+    {
+        inputStream.ForEachAsync(data =>
+            {
+                try
+                {
+                    var text = $"<color=#5865F2>[DC]</color> {data.SenderName}: {data.Message}";
+                    Globals.ChatManagerInstance.RpcServerMessage(text, true);
+                    return Task.CompletedTask;
+                }
+                catch (Exception exception)
+                {
+                    return Task.FromException(exception);
+                }
             }
         );
     }

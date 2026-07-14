@@ -63,7 +63,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
             MessageSendTime = DateTime.UtcNow.ToTimestamp(),
             SenderSteamID = senderSteamId
         };
-        GwServerPlugin.GrpcMgr.ChatLogsStream?.RequestStream.WriteAsync(log);
+        GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
 
         return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
     }

@@ -72,7 +72,7 @@ internal static class ChatManagerPatches
             Message = message,
             SenderSteamID = player.SteamID
         };
-        GwServerPlugin.GrpcMgr.ChatLogsStream?.RequestStream.WriteAsync(log);
+        GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
         return true;
     }
 }
