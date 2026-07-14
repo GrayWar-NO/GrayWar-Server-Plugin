@@ -135,6 +135,11 @@ message DonationLog{
   google.protobuf.Timestamp time = 4;
 }
 
+message serverReport{
+  string username = 1;
+  string content = 2;
+}
+
 
 // ---------------------------------------------------------------------
 // Services
@@ -152,6 +157,7 @@ service EdgeAgentService {
   rpc SendTeamKill(KillLog) returns (Ack);
   rpc sendLinkCode(LinkUser) returns (Ack);
   rpc sendDonation(DonationLog) returns (Ack);
+  rpc sendReport(serverReport) returns (Ack);
 
   rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
   rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
