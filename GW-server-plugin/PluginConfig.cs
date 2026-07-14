@@ -218,9 +218,7 @@ public static class PluginConfig
         switch (level)
         {
             case PermissionLevel.Admin:
-                var adminsList = AdminsList;
-                adminsList.Add(steamId.ToString());
-                Admins!.Value = string.Join(";", adminsList);
+                AddAdmin(steamId);
                 break;
             case PermissionLevel.Moderator:
                 var modsList = ModeratorsList;
@@ -231,6 +229,40 @@ public static class PluginConfig
             case PermissionLevel.Owner:
             default:
                 break;
+        }
+    }
+    
+    private static void AddAdmin(ulong steamId)
+    {
+        var adminsList = AdminsList.ToHashSet();
+        adminsList.Add(steamId.ToString());
+        Admins?.Value = string.Join(";", adminsList);
+    }
+    
+    private static void AddMod(ulong steamId)
+    {
+        var modsList = ModeratorsList.ToHashSet();
+        modsList.Add(steamId.ToString());
+        Moderators!.Value = string.Join(";", modsList);
+    }
+    
+    
+    /// <summary>
+    /// Updates the modlist by adding entries. does never remove any entry.
+    /// </summary>
+    /// <param name="modlist"></param>
+    public static void UpdateModList(permissionBreakdown modlist)
+    {
+        foreach (var steamid in modlist.Admins)
+        {
+            if (AdminsList.Contains(steamid.ToString())) continue;
+            AddAdmin(steamid);
+        }
+        
+        foreach (var steamid in modlist.Mods)
+        {
+            if (ModeratorsList.Contains(steamid.ToString())) continue;
+            AddMod(steamid);
         }
     }
 }

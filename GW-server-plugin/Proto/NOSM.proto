@@ -148,6 +148,10 @@ message serverReport{
   string content = 2;
 }
 
+message permissionBreakdown {
+  repeated uint64 admins = 2;
+  repeated uint64 mods = 3;
+}
 
 // ---------------------------------------------------------------------
 // Services
@@ -166,6 +170,7 @@ service EdgeAgentService {
   rpc sendLinkCode(LinkUser) returns (Ack);
   rpc sendDonation(DonationLog) returns (Ack);
   rpc sendReport(serverReport) returns (Ack);
+  rpc getStaffList(google.protobuf.Empty) returns (permissionBreakdown);
 
   rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
   rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
