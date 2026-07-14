@@ -1,6 +1,6 @@
 using System;
 using BepInEx.Configuration;
-using GW_server_plugin.Enums;
+using Com.Graywar.NoServerManager.Proto;
 using JetBrains.Annotations;
 
 namespace GW_server_plugin.Features.CommandUtils;

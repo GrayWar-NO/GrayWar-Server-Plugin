@@ -1,14 +1,20 @@
-using System.Linq;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
-using GW_server_plugin.Enums;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
-public class ReportCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
+/// <summary>
+///     Allows users to report sus behaviour to server staff. 
+/// </summary>
+/// <param name="config"></param>
+[AutoCommand]
+public class ReportCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
 {
+    /// <inheritdoc />
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    
     /// <inheritdoc />
     public override string Name => "report";
     
@@ -17,9 +23,6 @@ public class ReportCommand(ConfigFile config): PermissionConfigurableCommand(con
     
     /// <inheritdoc />
     public override string Usage => "report <reason>";
-    
-    /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length != 0);
@@ -34,6 +37,6 @@ public class ReportCommand(ConfigFile config): PermissionConfigurableCommand(con
             Username = player.PlayerName
         });
         
-        return UniTask.FromResult((true, $"{content} reported to GrayWar staff successfully."));
+        return UniTask.FromResult((true, (string?)$"{content} reported to GrayWar staff successfully."));
     }
 }

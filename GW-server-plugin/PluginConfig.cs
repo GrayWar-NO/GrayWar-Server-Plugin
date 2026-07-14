@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
-using GW_server_plugin.Enums;
+using Com.Graywar.NoServerManager.Proto;
 
 namespace GW_server_plugin;
 

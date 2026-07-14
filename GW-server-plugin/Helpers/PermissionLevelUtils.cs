@@ -1,5 +1,5 @@
 using System;
-using GW_server_plugin.Enums;
+using Com.Graywar.NoServerManager.Proto;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Helpers;
