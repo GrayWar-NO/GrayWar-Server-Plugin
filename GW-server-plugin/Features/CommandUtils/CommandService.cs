@@ -145,6 +145,7 @@ public static class CommandService
     /// </summary>
     /// <param name="command"> The command to execute. </param>
     /// <param name="args"> The arguments for the command. </param>
+    /// <param name="level"> Permission level to execute the command for</param>
     /// <returns></returns>
     public static async UniTask<(bool success, string? response)> TryExecuteCommand(IConsoleCommand command, string[] args, PermissionLevel level = PermissionLevel.Everyone)
     {

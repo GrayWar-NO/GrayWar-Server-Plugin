@@ -107,7 +107,8 @@ public static class MissionService
     /// Adds a mission to the rotation
     /// </summary>
     /// <param name="mission">The mission to add to the rotation</param>
-    public static void AddMission(MissionOptions mission)
+    /// <param name="save">If true, the resulting missionRotation will be saved in the config file.</param>
+    public static void AddMission(MissionOptions mission, bool save = false)
     {
         var oldMr = Globals.DedicatedServerManagerInstance.missionRotation!;
         var ml = new MissionOptions[oldMr.allMissions.Count + 1];
@@ -133,6 +134,10 @@ public static class MissionService
                 throw new ArgumentOutOfRangeException();
         }
         
+        if (!save) return;
+        
+        Globals.DedicatedServerManagerInstance.Config.MissionRotation = ml;
+        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
     }
 
     /// <summary>
