@@ -136,6 +136,8 @@ public class GwServerPlugin : BaseUnityPlugin
         try
         {
             GrpcMgr = new GrpcClientManager(Config);
+            var modList = GrpcMgr.Client!.getStaffList(new Empty())!;
+            PluginConfig.UpdateModList(modList);
         }
         catch (Exception e)
         {
