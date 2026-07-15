@@ -28,10 +28,7 @@ public static class PluginConfig
 
     internal static ConfigEntry<string>? CommandPrefix;
     internal const string DefaultCommandPrefix = "/";
-
-    internal static ConfigEntry<string>? ConsoleCommandPermissionLevel;
-    internal const string DefaultConsoleCommandPermissionLevel = "admin";
-
+    
     internal static ConfigEntry<bool>? UseStaffPrefix;
     internal const bool DefaultUseStaffPrefix = true;
 
@@ -137,11 +134,6 @@ public static class PluginConfig
         }
 
         GwServerPlugin.Logger.LogDebug($"Loaded Broadcast messages");
-
-        ConsoleCommandPermissionLevel =
-            config.Bind(RpcSection, "Communication Permission Level", DefaultConsoleCommandPermissionLevel);
-        GwServerPlugin.Logger.LogDebug($"Communication Permission level: {ConsoleCommandPermissionLevel}");
-
         GwServerPlugin.Logger.LogDebug("Loaded settings.");
     }
 
