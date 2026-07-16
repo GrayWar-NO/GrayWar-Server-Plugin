@@ -138,6 +138,13 @@ public class GwServerPlugin : BaseUnityPlugin
             GrpcMgr = new GrpcClientManager(Config);
             var modList = GrpcMgr.Client!.getStaffList(new Empty())!;
             PluginConfig.UpdateModList(modList);
+            
+            var bans = GrpcMgr.Client.GetBanList(new Empty()).Bans
+                .Select(ban => (id: new CSteamID(ban.SteamID), reason: ban.Reason));
+            
+            AllowBanListUtils.ReplaceWithNewData(Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
+                Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
+                bans.ToList());
         }
         catch (Exception e)
         {

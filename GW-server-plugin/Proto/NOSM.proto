@@ -171,13 +171,10 @@ service EdgeAgentService {
   rpc sendDonation(DonationLog) returns (Ack);
   rpc sendReport(serverReport) returns (Ack);
   rpc getStaffList(google.protobuf.Empty) returns (permissionBreakdown);
+  rpc GetBanList(google.protobuf.Empty) returns (BanList);
 
   rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
   rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
   rpc SubscribeToBans(google.protobuf.Empty) returns (stream BanRequest);
   rpc SubscribeToCommands(stream CommandResult) returns (stream Command);
-}
-
-service BanListGenerator {
-  rpc GetBanList(google.protobuf.Empty) returns (BanList);
 }

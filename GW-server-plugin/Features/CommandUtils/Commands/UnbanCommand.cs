@@ -11,7 +11,7 @@ using Steamworks;
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
-/// Command to ban a player.
+/// Command to unban a player.
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]

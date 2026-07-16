@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NuclearOption.DedicatedServer;
 using Steamworks;
 
@@ -18,5 +19,21 @@ public static class AllowBanListUtils
     {
         list.Remove(id);
         AllowBanList.RemoveId(path, id);
+    }
+    
+    /// <summary>
+    ///     Replaces all the bans in an AllowBanList with the data contained in data
+    /// </summary>
+    /// <param name="list">allowBanList whose content to replace</param>
+    /// <param name="path">Path of the file to save to</param>
+    /// <param name="data">Data to replace with</param>
+    public static void ReplaceWithNewData(AllowBanList list, string path, List<(CSteamID id, string reason)> data)
+    {
+        list.Clear();
+        foreach (var (id, reason) in data)
+        {
+            list.Add(id, reason);
+        }
+        AllowBanList.Save(path, data);
     }
 }
