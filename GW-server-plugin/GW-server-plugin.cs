@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
 using Com.Graywar.NoServerManager.Proto;
@@ -142,14 +143,27 @@ public class GwServerPlugin : BaseUnityPlugin
             var bans = GrpcMgr.Client.GetBanList(new Empty()).Bans
                 .Select(ban => (id: new CSteamID(ban.SteamID), reason: ban.Reason));
             
-            AllowBanListUtils.ReplaceWithNewData(Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
-                Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
-                bans.ToList());
+            _ = UpdateBanListWhenReadyAsync(bans);
         }
         catch (Exception e)
         {
             Logger.LogError($"Failed to initialize GrpcClientManager: {e}\n{e.StackTrace}");
         }
+    }
+    
+    private static async Task UpdateBanListWhenReadyAsync(IEnumerable<(CSteamID id, string reason)> bans)
+    {
+        while (Globals.NetworkManagerNuclearOptionInstance == null ||
+               Globals.DedicatedServerManagerInstance == null)
+        {
+            await Task.Delay(1000);
+        }
+        
+        AllowBanListUtils.ReplaceWithNewData(
+            Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
+            Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
+            bans.ToList()
+        );
     }
 
     private static void PatchAll()
