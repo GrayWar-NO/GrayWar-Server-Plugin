@@ -112,7 +112,8 @@ public class GrpcClientManager
     {
         stream.ResponseStream.ForEachAsync(async data =>
             {
-                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name;
+                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name ?? 
+                                  Globals.DedicatedServerManagerInstance.NextMissionOption.Key.Name;
                 if (ulong.TryParse(missionName, out var id))
                 {
                     var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
