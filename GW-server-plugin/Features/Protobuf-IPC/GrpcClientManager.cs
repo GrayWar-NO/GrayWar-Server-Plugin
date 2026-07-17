@@ -113,7 +113,6 @@ public class GrpcClientManager
         stream.ResponseStream.ForEachAsync(async data =>
             {
                 var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name;
-                GwServerPlugin.Logger.LogError($"Mission name: {missionName}");
                 if (ulong.TryParse(missionName, out var id))
                 {
                     var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
@@ -122,7 +121,6 @@ public class GrpcClientManager
                         missionName = missionNameResult.name!;
                     }
                 }
-                GwServerPlugin.Logger.LogError($"Mission name (second): {missionName}");
                 
                 StatusResponse rt;
                 try
