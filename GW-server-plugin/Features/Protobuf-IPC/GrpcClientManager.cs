@@ -112,7 +112,8 @@ public class GrpcClientManager
     {
         stream.ResponseStream.ForEachAsync(async data =>
             {
-                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name!;
+                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name;
+                GwServerPlugin.Logger.LogError($"Mission name: {missionName}");
                 if (ulong.TryParse(missionName, out var id))
                 {
                     var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
@@ -121,18 +122,30 @@ public class GrpcClientManager
                         missionName = missionNameResult.name!;
                     }
                 }
+                GwServerPlugin.Logger.LogError($"Mission name (second): {missionName}");
                 
-                var rt = new StatusResponse
+                StatusResponse rt;
+                try
                 {
-                    Ok = true,
-                    RequestID = data.RequestID,
-                    MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
-                    PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
-                    MissionName = missionName,
-                    MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
-                    LastRestart =  DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
-                };
-                
+                    rt = new StatusResponse
+                    {
+                        Ok = true,
+                        RequestID = data.RequestID,
+                        MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
+                        PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
+                        MissionName = missionName ?? "Not started",
+                        MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
+                        LastRestart = DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
+                    };
+                }
+                catch (Exception e)
+                {
+                    GwServerPlugin.Logger.LogError(e.ToString());
+                    rt = new StatusResponse
+                    {
+                        Ok = false
+                    };
+                }
                 await stream.RequestStream.WriteAsync(rt);
             }
         );
