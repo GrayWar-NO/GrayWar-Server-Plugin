@@ -18,6 +18,8 @@ public static class RestartService
     private static ConfigEntry<uint> _noPlayersRestartTimeout = null!;
     private static ConfigEntry<uint> _forceRestartMaxInterval = null!;
     
+    internal static bool AwaitingRestart;
+    
     private static CancellationTokenSource? _restartCts;
     
     /// <summary>
@@ -119,6 +121,10 @@ public static class RestartService
             GwServerPlugin.Logger.LogError(e);
             return false;
         }
+        finally
+        {
+            AwaitingRestart = false;
+        }
     }
     
     /// <summary>
@@ -129,6 +135,6 @@ public static class RestartService
         if (!_enableForceRestart.Value) return;
         if (DateTime.Now.Subtract(GwServerPlugin.ServerStartTime).Hours < _forceRestartMaxInterval.Value) return;
         GwServerPlugin.Logger.LogInfo("AUTO-RESTARTING SERVER");
-        Restart();
+        AwaitingRestart = true;
     }
 }

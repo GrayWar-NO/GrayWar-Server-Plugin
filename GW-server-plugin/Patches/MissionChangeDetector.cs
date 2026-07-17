@@ -2,6 +2,7 @@ using System;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using GW_server_plugin.Features.CommandUtils;
 using HarmonyLib;
 using NuclearOption.DedicatedServer;
 using NuclearOption.SavedMission;
@@ -58,6 +59,8 @@ public class MissionChangeDetector
             Time = DateTime.UtcNow.ToTimestamp()
         };
         GwServerPlugin.GrpcMgr.Client?.SendMissionChangeAsync(log);
+        if (!RestartService.AwaitingRestart) return;
+        RestartService.Restart();
         
         GwServerPlugin.WarnService.ClearWarns();
     }
