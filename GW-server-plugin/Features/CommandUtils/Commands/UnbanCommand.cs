@@ -71,7 +71,7 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
             BanEnd = DateTime.UtcNow.ToTimestamp(),
             ShouldBeBanned = false
         };
-        GwServerPlugin.GrpcMgr.TrySendBan(log);
+        GwServerPlugin.GrpcMgr.Client?.SendBanAsync(log);
         return UniTask.FromResult<(bool, string?)>((true, response));
     }
 

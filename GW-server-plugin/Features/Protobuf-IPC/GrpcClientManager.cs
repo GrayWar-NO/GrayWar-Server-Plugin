@@ -11,6 +11,7 @@ using Grpc.Core.Utils;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches;
+using Steamworks;
 using UnityEngine;
 
 namespace GW_server_plugin.Features.Protobuf_IPC;
@@ -24,11 +25,9 @@ public class GrpcClientManager
     private readonly ConfigEntry<string> _centralHost;
     private readonly ConfigEntry<uint> _centralPort;
     
-    private readonly HashSet<ulong> _logSuppressedSteamIDs = [];
-
     internal EdgeAgentService.EdgeAgentServiceClient? Client;
     internal IClientStreamWriter<ChatLog>? ChatLogStream;
-
+    
     /// <summary>
     /// 
     /// </summary>
@@ -45,7 +44,7 @@ public class GrpcClientManager
         if (enable.Value)
             InitializeGrpc();
     }
-
+    
     /// <summary>
     /// 
     /// </summary>
@@ -69,7 +68,7 @@ public class GrpcClientManager
         StatusRequestBehaviour(Client.StatusStream());
         ProcessDiscordMessages(chatStream.ResponseStream);
     }
-
+    
     private void CommandBehaviour(AsyncDuplexStreamingCall<CommandResult, Command> stream)
     {
         stream.ResponseStream.ForEachAsync(async data =>
@@ -78,7 +77,8 @@ public class GrpcClientManager
             {
                 _ = CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
                 return;
-            } 
+            }
+            
             var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
             await stream.RequestStream.WriteAsync(new CommandResult
             {
@@ -88,17 +88,20 @@ public class GrpcClientManager
             });
         });
     }
-
+    
     private void BanInputBehaviour(AsyncServerStreamingCall<BanRequest> stream)
     {
         stream.ResponseStream.ForEachAsync(data =>
         {
             try
             {
-                _ = data.ShouldBeBanned
-                    ? CommandService.TryExecuteCommand("ban", [data.SteamID.ToString(), data.Reason], PermissionLevel.Admin) 
-                    : CommandService.TryExecuteCommand("unban", [data.SteamID.ToString()], PermissionLevel.Admin);
-                _logSuppressedSteamIDs.Add(data.SteamID);
+                if (data.ShouldBeBanned)
+                    PlayerUtils.BanPlayer(data.SteamID, data.Reason, null, false);
+                else
+                    AllowBanListUtils.UnbanAndRemoveId(
+                        Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
+                        Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
+                        new CSteamID(data.SteamID));
                 return Task.CompletedTask;
             }
             catch (Exception exception)
@@ -112,7 +115,7 @@ public class GrpcClientManager
     {
         stream.ResponseStream.ForEachAsync(async data =>
             {
-                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name ?? 
+                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name ??
                                   Globals.DedicatedServerManagerInstance.NextMissionOption.Key.Name;
                 if (ulong.TryParse(missionName, out var id))
                 {
@@ -145,6 +148,7 @@ public class GrpcClientManager
                         Ok = false
                     };
                 }
+                
                 await stream.RequestStream.WriteAsync(rt);
             }
         );
@@ -167,16 +171,4 @@ public class GrpcClientManager
             }
         );
     }
-    
-    internal void TrySendBan(BanRequest banLog)
-    {
-        if (Client == null) return;
-        if (_logSuppressedSteamIDs.Contains(banLog.SteamID))
-        {
-            _logSuppressedSteamIDs.Remove(banLog.SteamID);
-            return;
-        }
-        Client.SendBanAsync(banLog);
-    }
-
 }

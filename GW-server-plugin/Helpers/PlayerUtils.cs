@@ -197,7 +197,8 @@ public static class PlayerUtils
     /// <param name="banSteamID">banned player's SteamID</param>
     /// <param name="reason">ban reason</param>
     /// <param name="duration">Ban duration, as format xh or xd</param>
-    public static void BanPlayer(ulong banSteamID, string reason, string? duration)
+    /// <param name="log">if true, this will enable logging the ban back to the central service.</param>
+    public static void BanPlayer(ulong banSteamID, string reason, string? duration, bool log = true)
     {
         AllowBanList.BanAndAppendId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
@@ -205,6 +206,8 @@ public static class PlayerUtils
             new CSteamID(banSteamID),
             reason
         );
+        
+        if (!log) return;
         
         var now = DateTime.UtcNow;
         
@@ -231,7 +234,7 @@ public static class PlayerUtils
             }
         }
         
-        GwServerPlugin.GrpcMgr.TrySendBan(banLog);
+        GwServerPlugin.GrpcMgr.Client?.SendBanAsync(banLog);
     }
 
     /// <summary>
