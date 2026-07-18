@@ -165,7 +165,7 @@ public static class CommandService
                 GwServerPlugin.Logger.LogInfo(
                     $"Command {command.Name} executed successfully by remote process with argument(s): {string.Join(", ", args)}"
                 );
-                return (true, response);
+                return (true, response ?? $"executed {command.Name} successfully!");
             }
 
             GwServerPlugin.Logger.LogWarning(
