@@ -48,7 +48,8 @@ public class AddWorkshopMission(ConfigFile config): PermissionConfigurableComman
         };
         
         var workshopID = ulong.Parse(args[0]);
-        var save = bool.Parse(args[1]);
+        // ReSharper disable once SimplifyConditionalTernaryExpression
+        var save = args.Length > 1 ? bool.Parse(args[1]) : false;
         try
         {
             var downloadResult = await SteamWorkshop.DownloadItemServer(new PublishedFileId_t(workshopID));
