@@ -14,10 +14,13 @@ public class SetWeatherCommand(ConfigFile config) : PermissionConfigurableComman
 {
     /// <inheritdoc />
     public override string Name => "setweather";
+    
     /// <inheritdoc />
     public override string Description => "vote the weather";
+    
     /// <inheritdoc />
     public override string Usage => $"setweather <clear/rainy/stormy>";
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
@@ -37,7 +40,6 @@ public class SetWeatherCommand(ConfigFile config) : PermissionConfigurableComman
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(string[] args)

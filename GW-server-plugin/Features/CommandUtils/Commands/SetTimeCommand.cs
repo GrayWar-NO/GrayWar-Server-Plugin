@@ -15,15 +15,19 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
 {
     /// <inheritdoc />
     public override string Name => "settime";
+    
     /// <inheritdoc />
     public override string Description => "set the time of day";
+    
     /// <inheritdoc />
     public override string Usage => $"{PluginConfig.CommandPrefixChar}settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
+    
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
@@ -37,7 +41,6 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(string[] args)

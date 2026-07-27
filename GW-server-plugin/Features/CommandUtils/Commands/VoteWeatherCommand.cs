@@ -4,7 +4,6 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using NuclearOption.Networking;
-using NuclearOption.SavedMission.ObjectiveV2.Objectives;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -16,10 +15,13 @@ public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableComma
 {
     /// <inheritdoc />
     public override string Name => "voteweather";
+    
     /// <inheritdoc />
     public override string Description => "vote the weather";
+    
     /// <inheritdoc />
     public override string Usage => $"{PluginConfig.CommandPrefixChar}votetime <clear/rainy/stormy>";
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 
