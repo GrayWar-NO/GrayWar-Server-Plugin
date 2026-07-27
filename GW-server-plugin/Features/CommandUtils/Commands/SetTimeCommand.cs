@@ -23,19 +23,7 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
-    {
-        if (args.Length != 1)
-            return UniTask.FromResult(false);
-        if ((args.Length == 1 && !int.TryParse(args[0], out _)) || (args.Length == 1 && int.Parse(args[0]) < 0) || (args.Length == 1 && int.Parse(args[0]) > 24))
-        {
-            ChatService.SendPrivateChatMessage("Number invalid. Please Try again.", player);
-            return UniTask.FromResult(false);
-        }
-
-        return UniTask.FromResult(true);
-    }
-    
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
