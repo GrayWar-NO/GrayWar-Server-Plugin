@@ -4,7 +4,6 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
