@@ -17,8 +17,8 @@ public class DiscordCommand: PermissionConfigurableCommand, IGameCommand
     /// <param name="config"></param>
     public DiscordCommand(ConfigFile config) : base(config)
     {
-        _joinCode = config.Bind("Discord Command", "JoinCode", "zfMMZD4kHE");
-        _url = config.Bind("Discord Command", "URL", "graywar.no");
+        _joinCode = config.Bind("Discord Command", "JoinCode", "pbhUgaWFW7");
+        _url = config.Bind("Discord Command", "URL", "discord.critzaura.com");
     }
     
     private readonly ConfigEntry<string> _joinCode;
