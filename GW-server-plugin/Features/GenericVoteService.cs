@@ -14,7 +14,7 @@ public static class GenericVoteService
 {
     internal static ConfigEntry<int> KickTimeout = null!;
     internal static ConfigEntry<double> KickThreshold = null!;
-    public static void InitializeVoteService(ConfigFile config)
+    public static void Initialize(ConfigFile config)
     {
         KickTimeout = config.Bind(PluginConfig.GenericVoteServiceSection, "Kick Timeout", 180,
             "When the vote will time out in seconds");

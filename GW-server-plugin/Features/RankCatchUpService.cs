@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features;
 public static class RankCatchUpService
 {
     internal static ConfigEntry<bool> RankCatchUp = null!;
-    public static void InitializeRankCatchUpService(ConfigFile config)
+    public static void Initialize(ConfigFile config)
     {
         RankCatchUp = config.Bind(PluginConfig.GeneralSection, "Rank Catchup", false,
             "On late game join, player will level up their rank based on current mission time");

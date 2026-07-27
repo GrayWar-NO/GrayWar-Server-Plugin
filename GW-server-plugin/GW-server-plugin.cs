@@ -72,6 +72,16 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger.LogInfo("Loaded WeatherRandomizer");
 
         MissionBalance = new MissionBalanceService();
+        Logger.LogInfo("Loaded MissionBalanceService");
+        
+        RestartService.Initialize(Config);
+        Logger.LogInfo("Initialized RestartService");
+        
+        RankCatchUpService.Initialize(Config);
+        Logger.LogInfo("Initialized RankCatchUpService");
+        
+        GenericVoteService.Initialize(Config);
+        Logger.LogInfo("Initialized GenericVoteService");
         
         try
         {
@@ -130,7 +140,6 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every30Minutes += RestartService.AutoRestart;
         
         TimeService.Initialize();
-        RestartService.Initialize(Config);
         try
         {
             GrpcMgr = new GrpcClientManager(Config);
@@ -242,6 +251,8 @@ public class GwServerPlugin : BaseUnityPlugin
             Time = DateTime.UtcNow.ToTimestamp()
         };
         GrpcMgr.Client?.SendPlayerActivityAsync(log);
+        
+        if (RankCatchUpService.RankCatchUp!.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)
