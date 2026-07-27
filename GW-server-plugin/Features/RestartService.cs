@@ -18,12 +18,13 @@ public static class RestartService
     private static ConfigEntry<uint> _noPlayersRestartTimeout = null!;
     private static ConfigEntry<uint> _forceRestartMaxInterval = null!;
 
+    private static bool _awaitingRestart = false;
     /// <summary>
     /// Used to check if server is awaiting a restart after mission ends
     /// </summary>
     public static bool AwaitingRestart
     {
-        get;
+        get => _awaitingRestart;
         set
         {
             if (value)
@@ -31,7 +32,7 @@ public static class RestartService
             else
                 GwServerPlugin.MissionVote.ClearInhibit();
             
-            field = value;
+            _awaitingRestart = value;
         }
     }
     
