@@ -22,7 +22,6 @@ public class VoteTimeCommand(ConfigFile config) : PermissionConfigurableCommand(
     
     /// <inheritdoc />
     public override string Usage =>
-        
         $"votetime <24hr format 0-24> (e.g '{PluginConfig.CommandPrefixChar}votetime 18' for 18:00)";
     
     /// <inheritdoc />
