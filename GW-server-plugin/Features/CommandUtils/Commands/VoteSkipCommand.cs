@@ -4,7 +4,6 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using NuclearOption.Networking;
-using NuclearOption.SavedMission.ObjectiveV2.Objectives;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
