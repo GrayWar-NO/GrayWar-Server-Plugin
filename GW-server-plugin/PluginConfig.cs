@@ -228,7 +228,7 @@ public static class PluginConfig
     {
         var adminsList = AdminsList.ToHashSet();
         adminsList.Add(steamId.ToString());
-        Admins?.Value = string.Join(";", adminsList);
+        Admins!.Value = string.Join(";", adminsList);
     }
     
     private static void AddMod(ulong steamId)
