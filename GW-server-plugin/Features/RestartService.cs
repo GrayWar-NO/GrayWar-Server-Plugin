@@ -184,7 +184,7 @@ public static class RestartReminderService
         }
 
         _restartCts = new CancellationTokenSource();
-        _ = ScheduleRestartReminder(_restartCts.Token);
+        await ScheduleRestartReminder(_restartCts.Token);
     }
 
     /// <summary>
