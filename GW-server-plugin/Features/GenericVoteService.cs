@@ -57,13 +57,17 @@ public static class GenericVoteService
     /// </summary>
     /// <param name="voter"></param>
     /// <param name="votedYes"></param>
-    public static void HandleVote(Player voter, bool votedYes)
+    /// <param name="result"></param>
+    public static void HandleVote(Player voter, bool votedYes, out (bool success, string? response) result)
     {
         if (ActiveVote == null)
+            result = (false,$"A vote session has not been started, use a vote command to start one.");
+        else
         {
-            ChatService.SendPrivateChatMessage($"A vote session has not been started, use a vote command to start one.", voter);
+            ActiveVote.AddVote(voter, votedYes);
+            result = (true, null);
         }
-        else ActiveVote.AddVote(voter, votedYes);
+        
     }
 
     public static void StopVoteKick()
