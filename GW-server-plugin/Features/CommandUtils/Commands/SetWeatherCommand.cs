@@ -1,5 +1,4 @@
-﻿using System;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
@@ -14,28 +13,18 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class SetWeatherCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "setweather";
+    public override string Name => "setweather";
     /// <inheritdoc />
-    public override string Description { get; } = "vote the weather";
+    public override string Description => "vote the weather";
     /// <inheritdoc />
-    public override string Usage { get; } = $"{PluginConfig.CommandPrefixChar}setweather <clear/rainy/stormy>";
+    public override string Usage => $"setweather <clear/rainy/stormy>";
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
-    {
-        if (args.Length != 1)
-            return UniTask.FromResult(false);
-        if (!float.TryParse(args[0], out _) || float.Parse(args[0]) < 0 || float.Parse(args[0]) > 1)
-        {
-            ChatService.SendPrivateChatMessage("Number invalid. Must be between 0.0 and 1.0", player);
-            return UniTask.FromResult(false);
-        }
-
-        return UniTask.FromResult(true);
-    }
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
     
+    /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
         if (args.Length != 1)
