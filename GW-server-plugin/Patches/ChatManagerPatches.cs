@@ -62,8 +62,8 @@ internal static class ChatManagerPatches
             return false;
         }
         GwServerPlugin.Logger.LogInfo(allChat
-            ? $"{player!.PlayerName} sent message: {message}"
-            : $"{player!.PlayerName} sent message in {player.HQ.faction.factionName} chat: {message}");
+            ? $"{player!.GetPlayerName().SanitizedName} sent message: {message}"
+            : $"{player!.GetPlayerName().SanitizedName} sent message in {player.HQ.faction.factionName} chat: {message}");
 
         var log = new ChatLog
         {

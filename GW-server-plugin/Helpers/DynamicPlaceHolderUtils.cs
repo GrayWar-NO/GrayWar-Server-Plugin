@@ -37,7 +37,7 @@ public static class DynamicPlaceholderUtils
     {
         if (player)
         {
-            original = original.Replace(PlayerName, player!.PlayerName);
+            original = original.Replace(PlayerName, player!.GetPlayerName().SanitizedName);
             original = original.Replace(PlayerNameCensored, player.GetNameOrCensored());
             original = original.Replace(SteamID, player.SteamID.ToString());
         }

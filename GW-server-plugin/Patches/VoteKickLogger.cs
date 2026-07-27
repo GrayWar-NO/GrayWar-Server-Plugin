@@ -17,7 +17,7 @@ public class VoteKickLogger
     [HarmonyPrefix]
     [HarmonyPatch(nameof(VoteKickManager.ExecuteKick))]
     // ReSharper disable once InconsistentNaming
-    internal static bool ExecuteKickPrefix(VoteKickManager __instance, ref CSteamID id, string playerName)
+    internal static bool ExecuteKickPrefix(VoteKickManager __instance, ref CSteamID id)
     {
         var steamId = id.m_SteamID.ToString();
 

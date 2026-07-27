@@ -16,15 +16,14 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "ban";
-
+    public override string Name => "ban";
+    
     /// <inheritdoc />
-    public override string Description { get; } = "Bans a player from the server.";
-
+    public override string Description => "Bans a player from the server.";
+    
     /// <inheritdoc />
-    public override string Usage { get; } =
-        "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
-
+    public override string Usage => "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
+    
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
@@ -91,7 +90,7 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
             banSteamID = player!.SteamID;
             Globals.NetworkManagerNuclearOptionInstance
                 .KickPlayerAsync(player, $"Banned for reason: {reason}").Forget();
-            response = $"Banned player {player.PlayerName} for reason {reason}";
+            response = $"Banned player {player.GetPlayerName().SanitizedName} for reason {reason}";
         }
 
         if (duration is not null)

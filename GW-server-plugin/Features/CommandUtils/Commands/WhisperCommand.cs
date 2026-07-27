@@ -64,7 +64,7 @@ public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(c
         };
         GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
 
-        return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.PlayerName}:  {message}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Message sent to {target!.GetPlayerName().SanitizedName}:  {message}"));
     }
 
 

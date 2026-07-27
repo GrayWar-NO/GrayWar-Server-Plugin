@@ -111,7 +111,7 @@ public static class CommandService
     {
         if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < command.PermissionLevel)
         {
-            GwServerPlugin.Logger.LogWarning($"Player {player.PlayerName} does not have permission to execute command {command.Name}");
+            GwServerPlugin.Logger.LogWarning($"Player {player.GetPlayerName().SanitizedName} does not have permission to execute command {command.Name}");
             return (false, $"You are not authorized to execute command {command.Name}");
         }
         string? response;
@@ -122,19 +122,19 @@ public static class CommandService
             if (executionResult.success)
             {
                 GwServerPlugin.Logger.LogInfo(
-                    $"Command {command.Name} executed successfully by {player.PlayerName} with argument(s): {string.Join(", ", args)}"
+                    $"Command {command.Name} executed successfully by {player.GetPlayerName().SanitizedName} with argument(s): {string.Join(", ", args)}"
                 );
                 return (true, response);
             }
 
             GwServerPlugin.Logger.LogWarning(
-                $"Failed to execute command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
+                $"Failed to execute command {command.Name} by {player.GetPlayerName().SanitizedName} with argument(s): {string.Join(", ", args)}");
             response ??= $"Failed to execute command {command.Name}";
             return (false, response);
         }
 
         GwServerPlugin.Logger.LogInfo(
-            $"Failed validation for command {command.Name} by {player.PlayerName} with argument(s): {string.Join(", ", args)}");
+            $"Failed validation for command {command.Name} by {player.GetPlayerName().SanitizedName} with argument(s): {string.Join(", ", args)}");
         response = $"Invalid arguments: {PluginConfig.CommandPrefix!.Value}{command.Usage}";
         return (false, response);
     }

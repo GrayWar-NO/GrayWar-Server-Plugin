@@ -71,7 +71,7 @@ public class GiveCommand(ConfigFile config): PermissionConfigurableCommand(confi
         targetPlayer.AddAllocation(sum);
         
         ChatService.SendPrivateChatMessage($"you were given you {sum} (million)!", targetPlayer);
-        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully given {sum}m to {targetPlayer.PlayerName}."));
+        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully given {sum}m to {targetPlayer.GetPlayerName().SanitizedName}."));
     }
 
     /// <inheritdoc />

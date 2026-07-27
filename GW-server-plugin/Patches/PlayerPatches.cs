@@ -1,4 +1,5 @@
 using Com.Graywar.NoServerManager.Proto;
+using GW_server_plugin.Events;
 using HarmonyLib;
 using NuclearOption.Networking;
 
@@ -8,6 +9,7 @@ namespace GW_server_plugin.Patches;
 /// Logs sortie status for players.
 /// </summary>
 [HarmonyPatch(typeof(Player))]
+[HarmonyWrapSafe]
 public class PlayerPatches
 {
     /// <summary>
@@ -44,5 +46,19 @@ public class PlayerPatches
             Killed = false
         };
         GwServerPlugin.GrpcMgr.Client?.SendSortieChangeAsync(log);
+    }
+    
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(Player.OnStartServer))]
+    private static void JoinMessagePostfix(Player __instance)
+    {
+        PlayerEvents.OnPlayerJoined(__instance);
+    }
+    
+    [HarmonyPostfix]
+    [HarmonyPatch(nameof(Player.OnStopServer))]
+    private static void DisconnectedMessagePostfix(Player __instance)
+    {
+        PlayerEvents.OnPlayerLeft(__instance);
     }
 }

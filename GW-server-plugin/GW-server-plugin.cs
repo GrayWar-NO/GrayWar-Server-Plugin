@@ -233,8 +233,8 @@ public class GwServerPlugin : BaseUnityPlugin
             return;
         }
         
-        Logger.LogDebug($"{player.PlayerName} : {player.SteamID} - joined the game");
-        var originalName = player.PlayerName;
+        Logger.LogDebug($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - joined the game");
+        var originalName = player.GetPlayerName().SanitizedName;
         PlayerUtils.ApplyOrRemoveStaffTag(player);
         // Apply identification tag if not a staff member
         if (!PlayerUtils.IsStaff(player))
@@ -242,7 +242,7 @@ public class GwServerPlugin : BaseUnityPlugin
             PlayerIdentifier.AssignNewPlayer(player);
             PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
-        Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - joined the game");
+        Logger.LogInfo($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - joined the game");
         var log = new JoinLeaveLog
         {
             SteamID = player.SteamID,
@@ -257,14 +257,14 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static void OnPlayerLeave(Player player)
     {
-        Logger.LogInfo($"{player.PlayerName} : {player.SteamID} - left the game");
+        Logger.LogInfo($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
         var log = new JoinLeaveLog
         {
             SteamID = player.SteamID,
             IsOn = false,
-            Name = player.PlayerName,
+            Name = player.GetPlayerName().SanitizedName,
             Time = DateTime.UtcNow.ToTimestamp(),
             Score = (float)Math.Round(player.PlayerScore, 2)
         };
@@ -274,6 +274,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
     {
+        Logger.LogInfo($"{player.SteamID} joined {HQ.faction.factionName}");
         var log = new FactionLog
         {
             SteamID = player.SteamID,
@@ -284,7 +285,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     internal static void OnPlayerTeamkill(Player killer, Player killed, string weaponName)
     {
-        OnTeamkill(killer, killed.PlayerName, weaponName);
+        OnTeamkill(killer, killed.GetPlayerName().SanitizedName, weaponName);
     }
 
     /// <summary>

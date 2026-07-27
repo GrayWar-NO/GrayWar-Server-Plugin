@@ -51,7 +51,7 @@ public class KickCommand(ConfigFile config): PermissionConfigurableCommand(confi
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
         {
             PlayerUtils.KickPlayer(targetPlayer!,  string.Join(" ", args.Skip(1)));
-            return UniTask.FromResult<(bool, string?)>((true, $"{targetPlayer!.PlayerName} has been kicked!"));
+            return UniTask.FromResult<(bool, string?)>((true, $"{targetPlayer!.GetPlayerName().SanitizedName} has been kicked!"));
         }
 
         return UniTask.FromResult<(bool, string?)>((false, $"{target} is not a valid player!"));

@@ -40,7 +40,7 @@ public class PlayerInfoCommand(ConfigFile config): PermissionConfigurableCommand
             response = $"Player for steamID {steamID} not found";
             return UniTask.FromResult<(bool, string?)>((false, response));
         }
-        response = player!.PlayerName;
+        response = player!.GetPlayerName().SanitizedName;
         return UniTask.FromResult<(bool, string?)>((true, response));
     }
 }

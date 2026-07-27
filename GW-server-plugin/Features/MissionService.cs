@@ -7,7 +7,6 @@ using GW_server_plugin.Patches;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking.Lobbies;
 using NuclearOption.SavedMission;
-using NuclearOption.SavedMission.ObjectiveV2;
 using UnityEngine;
 
 namespace GW_server_plugin.Features;

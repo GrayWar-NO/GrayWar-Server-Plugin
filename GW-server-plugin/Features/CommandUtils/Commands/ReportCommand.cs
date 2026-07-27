@@ -34,7 +34,7 @@ public class ReportCommand(ConfigFile config) : PermissionConfigurableCommand(co
         GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new serverReport
         {
             Content = content,
-            Username = player.PlayerName
+            Username = player.GetPlayerName().SanitizedName
         });
         
         return UniTask.FromResult((true, (string?)$"{content} reported to staff successfully."));

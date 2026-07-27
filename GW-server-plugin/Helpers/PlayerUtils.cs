@@ -25,7 +25,7 @@ public static class PlayerUtils
     {
         return networkPlayer.Identity?.GetComponent<Player>();
     }
-
+    
     /// <summary>
     ///     Get the Player object from an INetworkPlayer object, if available.
     /// </summary>
@@ -37,7 +37,7 @@ public static class PlayerUtils
         playerComponent = networkPlayer.GetPlayer();
         return playerComponent != null;
     }
-
+    
     /// <summary>
     ///     Try to find a player by name.
     /// </summary>
@@ -47,7 +47,7 @@ public static class PlayerUtils
     public static bool TryFindPlayer(string playerName, out Player? playerObject)
     {
         playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p =>
-            string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.PlayerName ?? "")),
+            string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.GetPlayerName().GetCensoredName() ?? "")),
                 StripStaffPrefix(StripIdPrefix(playerName)), StringComparison.CurrentCultureIgnoreCase))?.GetPlayer();
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
@@ -57,13 +57,13 @@ public static class PlayerUtils
                 GwServerPlugin.PlayerIdentifier.GetPlayerById((int)playerId, out playerSteamId);
             }
             else playerSteamId = playerId;
-
+            
             TryFindPlayerBySteamId(playerSteamId ?? 0ul, out playerObject);
         }
-
+        
         return playerObject != null;
     }
-
+    
     /// <summary>
     ///     Tries to find a player on the server from his steamID.
     /// </summary>
@@ -75,7 +75,7 @@ public static class PlayerUtils
         playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p => p.GetPlayer()?.SteamID == steamid)?.GetPlayer();
         return playerObject != null;
     }
-
+    
     /// <summary>
     ///     Utility function to strip a player name of the staff tag, if they have it.
     /// </summary>
@@ -85,13 +85,13 @@ public static class PlayerUtils
     {
         if (string.IsNullOrEmpty(playerName))
             return playerName;
-
+        
         var pattern = $@"^{Regex.Escape(PluginConfig.StaffPrefix!.Value)}\s*";
         var cleanName = Regex.Replace(playerName, pattern, "", RegexOptions.IgnoreCase);
-
+        
         return cleanName;
     }
-
+    
     /// <summary>
     /// Removes ID prefix from a player's name.
     /// </summary>
@@ -101,12 +101,12 @@ public static class PlayerUtils
     {
         if (string.IsNullOrEmpty(playerName))
             return playerName;
-
+        
         const string pattern = @"^\s*\[(?:[1-9]\d?|1\d\d|20[01])\]\s*";
-
+        
         return Regex.Replace(playerName, pattern, "");
     }
-
+    
     /// <summary>
     /// Checks if a player is staff.
     /// </summary>
@@ -118,7 +118,7 @@ public static class PlayerUtils
                  !PluginConfig.IsOwner(player.SteamID) &&
                  !PluginConfig.IsModerator(player.SteamID));
     }
-
+    
     /// <summary>
     ///     Apply or remove the staff tag based on player permission level.
     /// </summary>
@@ -127,11 +127,12 @@ public static class PlayerUtils
     public static void ApplyOrRemoveStaffTag(Player playerObject)
     {
         if (!PluginConfig.UseStaffPrefix!.Value || !IsStaff(playerObject)) return;
-        var newName = $"{PluginConfig.StaffPrefix!.Value} {playerObject.PlayerName}";
-        playerObject.PlayerName = newName;
+        var newName = new PlayerName($"{PluginConfig.StaffPrefix!.Value} {playerObject.GetPlayerName().RawSteamName}",
+            $"{PluginConfig.StaffPrefix!.Value} {playerObject.GetPlayerName().SanitizedName}");
+        playerObject._playerNameCache = newName;
     }
-
-
+    
+    
     /// <summary>
     /// Counts the staff members in a given list of players.
     /// </summary>
@@ -143,7 +144,7 @@ public static class PlayerUtils
                 networkPlayer.TryGetPlayer<Player>(out var player) &&
                 IsStaff(player));
     }
-
+    
     /// <summary>
     /// Applies identification tag to a player.
     /// </summary>
@@ -151,10 +152,11 @@ public static class PlayerUtils
     /// <param name="id"> ID to apply to the player. </param>
     public static void ApplyIdentificationTag(Player playerObject, int id)
     {
-        var newName = $"[{id}] {playerObject.PlayerName}";
-        playerObject.PlayerName = newName;
+        var newName = new PlayerName($"[{id}] {playerObject.GetPlayerName().RawSteamName}",
+            $"[{id}] {playerObject.GetPlayerName().SanitizedName}");
+        playerObject._playerNameCache = newName;
     }
-
+    
     /// <summary>
     ///     Get the permission level of a player.
     /// </summary>
@@ -164,16 +166,16 @@ public static class PlayerUtils
     {
         if (PluginConfig.Owner!.Value == player.SteamID.ToString())
             return PermissionLevel.Admin;
-
+        
         if (PluginConfig.AdminsList.Contains(player.SteamID.ToString()))
             return PermissionLevel.Admin;
-
+        
         if (PluginConfig.ModeratorsList.Contains(player.SteamID.ToString()))
             return PermissionLevel.Moderator;
-
+        
         return PermissionLevel.Everyone;
     }
-
+    
     /// <summary>
     /// Function that kicks a player.
     /// </summary>
@@ -222,9 +224,14 @@ public static class PlayerUtils
         if (duration != null)
         {
             string? amountStr = null;
-            try { amountStr = duration.Substring(0, duration.Length - 1); }
-            catch (ArgumentOutOfRangeException){}
-
+            try
+            {
+                amountStr = duration.Substring(0, duration.Length - 1);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+            }
+            
             if (amountStr != null && uint.TryParse(amountStr, out var amount))
             {
                 if (duration.EndsWith("d", StringComparison.OrdinalIgnoreCase))
@@ -236,7 +243,7 @@ public static class PlayerUtils
         
         GwServerPlugin.GrpcMgr.Client?.SendBanAsync(banLog);
     }
-
+    
     /// <summary>
     /// Kicks a player asynchronously with reason.
     /// </summary>
@@ -253,8 +260,7 @@ public static class PlayerUtils
         var conn = player.Owner;
         if (addToKickList)
             managerNuclearOption.authenticator.OnKick(conn);
-        var hostName = GameManager.GetLocalPlayer<Player>(out var localPlayer) ? localPlayer.PlayerName : "server";
-        player.KickReason(reason, hostName);
+        player.KickReason(reason);
         await UniTask.Delay(1000); // conservative wait time to account for high-ping ppl.
         conn.Disconnect();
     }

@@ -16,14 +16,14 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "warn";
-
+    public override string Name => "warn";
+    
     /// <inheritdoc />
-    public override string Description { get; } = "Warns a player.";
-
+    public override string Description => "Warns a player.";
+    
     /// <inheritdoc />
-    public override string Usage { get; } = "warn <Player (by name, steamID or playerID)> <Reason>";
-
+    public override string Usage => "warn <Player (by name, steamID or playerID)> <Reason>";
+    
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
@@ -61,7 +61,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
                 throw new VerificationException(
                     $"Could not find player {target}: validation was not called properly.");
             warnSteamID = player!.SteamID;
-            response = $"Warned player {player.PlayerName} for reason {reason}";
+            response = $"Warned player {player.GetPlayerName().SanitizedName} for reason {reason}";
         }
 
         return UniTask.FromResult<(bool, string?)>((GwServerPlugin.WarnService.AddWarn(warnSteamID, reason), response));
