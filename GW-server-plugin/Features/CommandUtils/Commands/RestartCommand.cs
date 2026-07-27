@@ -21,21 +21,18 @@ public class Restart(ConfigFile config) : PermissionConfigurableCommand(config),
     public override string Description => "restart server after mission ends";
 
     /// <inheritdoc />
-    public override string Usage => $"restart or {PluginConfig.CommandPrefix}restart [f]orce immediate restart";
+    public override string Usage => $"restart or {PluginConfig.CommandPrefix}restart [f]orce immediate restart or [c]cancel to cancel restart";
 
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
-    {
-        if (args.Length == 1 && args[0] != "force" && args[0] != "f")
-            return UniTask.FromResult(false);
-
-        return UniTask.FromResult(args.Length <= 1);
-    }
+    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
 
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
-        return UniTask.FromResult(args.Length <= 1 && (args[0] == "force" || args[0] == "f"));
+        if (args.Length == 1 && args[0] != "force" && args[0] != "f" && args[0] != "cancel" && args[0] != "c")
+            return UniTask.FromResult(false);
+
+        return UniTask.FromResult(args.Length <= 1);
     }
 
     /// <inheritdoc />
@@ -47,6 +44,12 @@ public class Restart(ConfigFile config) : PermissionConfigurableCommand(config),
     {
         try
         {
+            if (args.Length == 1 && (args[0] == "cancel" || args[0] == "c"))
+            {
+                RestartService.AwaitingRestart = false;
+                return UniTask.FromResult<(bool, string?)>((true, "Restart canceled"));
+            }
+            
             // Force restart if there are no players
             var playerCount = PlayerUtils.GetPlayerCount();
             if (playerCount == 0 || (args.Length == 1 && (args[0] == "force" || args[0] == "f")))
