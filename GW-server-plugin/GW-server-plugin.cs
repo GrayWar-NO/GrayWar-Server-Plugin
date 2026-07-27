@@ -106,8 +106,8 @@ public class GwServerPlugin : BaseUnityPlugin
         RankCatchUpService.Initialize(Config);
         Logger.LogInfo("Initialized RankCatchUpService");
         
-        GenericVoteService.Initialize(Config);
-        Logger.LogInfo("Initialized GenericVoteService");
+        VoteSession.Initialize(Config);
+        Logger.LogInfo("Initialized VoteSession");
         
         try
         {

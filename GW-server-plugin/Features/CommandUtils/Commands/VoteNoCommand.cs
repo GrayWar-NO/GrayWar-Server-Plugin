@@ -33,7 +33,12 @@ public class VoteNoCommand(ConfigFile config) : PermissionConfigurableCommand(co
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
-        GenericVoteService.HandleVote(player, false, out var result);
-        return UniTask.FromResult(result);
+        if (VoteSession.Instance != null)
+        {
+            VoteSession.Instance.HandleVote(player, false, out var result);
+            return UniTask.FromResult(result);
+        }
+
+        return new UniTask<(bool success, string? response)>((false, "Vote failed, no active vote session"));
     }
 }

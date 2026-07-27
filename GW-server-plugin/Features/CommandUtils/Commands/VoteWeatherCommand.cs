@@ -39,7 +39,7 @@ public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableComma
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
-        if (!GenericVoteService.CanStartVote())
+        if (!VoteSession.CanStartVote())
         {
             var response = "Cannot start a new vote, please wait for current vote to expire.";
             return UniTask.FromResult<(bool success, string? response)>((false,response));
@@ -68,7 +68,7 @@ public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableComma
         GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
         ChatService.SendChatMessageAsServer(startingMessage);
         
-        GenericVoteService.StartVote(
+        VoteSession.StartVoteSession(
             player,
             OnPass,
             true,
