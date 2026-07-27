@@ -19,7 +19,7 @@ public class ReportCommand(ConfigFile config) : PermissionConfigurableCommand(co
     public override string Name => "report";
     
     /// <inheritdoc />
-    public override string Description => "Reports something to graywar staff";
+    public override string Description => "Reports something to staff";
     
     /// <inheritdoc />
     public override string Usage => "report <reason>";
@@ -37,6 +37,6 @@ public class ReportCommand(ConfigFile config) : PermissionConfigurableCommand(co
             Username = player.PlayerName
         });
         
-        return UniTask.FromResult((true, (string?)$"{content} reported to GrayWar staff successfully."));
+        return UniTask.FromResult((true, (string?)$"{content} reported to staff successfully."));
     }
 }
