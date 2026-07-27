@@ -37,6 +37,37 @@ public static class PlayerUtils
         playerComponent = networkPlayer.GetPlayer();
         return playerComponent != null;
     }
+
+    /// <summary>
+    /// Gets the name used by this plugin when displaying a connected player.
+    /// </summary>
+    /// <remarks>
+    /// The dedicated server does not receive client names over Mirage. This uses the
+    /// Steam Web API name cached at connection time, rather than Player.GetPlayerName().
+    /// </remarks>
+    public static string GetDisplayName(this Player player)
+    {
+        var name = player.GetLogName();
+
+        if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
+            return $"{PluginConfig.StaffPrefix!.Value} {name}";
+
+        return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
+            ? $"[{id}] {name}"
+            : name;
+    }
+
+    /// <summary>
+    /// Gets the plain Steam persona name used in logs and audit records.
+    /// This deliberately omits staff and player-ID display tags.
+    /// </summary>
+    public static string GetLogName(this Player player)
+    {
+        return GwServerPlugin.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
+               !string.IsNullOrWhiteSpace(cachedName)
+            ? cachedName
+            : player.SteamID.ToString();
+    }
     
     /// <summary>
     ///     Try to find a player by name.
@@ -46,9 +77,12 @@ public static class PlayerUtils
     /// <returns></returns>
     public static bool TryFindPlayer(string playerName, out Player? playerObject)
     {
-        playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p =>
-            string.Equals(StripStaffPrefix(StripIdPrefix(p.GetPlayer()?.GetPlayerName().GetCensoredName() ?? "")),
-                StripStaffPrefix(StripIdPrefix(playerName)), StringComparison.CurrentCultureIgnoreCase))?.GetPlayer();
+        playerObject = null;
+        var normalizedName = StripStaffPrefix(StripIdPrefix(playerName));
+
+        if (GwServerPlugin.TryGetConnectedPlayerSteamId(normalizedName, out var steamId))
+            TryFindPlayerBySteamId(steamId, out playerObject);
+
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
             ulong? playerSteamId;
@@ -120,20 +154,6 @@ public static class PlayerUtils
     }
     
     /// <summary>
-    ///     Apply or remove the staff tag based on player permission level.
-    /// </summary>
-    /// <param name="playerObject"> The Player object. </param>
-    /// <returns></returns>
-    public static void ApplyOrRemoveStaffTag(Player playerObject)
-    {
-        if (!PluginConfig.UseStaffPrefix!.Value || !IsStaff(playerObject)) return;
-        var newName = new PlayerName($"{PluginConfig.StaffPrefix!.Value} {playerObject.GetPlayerName().RawSteamName}",
-            $"{PluginConfig.StaffPrefix!.Value} {playerObject.GetPlayerName().SanitizedName}");
-        playerObject._playerNameCache = newName;
-    }
-    
-    
-    /// <summary>
     /// Counts the staff members in a given list of players.
     /// </summary>
     /// <returns></returns>
@@ -143,18 +163,6 @@ public static class PlayerUtils
             .Count(networkPlayer =>
                 networkPlayer.TryGetPlayer<Player>(out var player) &&
                 IsStaff(player));
-    }
-    
-    /// <summary>
-    /// Applies identification tag to a player.
-    /// </summary>
-    /// <param name="playerObject"> Player to apply the identification tag to.</param>
-    /// <param name="id"> ID to apply to the player. </param>
-    public static void ApplyIdentificationTag(Player playerObject, int id)
-    {
-        var newName = new PlayerName($"[{id}] {playerObject.GetPlayerName().RawSteamName}",
-            $"[{id}] {playerObject.GetPlayerName().SanitizedName}");
-        playerObject._playerNameCache = newName;
     }
     
     /// <summary>

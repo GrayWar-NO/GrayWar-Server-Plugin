@@ -43,7 +43,7 @@ internal static class ChatManagerPatches
     [HarmonyPatch("UserCode_CmdSendChatMessage_\u002D456754112")]
     private static bool UserCode_CmdSendChatMessagePrefix(string message, bool allChat, INetworkPlayer sender)
     {
-        if (!sender.TryGetPlayer(out var player))
+        if (!sender.TryGetPlayer(out var player) || player == null)
         {
             GwServerPlugin.Logger.LogWarning("Player component is null");
             return false;
@@ -58,21 +58,28 @@ internal static class ChatManagerPatches
             var commandName = arguments[0];
             arguments = arguments.Skip(1).ToArray();
             
-            ExecuteCommandAndRespondAsync(commandName, arguments, player!).Forget();
+            ExecuteCommandAndRespondAsync(commandName, arguments, player).Forget();
             return false;
         }
+        var factionName = player.HQ?.faction?.factionName ?? "unknown";
         GwServerPlugin.Logger.LogInfo(allChat
-            ? $"{player!.GetPlayerName().SanitizedName} sent message: {message}"
-            : $"{player!.GetPlayerName().SanitizedName} sent message in {player.HQ.faction.factionName} chat: {message}");
+            ? $"{player.GetDisplayName()} sent message: {message}"
+            : $"{player.GetDisplayName()} sent message in {factionName} chat: {message}");
 
         var log = new ChatLog
         {
-            MessageChannel = allChat ? "all" : player.HQ.faction.factionName,
+            MessageChannel = allChat ? "all" : factionName,
             MessageSendTime = DateTime.UtcNow.ToTimestamp(),
             Message = message,
             SenderSteamID = player.SteamID
         };
         GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
+        if (allChat)
+        {
+            var displayName = PlayerUtils.GetDisplayName(player);
+            Globals.ChatManagerInstance.RpcServerMessage($"{displayName}: {message}", true);
+            return false;
+        }
         return true;
     }
 }

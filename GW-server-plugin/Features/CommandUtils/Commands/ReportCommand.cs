@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -34,7 +35,7 @@ public class ReportCommand(ConfigFile config) : PermissionConfigurableCommand(co
         GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new serverReport
         {
             Content = content,
-            Username = player.GetPlayerName().SanitizedName
+            Username = player.GetLogName()
         });
         
         return UniTask.FromResult((true, (string?)$"{content} reported to staff successfully."));

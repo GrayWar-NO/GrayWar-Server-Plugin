@@ -86,14 +86,33 @@ class PatchImpactDetectorFixedUpdate
             new CodeInstruction(OpCodes.Ldfld, laserWeaponInfo),
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
-
+        
         return TakeDamageTranspiler.Inject(instructions, loader);
     }
 }
 
-[HarmonyPatch(typeof(FuelTank), nameof(FuelTank.FuelTankFire))]
+[HarmonyPatch]
 class PatchFuelTankFire
 {
+    static MethodBase TargetMethod()
+    {
+        // 1. Get the original method
+        var originalMethod = typeof(FuelTank).GetMethod(nameof(FuelTank.FuelTankFire),
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        
+        var asyncAttr = originalMethod!.GetCustomAttribute<AsyncStateMachineAttribute>();
+        
+        if (asyncAttr == null)
+        {
+            // Fallback just in case the method is no longer async in a future update
+            return originalMethod!;
+        }
+        var stateMachineType = asyncAttr.StateMachineType;
+        
+        return stateMachineType!.GetMethod("MoveNext",
+            BindingFlags.NonPublic | BindingFlags.Instance)!;
+    }
+    
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         return TakeDamageTranspiler.Inject(instructions, "Fuel tank fire");
@@ -105,7 +124,18 @@ class PatchCollisionDamage
 {
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        return TakeDamageTranspiler.Inject(instructions, "Collision");
+        return GenericTranspiler.Inject(instructions, "Collision",
+            AccessTools.Method(typeof(UnitPart), nameof(UnitPart.TakeDamage)),
+            AccessTools.Method(typeof(TakeDamageExtensions), nameof(TakeDamageExtensions.TakeDamage), [
+                typeof(UnitPart),
+                typeof(float),
+                typeof(float),
+                typeof(float),
+                typeof(float),
+                typeof(float),
+                typeof(PersistentID),
+                typeof(string)
+            ]));
     }
 }
 
@@ -124,13 +154,13 @@ class PatchBulletTrajectoryTrace
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var weaponNameField = AccessTools.Field(typeof(WeaponInfo), nameof(WeaponInfo.weaponName));
-
+        
         var loader = new[]
         {
             new CodeInstruction(OpCodes.Ldarg_2),
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
-
+        
         var newInstr = TakeDamageTranspiler.Inject(instructions, loader);
         return BlastFragTranspiler.Inject(newInstr, loader);
     }
@@ -159,7 +189,7 @@ class PatchMissileRPCDetonate
         typeof(bool),
         typeof(bool)
     ];
-
+    
     private static readonly Type[] NewParameters =
     [
         typeof(Missile.Warhead),
@@ -173,13 +203,13 @@ class PatchMissileRPCDetonate
         typeof(bool),
         typeof(string)
     ];
-
+    
     private static readonly MethodInfo Original =
         AccessTools.Method(typeof(Missile.Warhead), nameof(Missile.Warhead.Detonate), OriginalParameters);
-
+    
     private static readonly MethodInfo Replacement =
         AccessTools.Method(typeof(MissileExtensions), nameof(MissileExtensions.Detonate), NewParameters);
-
+    
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var missileInfo = AccessTools.Field(typeof(Missile), nameof(Missile.info));
@@ -190,7 +220,7 @@ class PatchMissileRPCDetonate
             new CodeInstruction(OpCodes.Ldfld, missileInfo),
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
-
+        
         return GenericTranspiler.Inject(instructions, loader, Original, Replacement);
     }
 }
@@ -203,20 +233,20 @@ class PatchUnitHitOnPhysicsFrame
         // Get the async state machine generated for HitOnPhysicsFrame
         var method = AccessTools.Method(typeof(Unit), nameof(Unit.HitOnPhysicsFrame));
         var attr = method.GetCustomAttribute<AsyncStateMachineAttribute>();
-
+        
         return attr == null
             ? throw new Exception("HitOnPhysicsFrame is not an async method")
             :
             // Patch MoveNext instead
             AccessTools.Method(attr.StateMachineType, "MoveNext");
     }
-
-
+    
+    
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var list = new List<CodeInstruction>(instructions);
         LocalBuilder? weaponInfoLocal = null;
-
+        
         foreach (var instr in list)
         {
             if (instr.opcode != OpCodes.Stloc_S || instr.operand is not LocalBuilder lb) continue;
@@ -224,10 +254,10 @@ class PatchUnitHitOnPhysicsFrame
             weaponInfoLocal = lb;
             break;
         }
-
+        
         if (weaponInfoLocal is null) throw new NullReferenceException("No weaponInfo in provided method");
-
-
+        
+        
         var weaponNameField = AccessTools.Field(typeof(WeaponInfo), nameof(WeaponInfo.weaponName));
         var loader = new[]
         {
@@ -251,7 +281,7 @@ class PatchMissilePenetrateObject
             new CodeInstruction(OpCodes.Ldfld, missileWeaponInfo),
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
-
+        
         return ArmorPenetrateTranspiler.Inject(instructions, loader);
     }
 }
@@ -267,7 +297,7 @@ class PatchUnitRegisterHit
             new CodeInstruction(OpCodes.Ldarg_S, 4),
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
-
+        
         return ArmorPenetrateTranspiler.Inject(instructions, loader);
     }
 }
@@ -296,7 +326,7 @@ class PatchMissileExplosionForceOnPhysicsFrame
         // Get the async state machine generated for HitOnPhysicsFrame
         var method = AccessTools.Method(typeof(Missile), nameof(Missile.ExplosionForceOnPhysicsFrame));
         var attr = method.GetCustomAttribute<AsyncStateMachineAttribute>();
-
+        
         var tm = attr == null
             ? throw new Exception("ExplosionForceOnPhysicsFrame is not an async method")
             :
@@ -306,15 +336,14 @@ class PatchMissileExplosionForceOnPhysicsFrame
         GwServerPlugin.Logger.LogDebug($"found method {method} for Missile.ExplosionForceOnPhysicsFrame.");
         
         return tm;
-        
     }
-
-
+    
+    
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var missileWeaponInfo = AccessTools.Field(typeof(Missile), nameof(Missile.info));
         var weaponNameField = AccessTools.Field(typeof(WeaponInfo), nameof(WeaponInfo.weaponName));
-
+        
         var loader = new[]
         {
             new CodeInstruction(OpCodes.Ldloc_1),
@@ -322,24 +351,6 @@ class PatchMissileExplosionForceOnPhysicsFrame
             new CodeInstruction(OpCodes.Ldfld, weaponNameField)
         };
         return BlastFragTranspiler.Inject(instructions, loader);
-    }
-}
-
-[HarmonyPatch(typeof(SoftBodyRotor), nameof(SoftBodyRotor.TakeShockwave))]
-class PatchSoftBodyTakeShockwave
-{
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-    {
-        return TakeDamageTranspiler.Inject(instructions, "Overpressure damage");
-    }
-}
-
-[HarmonyPatch(typeof(SwashRotor), nameof(SwashRotor.TakeShockwave))]
-class PatchSwashTakeShockwave
-{
-    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-    {
-        return TakeDamageTranspiler.Inject(instructions, "Overpressure damage");
     }
 }
 
@@ -357,11 +368,11 @@ class PatchShockwaveUpdate
 {
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        
-        var storageField = typeof(GwServerPlugin).GetField(nameof(GwServerPlugin.ShockwaveWeaponStorage), BindingFlags.Static | BindingFlags.Public);
+        var storageField = typeof(GwServerPlugin).GetField(nameof(GwServerPlugin.ShockwaveWeaponStorage),
+            BindingFlags.Static | BindingFlags.Public);
         var getMethod = typeof(ShockwaveWeaponTypeStorage).GetMethod(nameof(ShockwaveWeaponTypeStorage.Get));
         var wpnNameField = typeof(ShockwaveWeaponTypeLog).GetField(nameof(ShockwaveWeaponTypeLog.WeaponName));
-
+        
         var loader = new[]
         {
             new CodeInstruction(OpCodes.Ldsfld, storageField),
@@ -372,4 +383,3 @@ class PatchShockwaveUpdate
         return HasShockwaveReachedTranspiler.Inject(instructions, loader);
     }
 }
-

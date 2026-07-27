@@ -14,6 +14,7 @@ public static class PluginConfig
     internal const string RpcSection = "gRPC communication";
     internal const string BroadcastSection = "Broadcasts";
     internal const string GenericVoteServiceSection = "Generic Vote Service";
+    internal const string SteamWebApiSection = "Steam Web API";
 
     internal static ConfigEntry<bool>? ForceLowWreckDespawn;
     internal const bool DefaultForceLowWreckDespawn = true;
@@ -62,6 +63,8 @@ public static class PluginConfig
     internal static ConfigEntry<string>? Owner;
     internal const string DefaultOwner = "";
 
+    internal static ConfigEntry<string>? SteamWebApiKey;
+
     internal static List<string> ModeratorsList =>
         Moderators!.Value.Split(';').Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
 
@@ -103,6 +106,9 @@ public static class PluginConfig
         Owner = config.Bind(GeneralSection, "Owner", DefaultOwner,
             "The Steam ID of the server owner. This player has access to all commands, and cannot be removed from the admin list.");
         GwServerPlugin.Logger.LogDebug($"Owner: {Owner.Value}");
+
+        SteamWebApiKey = config.Bind(SteamWebApiSection, "Key", "",
+            "Steam Web API key used to look up player persona names. Keep this value private.");
 
         UseStaffPrefix = config.Bind(GeneralSection, "UseStaffPrefix", DefaultUseStaffPrefix,
             "Whether to use staff prefix or not.");

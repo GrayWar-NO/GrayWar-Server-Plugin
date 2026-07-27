@@ -90,7 +90,7 @@ public class BanCommand(ConfigFile config) : PermissionConfigurableCommand(confi
             banSteamID = player!.SteamID;
             Globals.NetworkManagerNuclearOptionInstance
                 .KickPlayerAsync(player, $"Banned for reason: {reason}").Forget();
-            response = $"Banned player {player.GetPlayerName().SanitizedName} for reason {reason}";
+            response = $"Banned player {player.GetDisplayName()} for reason {reason}";
         }
 
         if (duration is not null)

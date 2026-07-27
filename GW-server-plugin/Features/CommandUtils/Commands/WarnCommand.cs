@@ -61,7 +61,7 @@ public class WarnCommand(ConfigFile config): PermissionConfigurableCommand(confi
                 throw new VerificationException(
                     $"Could not find player {target}: validation was not called properly.");
             warnSteamID = player!.SteamID;
-            response = $"Warned player {player.GetPlayerName().SanitizedName} for reason {reason}";
+            response = $"Warned player {player.GetDisplayName()} for reason {reason}";
         }
 
         return UniTask.FromResult<(bool, string?)>((GwServerPlugin.WarnService.AddWarn(warnSteamID, reason), response));
