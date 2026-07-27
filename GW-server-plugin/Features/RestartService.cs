@@ -23,7 +23,7 @@ public static class RestartService
     private static CancellationTokenSource? _restartCts;
     
     /// <summary>
-    ///     Initializes the config variables for the restartservice.
+    ///     Initializes the config variables for the Restart Service.
     /// </summary>
     /// <param name="config"></param>
     public static void Initialize(ConfigFile config)
