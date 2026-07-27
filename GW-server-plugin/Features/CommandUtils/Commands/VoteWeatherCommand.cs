@@ -4,8 +4,8 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using NuclearOption.Networking;
+using NuclearOption.SavedMission.ObjectiveV2.Objectives;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
@@ -14,20 +14,18 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// <param name="config"></param>
 public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
 {
-    public override string Name { get; } = "voteweather";
-    public override string Description { get; } = "vote the weather";
-    public override string Usage { get; } = $"{PluginConfig.CommandPrefixChar}votetime <clear/rainy/stormy>";
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
+    /// <inheritdoc />
+    public override string Name => "voteweather";
+    /// <inheritdoc />
+    public override string Description => "vote the weather";
+    /// <inheritdoc />
+    public override string Usage => $"{PluginConfig.CommandPrefixChar}votetime <clear/rainy/stormy>";
+    /// <inheritdoc />
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 
+    /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)
     {
-        if (!GenericVoteService.CanStartVote())
-        {
-            ChatService.SendPrivateChatMessage("Cannot start a new vote, please wait for current vote to expire.",
-                player);
-            return UniTask.FromResult<bool>(false);
-        }
-
         if (args.Length != 1)
             return UniTask.FromResult(false);
         if (args[0] == "clear" || args[0] == "rainy" || args[0] == "stormy")
@@ -36,8 +34,15 @@ public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableComma
         return UniTask.FromResult(false);
     }
 
+    /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
+        if (!GenericVoteService.CanStartVote())
+        {
+            var response = "Cannot start a new vote, please wait for current vote to expire.";
+            return UniTask.FromResult<(bool success, string? response)>((false,response));
+        }
+        
         var weather = args[0];
 
         void OnPass()
@@ -69,6 +74,6 @@ public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableComma
             reason: $"Set to {weather}",
             targetName: "Weather"
         );
-        return UniTask.FromResult<(bool success, string? response)>((true, ""));
+        return UniTask.FromResult<(bool success, string? response)>((true, null));
     }
 }
