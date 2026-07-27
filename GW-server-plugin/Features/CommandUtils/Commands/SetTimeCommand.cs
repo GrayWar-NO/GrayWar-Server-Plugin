@@ -20,7 +20,7 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
     public override string Description => "set the time of day";
     
     /// <inheritdoc />
-    public override string Usage => $"{PluginConfig.CommandPrefixChar}settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
+    public override string Usage => $"settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
     
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
@@ -48,7 +48,6 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
         var timeOfDay = int.Parse(args[0]);
         LevelInfo.i.SetTimeOfDay(timeOfDay);
         var message = $"Time set to {timeOfDay}:00";
-        ChatService.SendChatMessageAsServer(message);
-        return UniTask.FromResult<(bool success, string? response)>((true, null));
+        return UniTask.FromResult<(bool success, string? response)>((true, message));
     }
 }
