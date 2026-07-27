@@ -14,11 +14,11 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "settime";
+    public override string Name => "settime";
     /// <inheritdoc />
-    public override string Description { get; } = "set the time";
+    public override string Description => "set the time";
     /// <inheritdoc />
-    public override string Usage { get; } = $"{PluginConfig.CommandPrefixChar}settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
+    public override string Usage => $"{PluginConfig.CommandPrefixChar}settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
