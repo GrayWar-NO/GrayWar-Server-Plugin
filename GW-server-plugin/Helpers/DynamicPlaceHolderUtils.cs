@@ -35,10 +35,10 @@ public static class DynamicPlaceholderUtils
     /// <returns> The string with the placeholders replaced. </returns>
     public static string ReplaceDynamicPlaceholders(string original, Player? player = null)
     {
-        if (player)
+        if (player != null)
         {
-            original = original.Replace(PlayerName, player!.GetPlayerName().SanitizedName);
-            original = original.Replace(PlayerNameCensored, player.GetNameOrCensored());
+            original = original.Replace(PlayerName, player.GetDisplayName());
+            original = original.Replace(PlayerNameCensored, player.GetDisplayName());
             original = original.Replace(SteamID, player.SteamID.ToString());
         }
         

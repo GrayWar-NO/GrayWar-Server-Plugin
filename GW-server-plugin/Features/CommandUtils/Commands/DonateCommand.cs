@@ -81,7 +81,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         player.AddAllocation(-sum);
         targetPlayer.AddAllocation(sum);
         
-        ChatService.SendPrivateChatMessage($"{player.GetPlayerName().SanitizedName} has given you {sum} (million)!", targetPlayer);
+        ChatService.SendPrivateChatMessage($"{player.GetDisplayName()} has given you {sum} (million)!", targetPlayer);
         
         // Logging
         var log = new DonationLog
@@ -93,7 +93,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         };
         GwServerPlugin.GrpcMgr.Client?.sendDonationAsync(log);
         
-        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully donated {sum} (million) to {targetPlayer.GetPlayerName().SanitizedName}."));
+        return UniTask.FromResult<(bool, string?)>((true, $"You have successfully donated {sum} (million) to {targetPlayer.GetDisplayName()}."));
     }
     
     /// <inheritdoc />

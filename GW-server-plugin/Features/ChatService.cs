@@ -105,7 +105,7 @@ public static class ChatService
             GwServerPlugin.Logger.LogWarning("Cannot send private chat message.");
             return;
         }
-        actualMessage = sender == null ? $"{PluginConfig.ServerBroadcastName!.Value}: {actualMessage}" : $"{sender.GetPlayerName().SanitizedName}: {actualMessage}";
+        actualMessage = sender == null ? $"{PluginConfig.ServerBroadcastName!.Value}: {actualMessage}" : $"{sender.GetDisplayName()}: {actualMessage}";
 
         while (actualMessage.Length > 128)
         {
@@ -114,7 +114,7 @@ public static class ChatService
         }
 
         Globals.ChatManagerInstance.RpcTargetServerMessage(targetPlayer.Owner, actualMessage, true);
-        GwServerPlugin.Logger.LogInfo($"Sent private message to {targetPlayer.GetPlayerName().SanitizedName}: {actualMessage}");
+        GwServerPlugin.Logger.LogInfo($"Sent private message to {targetPlayer.GetLogName()}: {actualMessage}");
     }
     
     /// <summary>

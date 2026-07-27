@@ -58,7 +58,7 @@ public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(con
                 throw new VerificationException(
                     $"Could not find player {target}: validation was not called properly.");
             banSteamID = player!.SteamID;
-            response = $"Unbanned player {player.GetPlayerName().SanitizedName}";
+            response = $"Unbanned player {player.GetDisplayName()}";
         }
 
         AllowBanListUtils.UnbanAndRemoveId(

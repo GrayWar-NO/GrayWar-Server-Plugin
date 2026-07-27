@@ -44,7 +44,7 @@ public class ListPlayersCommand(ConfigFile config) : PermissionConfigurableComma
             player.TryGetPlayer(out p);
             if (p != null)
             {
-                playerNames += $"{p.GetPlayerName().SanitizedName}, ";
+                playerNames += $"{p.GetDisplayName()}, ";
             }
         }
         var response = $"[{players.Count - 1}] ";

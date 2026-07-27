@@ -55,6 +55,32 @@ public class GwServerPlugin : BaseUnityPlugin
 
     internal static GrpcClientManager GrpcMgr = null!;
 
+    /// <summary>
+    /// Maps each connected player's SteamID to their current display name.
+    /// </summary>
+    internal static readonly Dictionary<ulong, string> ConnectedPlayerNames = [];
+
+    private static readonly object ConnectedPlayerNamesLock = new();
+
+    internal static bool TryGetConnectedPlayerSteamId(string playerName, out ulong steamId)
+    {
+        lock (ConnectedPlayerNamesLock)
+        {
+            var player = ConnectedPlayerNames.FirstOrDefault(pair =>
+                string.Equals(pair.Value, playerName, StringComparison.CurrentCultureIgnoreCase));
+            steamId = player.Key;
+            return player.Key != 0;
+        }
+    }
+
+    internal static bool TryGetConnectedPlayerName(ulong steamId, out string playerName)
+    {
+        lock (ConnectedPlayerNamesLock)
+        {
+            return ConnectedPlayerNames.TryGetValue(steamId, out playerName!);
+        }
+    }
+
     private void Awake()
     {
         ServerStartTime = DateTime.Now;
@@ -233,43 +259,74 @@ public class GwServerPlugin : BaseUnityPlugin
             return;
         }
         
-        Logger.LogDebug($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - joined the game");
         var originalName = player.GetPlayerName().SanitizedName;
-        PlayerUtils.ApplyOrRemoveStaffTag(player);
-        // Apply identification tag if not a staff member
+        lock (ConnectedPlayerNamesLock)
+        {
+            ConnectedPlayerNames[player.SteamID] = originalName;
+        }
+        // Assign an ID used by PlayerUtils.GetDisplayName for non-staff players.
         if (!PlayerUtils.IsStaff(player))
         {
             PlayerIdentifier.AssignNewPlayer(player);
-            PlayerUtils.ApplyIdentificationTag(player, PlayerIdentifier.GetPlayerId(player));
         }
-        Logger.LogInfo($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - joined the game");
-        var log = new JoinLeaveLog
-        {
-            SteamID = player.SteamID,
-            IsOn = true,
-            Name = originalName,
-            Time = DateTime.UtcNow.ToTimestamp()
-        };
-        GrpcMgr.Client?.SendPlayerActivityAsync(log);
+
+        _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
         
         if (RankCatchUpService.RankCatchUp!.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)
     {
-        Logger.LogInfo($"{player.GetPlayerName().SanitizedName} : {player.SteamID} - left the game");
+        var logName = player.GetLogName();
+        lock (ConnectedPlayerNamesLock)
+        {
+            ConnectedPlayerNames.Remove(player.SteamID);
+        }
+
+        Logger.LogInfo($"{logName} : {player.SteamID} - left the game");
         MissionVote.RemoveVoter(player.SteamID);
         PlayerIdentifier.RemovePlayer(player);
         var log = new JoinLeaveLog
         {
             SteamID = player.SteamID,
             IsOn = false,
-            Name = player.GetPlayerName().SanitizedName,
+            Name = logName,
             Time = DateTime.UtcNow.ToTimestamp(),
             Score = (float)Math.Round(player.PlayerScore, 2)
         };
         GrpcMgr.Client?.SendPlayerActivityAsync(log);
         RestartService.CheckIfNoPlayers();
+    }
+
+    private static async Task UpdateConnectedPlayerNameAsync(Player player, DateTime joinedAt)
+    {
+        var steamId = player.SteamID;
+        var username = await SteamWebApi.GetUsernameAsync(steamId).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(username)) return;
+
+        var playerIsStillConnected = false;
+        lock (ConnectedPlayerNamesLock)
+        {
+            // Do not re-add a player who left while the web request was pending.
+            if (ConnectedPlayerNames.ContainsKey(steamId))
+            {
+                ConnectedPlayerNames[steamId] = username!;
+                playerIsStillConnected = true;
+            }
+        }
+
+        if (!playerIsStillConnected) return;
+
+        var logName = player.GetLogName();
+        Logger.LogInfo($"{logName} : {steamId} - joined the game");
+        var log = new JoinLeaveLog
+        {
+            SteamID = steamId,
+            IsOn = true,
+            Name = logName,
+            Time = joinedAt.ToTimestamp()
+        };
+        GrpcMgr.Client?.SendPlayerActivityAsync(log);
     }
 
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
@@ -285,7 +342,7 @@ public class GwServerPlugin : BaseUnityPlugin
     
     internal static void OnPlayerTeamkill(Player killer, Player killed, string weaponName)
     {
-        OnTeamkill(killer, killed.GetPlayerName().SanitizedName, weaponName);
+        OnTeamkill(killer, killed.GetLogName(), weaponName);
     }
 
     /// <summary>

@@ -34,11 +34,13 @@ public static class GenericTranspiler
         MethodInfo original,
         MethodInfo replacement)
     {
+        var found = false;
         var loader = loadWeaponName.ToList();
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(original))
             {
+                found = true;
                 // stack before:
                 // Unit, PersistentID, float
 
@@ -55,6 +57,7 @@ public static class GenericTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {original}");
     }
 
     /// <summary>
@@ -136,11 +139,13 @@ public static class TakeDamageTranspiler
         IEnumerable<CodeInstruction> instructions,
         IEnumerable<CodeInstruction> loadWeaponName)
     {
+        var found = false;
         var loader = loadWeaponName.ToList();
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack before:
                 // Unit, PersistentID, float
 
@@ -157,6 +162,7 @@ public static class TakeDamageTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 
     /// <summary>
@@ -169,10 +175,12 @@ public static class TakeDamageTranspiler
         IEnumerable<CodeInstruction> instructions,
         string weaponName)
     {
+        var found = false;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack currently:
                 // Unit, PersistentID, float
 
@@ -188,6 +196,7 @@ public static class TakeDamageTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 }
 
@@ -234,11 +243,13 @@ public static class ArmorPenetrateTranspiler
         IEnumerable<CodeInstruction> instructions,
         IEnumerable<CodeInstruction> loadWeaponName)
     {
+        var found = false;
         var loader = loadWeaponName.ToList();
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack before:
                 // Unit, PersistentID, float
 
@@ -255,6 +266,7 @@ public static class ArmorPenetrateTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 
     /// <summary>
@@ -267,10 +279,12 @@ public static class ArmorPenetrateTranspiler
         IEnumerable<CodeInstruction> instructions,
         string weaponName)
     {
+        var found = true;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = false;
                 // stack currently:
                 // Unit, PersistentID, float
 
@@ -286,6 +300,7 @@ public static class ArmorPenetrateTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 }
 
@@ -311,10 +326,12 @@ public static class RecordDamageTranspiler
         IEnumerable<CodeInstruction> loadWeaponName)
     {
         var loader = loadWeaponName.ToList();
+        var found = false;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack before:
                 // Unit, PersistentID, float
 
@@ -331,6 +348,7 @@ public static class RecordDamageTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 
     /// <summary>
@@ -343,10 +361,12 @@ public static class RecordDamageTranspiler
         IEnumerable<CodeInstruction> instructions,
         string weaponName)
     {
+        var found = false;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack currently:
                 // Unit, PersistentID, float
                 yield return new CodeInstruction(OpCodes.Ldstr, weaponName);
@@ -361,6 +381,7 @@ public static class RecordDamageTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 }
 
@@ -385,11 +406,13 @@ public static class BlastFragTranspiler
         IEnumerable<CodeInstruction> instructions,
         IEnumerable<CodeInstruction> loadWeaponName)
     {
+        var found = false;
         var loader = loadWeaponName.ToList();
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 // stack before:
                 // Unit, PersistentID, float
 
@@ -407,6 +430,7 @@ public static class BlastFragTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 
     /// <summary>
@@ -419,13 +443,14 @@ public static class BlastFragTranspiler
         IEnumerable<CodeInstruction> instructions,
         string weaponName)
     {
+        var found = false;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
                 // stack currently:
                 // Unit, PersistentID, float
-
+                found = true;
                 yield return new CodeInstruction(OpCodes.Ldstr, weaponName);
 
                 // stack becomes:
@@ -438,6 +463,7 @@ public static class BlastFragTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 }
 
@@ -512,18 +538,13 @@ public static class TakeShockwaveTranspiler
         IEnumerable<CodeInstruction> instructions,
         string weaponName)
     {
+        var found = false;
         foreach (var instruction in instructions)
         {
             if (instruction.Calls(Original))
             {
-                // stack currently:
-                // Unit, PersistentID, float
-
+                found = true;
                 yield return new CodeInstruction(OpCodes.Ldstr, weaponName);
-
-                // stack becomes:
-                // Unit, PersistentID, float, string
-
                 yield return new CodeInstruction(OpCodes.Call, Replacement);
             }
             else
@@ -531,6 +552,7 @@ public static class TakeShockwaveTranspiler
                 yield return instruction;
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
     }
 }
 
@@ -581,10 +603,12 @@ public static class HasShockwaveReachedTranspiler
         var instrList = instructions.ToList();
         var loader = loadWeaponName.ToList();
         var rtList = new List<CodeInstruction>();
+        var found = false;
         foreach (var instruction in instrList)
         {
             if (instruction.Calls(Original))
             {
+                found = true;
                 rtList.AddRange(loader.Select(emit => emit.Clone()));
                 rtList.Add(new CodeInstruction(instruction.opcode, Replacement));
                 var index = rtList.Count - 1;
@@ -596,6 +620,7 @@ public static class HasShockwaveReachedTranspiler
                 rtList.Add(instruction);
             }
         }
+        if (!found) GwServerPlugin.Logger.LogError($"FAILED TO FIND TRANSPILE TARGET FOR {Original}");
         return rtList;
     }
 }
