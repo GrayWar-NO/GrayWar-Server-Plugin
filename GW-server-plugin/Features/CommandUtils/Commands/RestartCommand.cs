@@ -27,7 +27,7 @@ public class Restart(ConfigFile config) : PermissionConfigurableCommand(config),
     public UniTask<bool> Validate(Player player, string[] args)
     {
         if (args.Length == 1 && args[0] != "force" && args[0] != "f")
-            ChatService.SendPrivateChatMessage("Only valid argument is [f]orce. Please try again", player);
+            return UniTask.FromResult(false);
 
         return UniTask.FromResult(args.Length <= 1);
     }
