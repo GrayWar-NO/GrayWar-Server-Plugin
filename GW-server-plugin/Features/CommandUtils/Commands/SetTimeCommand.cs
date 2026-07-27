@@ -16,7 +16,7 @@ public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(c
     /// <inheritdoc />
     public override string Name => "settime";
     /// <inheritdoc />
-    public override string Description => "set the time";
+    public override string Description => "set the time of day";
     /// <inheritdoc />
     public override string Usage => $"{PluginConfig.CommandPrefixChar}settime <0-24hrs> (e.g '{PluginConfig.CommandPrefixChar}settime 18' for 18:00)";
     /// <inheritdoc />
