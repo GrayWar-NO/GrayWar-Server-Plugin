@@ -19,6 +19,7 @@ public static class RestartService
     private static ConfigEntry<uint> _forceRestartMaxInterval = null!;
 
     private static bool _awaitingRestart = false;
+
     /// <summary>
     /// Used to check if server is awaiting a restart after mission ends
     /// </summary>
@@ -28,16 +29,22 @@ public static class RestartService
         set
         {
             if (value)
+            {
                 GwServerPlugin.MissionVote.Inhibit("Awaiting server restart");
+                _ = RestartReminderService.StartRestartReminder();
+            }
             else
+            {
                 GwServerPlugin.MissionVote.ClearInhibit();
-            
+                RestartReminderService.CancelRestart();
+            }
+
             _awaitingRestart = value;
         }
     }
-    
+
     private static CancellationTokenSource? _restartCts;
-    
+
     /// <summary>
     ///     Initializes the config variables for the Restart Service.
     /// </summary>
@@ -53,7 +60,7 @@ public static class RestartService
         _noPlayersRestartTimeout = config.Bind("RestartService", "noPlayersRestartTimeout", 60u,
             "How long should the server wait to restart after the last player leaves (in seconds)");
     }
-    
+
     /// <summary>
     ///     Checks player count. If it's 0, start the restart timer.
     /// </summary>
@@ -65,7 +72,7 @@ public static class RestartService
         _restartCts = new CancellationTokenSource();
         _ = ScheduleRestartAsync(_restartCts.Token);
     }
-    
+
     /// <summary>
     ///     Cancel any pending restart.
     /// </summary>
@@ -77,7 +84,7 @@ public static class RestartService
         _restartCts.Cancel();
         _restartCts = null;
     }
-    
+
     private static async Task ScheduleRestartAsync(CancellationToken ct)
     {
         try
@@ -85,7 +92,7 @@ public static class RestartService
             GwServerPlugin.Logger.LogInfo(
                 $"No players. Waiting {_noPlayersRestartTimeout.Value} seconds to restart...");
             await Task.Delay(TimeSpan.FromSeconds(_noPlayersRestartTimeout.Value), ct);
-            
+
             // Re-check after delay
             if (PlayerUtils.GetPlayerCount() == 0)
             {
@@ -106,7 +113,7 @@ public static class RestartService
             _restartCts = null;
         }
     }
-    
+
     /// <summary>
     ///     Restarts the server via the docker socket.
     /// </summary>
@@ -121,14 +128,14 @@ public static class RestartService
             var dockerHost = Environment.GetEnvironmentVariable("DOCKER_HOST");
             var dockerURL = $"{dockerHost}/containers/{hostname}/restart";
             GwServerPlugin.Logger.LogInfo(dockerURL);
-            
+
             var process = new Process();
             process.StartInfo.FileName = "curl";
             process.StartInfo.Arguments = $"-X POST {dockerURL}";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
-            
+
             process.Start();
             return true;
         }
@@ -142,7 +149,7 @@ public static class RestartService
             AwaitingRestart = false;
         }
     }
-    
+
     /// <summary>
     ///     Forces restart if the server ever is awake for more than 24 hours.
     /// </summary>
@@ -154,5 +161,67 @@ public static class RestartService
         ChatService.SendChatMessageAsServer(
             "This server has been running for 24 hours. To keep everything running smoothly, it will restart after this mission ends");
         AwaitingRestart = true;
+    }
+}
+
+
+/// <summary>
+///     Sends server messages reminding of pending restart to players
+/// </summary>
+public static class RestartReminderService
+{
+    private static CancellationTokenSource? _restartCts;
+
+    /// <summary>
+    ///     starts the restart reminder
+    /// </summary>
+    public static async Task StartRestartReminder()
+    {
+        if (_restartCts != null)
+        {
+            GwServerPlugin.Logger.LogWarning("RestartReminderService has been called but already started");
+            return;
+        }
+
+        _restartCts = new CancellationTokenSource();
+        _ = ScheduleRestartReminder(_restartCts.Token);
+    }
+
+    /// <summary>
+    ///     schedules the restart reminder
+    /// </summary>
+    private static async Task ScheduleRestartReminder(CancellationToken ct)
+    {
+        try
+        {
+
+            while (true)
+            {
+                ChatService.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
+                await Task.Delay(TimeSpan.FromSeconds(180), ct);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+        catch (Exception e)
+        {
+            GwServerPlugin.Logger.LogError(e);
+        }
+        finally
+        {
+            _restartCts = null;
+        }
+    }
+
+    /// <summary>
+    ///     Cancel Restart Reminder.
+    /// </summary>
+    public static void CancelRestart()
+    {
+        if (_restartCts == null) return;
+        _restartCts.Cancel();
+        _restartCts = null;
+        ChatService.SendChatMessageAsServer("WARNING: Server restart has been canceled");
     }
 }
