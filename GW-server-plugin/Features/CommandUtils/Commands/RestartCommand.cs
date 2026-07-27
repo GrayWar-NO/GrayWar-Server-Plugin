@@ -18,10 +18,10 @@ public class Restart(ConfigFile config): PermissionConfigurableCommand(config), 
     public override string Name => "restart";
 
     /// <inheritdoc />
-    public override string Description => "restart server";
+    public override string Description => "restart server after mission ends";
 
     /// <inheritdoc />
-    public override string Usage => "/restart";
+    public override string Usage => "/restart /restart [f]orce immediate restart";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);
@@ -39,7 +39,13 @@ public class Restart(ConfigFile config): PermissionConfigurableCommand(config), 
     {
         try
         {
-            return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), "Server restarting..."));
+            if (args[0] == "force" || args[0] == "f")
+            {
+                return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), "Server restarting..."));
+            }
+            
+            RestartService.AwaitingRestart = true;
+            return UniTask.FromResult<(bool, string ?)>((true, "Server has scheduled restart after mission"));
         }
         catch (Exception e)
         {
@@ -50,5 +56,4 @@ public class Restart(ConfigFile config): PermissionConfigurableCommand(config), 
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
-
 }
