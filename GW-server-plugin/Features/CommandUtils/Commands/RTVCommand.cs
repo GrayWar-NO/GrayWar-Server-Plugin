@@ -40,11 +40,6 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)
     {
-        if (RestartService.AwaitingRestart)
-        {
-            ChatService.SendPrivateChatMessage("Mission voting is disabled. Server will restart after mission", player);
-            return UniTask.FromResult(false);
-        }
         if (args.Length is 0 or > 2 || 
             !YesValues.Contains(args[0]) && !NoValues.Contains(args[0])) return UniTask.FromResult(false);
         return UniTask.FromResult(args.Length <= 1 || int.TryParse(args[1], out _));
