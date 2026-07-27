@@ -13,6 +13,7 @@ public static class PluginConfig
     internal const string GeneralSection = "General";
     internal const string RpcSection = "gRPC communication";
     internal const string BroadcastSection = "Broadcasts";
+    internal const string GenericVoteServiceSection = "Generic Vote Service";
 
     internal static ConfigEntry<bool>? ForceLowWreckDespawn;
     internal const bool DefaultForceLowWreckDespawn = true;

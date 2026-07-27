@@ -31,6 +31,13 @@ public class MissionSaveLoadPatches
         GwServerPlugin.WeatherRandomizer.Apply(ref mission);
         ForceLowWreckDespawn(ref mission);
         MissionEvents.OnMissionLoad(mission);
+        CancelVote();
+    }
+    
+    private static void CancelVote()
+    {
+        if (GenericVoteService.ActiveVote != null && GenericVoteService.ActiveVote.CancelIfMissionChanges)
+            GenericVoteService.ActiveVote.FinaliseVote(false);
     }
     
     private static void ForceLowWreckDespawn(ref Mission mission)
