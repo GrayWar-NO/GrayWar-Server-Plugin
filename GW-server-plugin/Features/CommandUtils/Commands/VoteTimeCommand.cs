@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using NuclearOption.Networking;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
@@ -15,37 +14,37 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 [AutoCommand]
 public class VoteTimeCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
 {
-    public override string Name { get; } = "votetime";
-    public override string Description { get; } = "vote the time";
+    /// <inheritdoc />
+    public override string Name => "votetime";
+    /// <inheritdoc />
+    public override string Description => "vote the time of day";
+    /// <inheritdoc />
+    public override string Usage =>
+        $"votetime <24hr format 0-24> (e.g '{PluginConfig.CommandPrefixChar}votetime 18' for 18:00)";
+    /// <inheritdoc />
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 
-    public override string Usage { get; } =
-        $"{PluginConfig.CommandPrefixChar}votetime <24hr format 0-24> (e.g '{PluginConfig.CommandPrefixChar}votetime 18' for 18:00)";
-
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
-
+    /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)
     {
-        if (!GenericVoteService.CanStartVote())
-        {
-            ChatService.SendPrivateChatMessage("Cannot start a new vote, please wait for current vote to expire.",
-                player);
-            return UniTask.FromResult(false);
-        }
-
         if (args.Length != 1)
             return UniTask.FromResult(false);
         if ((args.Length == 1 && !int.TryParse(args[0], out _)) || (args.Length == 1 && int.Parse(args[0]) < 0) ||
             (args.Length == 1 && int.Parse(args[0]) > 24))
-        {
-            ChatService.SendPrivateChatMessage("Number invalid. Please Try again.", player);
             return UniTask.FromResult(false);
-        }
 
         return UniTask.FromResult(true);
     }
 
+    /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
+        if (!GenericVoteService.CanStartVote())
+        {
+            var response = "Cannot start a new vote, please wait for current vote to expire.";
+            return UniTask.FromResult<(bool success, string? response)>((false,response));
+        }
+
         var timeOfDay = int.Parse(args[0]);
 
         void OnPass()
