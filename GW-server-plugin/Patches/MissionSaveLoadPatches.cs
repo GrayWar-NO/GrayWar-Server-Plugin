@@ -32,8 +32,13 @@ public class MissionSaveLoadPatches
         ForceLowWreckDespawn(ref mission);
         MissionEvents.OnMissionLoad(mission);
         
-        if (VoteSession.Instance != null && VoteSession.Instance.CancelIfMissionChanges)
-            VoteSession.Instance.FinaliseVote(false);
+        CancelVoteSession();
+        
+    }
+
+    private static void CancelVoteSession()
+    {
+        if (VoteSession.Instance != null && VoteSession.Instance.CancelIfMissionChanges) VoteSession.CancelVoteSession();
     }
     
     private static void ForceLowWreckDespawn(ref Mission mission)
