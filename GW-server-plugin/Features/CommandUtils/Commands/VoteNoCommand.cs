@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class VoteNoCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
+public class VoteNoCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "n";
@@ -20,7 +20,7 @@ public class VoteNoCommand(ConfigFile config) : PermissionConfigurableCommand(co
     
     /// <inheritdoc />
     public override string Usage => $"n";
-
+    
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
@@ -29,7 +29,7 @@ public class VoteNoCommand(ConfigFile config) : PermissionConfigurableCommand(co
     {
         return UniTask.FromResult(true);
     }
-
+    
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
@@ -38,7 +38,7 @@ public class VoteNoCommand(ConfigFile config) : PermissionConfigurableCommand(co
             VoteSession.Instance.HandleVote(player, false, out var result);
             return UniTask.FromResult(result);
         }
-
+        
         return new UniTask<(bool success, string? response)>((false, "Vote failed, no active vote session"));
     }
 }

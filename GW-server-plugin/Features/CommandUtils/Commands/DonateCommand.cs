@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
+public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand
 {
 
     /// <inheritdoc />

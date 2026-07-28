@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class NextMissionCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class NextMissionCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "nextmission";

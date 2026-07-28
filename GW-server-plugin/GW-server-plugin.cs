@@ -131,20 +131,21 @@ public class GwServerPlugin : BaseUnityPlugin
             var commandTypes = assembly.GetTypes()
                 .Where(t => t.IsClass
                             && !t.IsAbstract
-                            && t.IsSubclassOf(typeof(PermissionConfigurableCommand)));
+                            && t.IsSubclassOf(typeof(ConfigurableCommand)));
 
             foreach (var type in commandTypes)
             {
                 try
                 {
-                    var commandInstance = (PermissionConfigurableCommand)Activator.CreateInstance(type, Config);
+                    var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
+
+                    if (!commandInstance.Enable) continue;
 
                     CommandService.AddCommand(commandInstance);
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
                 catch (Exception ex)
                 {
-                    // It's good practice to log this in BepInEx so one broken command doesn't break them all
                     Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
                 }
             }

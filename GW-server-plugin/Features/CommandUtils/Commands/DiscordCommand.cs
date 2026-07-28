@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Gives instructions on how to join the discord server
 /// </summary>
 [AutoCommand]
-public class DiscordCommand: PermissionConfigurableCommand, IGameCommand
+public class DiscordCommand: ConfigurableCommand, IGameCommand
 {
     /// <summary>
     ///     Default builder for <see cref="DiscordCommand"/>

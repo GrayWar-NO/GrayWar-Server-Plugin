@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Vote for specific time
 /// </summary>
 /// <param name="config"></param>
-public class VoteWeatherCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
+public class VoteWeatherCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "voteweather";

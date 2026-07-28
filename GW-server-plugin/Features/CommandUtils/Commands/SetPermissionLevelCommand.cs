@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class SetPermissionLevelCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand
+public class SetPermissionLevelCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "setpermissionlevel";
