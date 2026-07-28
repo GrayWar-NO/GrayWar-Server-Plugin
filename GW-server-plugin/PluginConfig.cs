@@ -13,6 +13,7 @@ public static class PluginConfig
     internal const string GeneralSection = "General";
     internal const string RpcSection = "gRPC communication";
     internal const string BroadcastSection = "Broadcasts";
+    internal const string GenericVoteServiceSection = "Generic Vote Service";
     internal const string SteamWebApiSection = "Steam Web API";
 
     internal static ConfigEntry<bool>? ForceLowWreckDespawn;
@@ -234,7 +235,7 @@ public static class PluginConfig
     {
         var adminsList = AdminsList.ToHashSet();
         adminsList.Add(steamId.ToString());
-        Admins?.Value = string.Join(";", adminsList);
+        Admins!.Value = string.Join(";", adminsList);
     }
     
     private static void AddMod(ulong steamId)

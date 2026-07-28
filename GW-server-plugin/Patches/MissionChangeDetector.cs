@@ -59,8 +59,6 @@ public class MissionChangeDetector
             Time = DateTime.UtcNow.ToTimestamp()
         };
         GwServerPlugin.GrpcMgr.Client?.SendMissionChangeAsync(log);
-        if (!RestartService.AwaitingRestart) return;
-        RestartService.Restart();
         
         GwServerPlugin.WarnService.ClearWarns();
     }

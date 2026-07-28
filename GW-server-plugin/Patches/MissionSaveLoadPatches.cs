@@ -1,4 +1,5 @@
 ﻿using GW_server_plugin.Events;
+using GW_server_plugin.Features;
 using HarmonyLib;
 using NuclearOption.SavedMission;
 
@@ -22,11 +23,22 @@ public class MissionSaveLoadPatches
         ref string error,
         ref bool __result)
     {
+        if (RestartService.AwaitingRestart)
+            RestartService.Restart();
+        
         if (!__result) return;
         if (mission == null) return;
         GwServerPlugin.WeatherRandomizer.Apply(ref mission);
         ForceLowWreckDespawn(ref mission);
         MissionEvents.OnMissionLoad(mission);
+        
+        CancelVoteSession();
+        
+    }
+
+    private static void CancelVoteSession()
+    {
+        if (VoteSession.Instance != null && VoteSession.Instance.CancelIfMissionChanges) VoteSession.CancelVoteSession();
     }
     
     private static void ForceLowWreckDespawn(ref Mission mission)
