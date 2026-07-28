@@ -4,16 +4,26 @@ using NuclearOption.Networking;
 using UnityEngine;
 
 namespace GW_server_plugin.Features;
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+/// <summary>
+/// Ranks up player during late-game joins
+/// </summary>
 public static class RankCatchUpService
 {
     internal static ConfigEntry<bool> RankCatchUp = null!;
+    /// <summary>
+    /// Initialize config properties
+    /// </summary>
+    /// <param name="config"></param>
     public static void Initialize(ConfigFile config)
     {
         RankCatchUp = config.Bind(PluginConfig.GeneralSection, "Rank Catchup", false,
             "On late game join, player will level up their rank based on current mission time");
     }
+    /// <summary>
+    /// Ranks up player
+    /// </summary>
+    /// <param name="player"></param>
     public static void CatchUpPlayer(Player player)
     {
         var currentMissionTime = Time.timeSinceLevelLoad;
