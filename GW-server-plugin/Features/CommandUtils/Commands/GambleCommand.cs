@@ -1,12 +1,10 @@
 using System;
-using Cysharp.Threading.Tasks;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
-using GW_server_plugin.Features;
-using GW_server_plugin.Features.CommandUtils;
+using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.CritzOS;
+namespace GW_server_plugin.Features.CommandUtils.Commands;
 
 /// <summary>
 ///   Gamble
