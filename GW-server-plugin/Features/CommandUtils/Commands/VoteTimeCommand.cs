@@ -71,7 +71,7 @@ public class VoteTimeCommand(ConfigFile config) : PermissionConfigurableCommand(
             OnPass,
             true,
             false,
-            reason: "Set to {timeOfDay}:00",
+            reason: $"Set to {timeOfDay}:00",
             targetName: "Time"
         );
         return UniTask.FromResult<(bool success, string? response)>((true, null));
