@@ -65,7 +65,7 @@ internal static class ChatManagerPatches
         GwServerPlugin.Logger.LogInfo(allChat
             ? $"{player.GetDisplayName()} sent message: {message}"
             : $"{player.GetDisplayName()} sent message in {factionName} chat: {message}");
-
+        
         var log = new ChatLog
         {
             MessageChannel = allChat ? "all" : factionName,
@@ -73,13 +73,51 @@ internal static class ChatManagerPatches
             Message = message,
             SenderSteamID = player.SteamID
         };
-        GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
+        GwServerPlugin.GrpcMgr?.ChatLogStream?.WriteAsync(log);
+        
+        // --- SERVER SIDE MESSAGE VALIDATION ---
+        // This is taken from the original function that we skip.
+        if (!Globals.ChatManagerInstance.ValidateChatMessageSize(message))
+        {
+            sender.SetError(1, NuclearOptionPlayerErrorFlags.MessagingSpam);
+        }
+        else
+        {
+            Player player1;
+            if (!sender.TryGetPlayer<Player>(out player1))
+            {
+                sender.SetError(100, PlayerErrorFlags.Critical);
+                sender.Disconnect();
+            }
+            else if (!Globals.ChatManagerInstance.CheckRateLimit(player1, true, true))
+            {
+                sender.SetError(1, NuclearOptionPlayerErrorFlags.MessagingSpam);
+            }
+        }
+        // ---
+        
+        var displayName = PlayerUtils.GetDisplayName(player);
         if (allChat)
         {
-            var displayName = PlayerUtils.GetDisplayName(player);
             Globals.ChatManagerInstance.RpcServerMessage($"{displayName}: {message}", true);
-            return false;
         }
-        return true;
+        else
+        {
+            var senderHq = player.HQ;
+            if (senderHq == null)
+            {
+                GwServerPlugin.Logger.LogWarning($"Could not send team chat for {player.SteamID}: player has no faction HQ.");
+                return false;
+            }
+
+            foreach (var authenticatedPlayer in Globals.AuthenticatedPlayers)
+            {
+                if (!authenticatedPlayer.TryGetPlayer(out var recipient) || recipient?.HQ != senderHq)
+                    continue;
+
+                Globals.ChatManagerInstance.RpcTargetServerMessage(authenticatedPlayer, $"<color=#57ffff>(ally)</color> {displayName}: {message}", true);
+            }
+        }
+        return false;
     }
 }

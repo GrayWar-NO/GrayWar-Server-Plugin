@@ -24,8 +24,18 @@ public class MissionChangeDetector
     static async UniTask<bool> AwaitResult(Mission mission, UniTask<bool> originalTask)
     {
         bool result = await originalTask;
+        if (!result) return false;
 
-        OnMissionChanged(mission);
+        try
+        {
+            OnMissionChanged(mission);
+        }
+        catch (Exception exception)
+        {
+            // Mission reporting is optional and must never make the game server
+            // fail a successfully loaded mission.
+            GwServerPlugin.Logger.LogError($"Failed to report mission change: {exception}");
+        }
 
         return result;
     }
@@ -58,8 +68,8 @@ public class MissionChangeDetector
             MissionName = name,
             Time = DateTime.UtcNow.ToTimestamp()
         };
-        GwServerPlugin.GrpcMgr.Client?.SendMissionChangeAsync(log);
+        GwServerPlugin.GrpcMgr?.Client?.SendMissionChangeAsync(log);
         
-        GwServerPlugin.WarnService.ClearWarns();
+        GwServerPlugin.WarnService?.ClearWarns();
     }
 }   
