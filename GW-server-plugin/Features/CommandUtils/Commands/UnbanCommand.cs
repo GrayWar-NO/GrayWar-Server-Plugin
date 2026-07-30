@@ -18,13 +18,13 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class UnbanCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "unban";
+    public override string Name => "unban";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Unbans a player from the server.";
+    public override string Description => "Unbans a player from the server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "unban <Player (by name, steamID or playerID)>";
+    public override string Usage => "unban <Player (by name, steamID or playerID)>";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

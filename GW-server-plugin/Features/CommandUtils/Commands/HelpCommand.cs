@@ -15,14 +15,14 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "help";
+    public override string Name => "help";
 
     /// <inheritdoc />
-    public override string Description { get; } =
+    public override string Description =>
         "Get help on other commands, or the list of commands you have available.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "help [command name]";
+    public override string Usage => "help <command name>";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

@@ -31,7 +31,7 @@ public class DiscordCommand: PermissionConfigurableCommand, IGameCommand
     public override string Description => "Get instructions on how to join the discord server.";
 
     /// <inheritdoc />
-    public override string Usage => "/discord (takes no arguments)";
+    public override string Usage => "discord (takes no arguments)";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);
