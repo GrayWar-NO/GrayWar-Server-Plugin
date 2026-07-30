@@ -176,7 +176,7 @@ public static class CommandService
 
         GwServerPlugin.Logger.LogWarning(
             $"Failed validation for command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments for command {command.Name}\n{PluginConfig.CommandPrefix!.Value}{command.Usage}";
+        response = $"Invalid arguments for command {command.Name}\nDescription: {command.Description}\n{PluginConfig.CommandPrefix!.Value}{command.Usage}";
         return (false, response);
     }
 }
