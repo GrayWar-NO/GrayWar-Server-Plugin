@@ -106,8 +106,8 @@ public class GwServerPlugin : BaseUnityPlugin
         RankCatchUpService.Initialize(Config);
         Logger.LogInfo("Initialized RankCatchUpService");
         
-        VoteSession.Initialize(Config);
-        Logger.LogInfo("Initialized VoteSession");
+        // VoteSession.Initialize(Config);
+        // Logger.LogInfo("Initialized VoteSession");
         
         try
         {
@@ -273,7 +273,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
         
-        if (RankCatchUpService.RankCatchUp!.Value) RankCatchUpService.CatchUpPlayer(player);
+        if (RankCatchUpService.RankCatchUp.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)
