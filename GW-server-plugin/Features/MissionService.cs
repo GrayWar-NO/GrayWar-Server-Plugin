@@ -208,4 +208,13 @@ public static class MissionService
         if (missionOpt == null) return false;
         return await StartMission(missionOpt.Value);
     }
+    
+    /// <summary>
+    ///     Select the next mission on the server.
+    /// </summary>
+    /// <param name="option"> The mission to start. </param>
+    public static async Task SetNextMission(MissionOptions option)
+    {
+        await Globals.DedicatedServerManagerInstance.SetNextMissionAsync(option);
+    }
 }

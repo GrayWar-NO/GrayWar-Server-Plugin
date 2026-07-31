@@ -14,13 +14,6 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 [AutoCommand]
 public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
 {
-    private static readonly HashSet<string> YesValues =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "y",
-            "yes",
-        };
-
     private static readonly HashSet<string> NoValues =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -32,33 +25,42 @@ public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config
     public override string Name => "rtv";
 
     /// <inheritdoc />
-    public override string Description => "Command to vote on changing the mission.\nMissionIDs for voting for a specific mission can be found with /missions.\nChooses the next mission in rotation by default.";
+    public override string Description =>
+        "Command to vote on queuing the next mission.\nMissionIDs for voting for a specific mission can be found with /missions.";
 
     /// <inheritdoc />
-    public override string Usage => "rtv <(Y)es/(N)o> <Optional int missionID>";
+    public override string Usage =>
+        $"rtv <missionID> or {PluginConfig.CommandPrefixChar}rtv <(N)o> to keep next mission as is";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)
     {
-        if (args.Length is 0 or > 2 || 
-            !YesValues.Contains(args[0]) && !NoValues.Contains(args[0])) return UniTask.FromResult(false);
-        return UniTask.FromResult(args.Length <= 1 || int.TryParse(args[1], out _));
+        return UniTask.FromResult(args.Length == 1 && (NoValues.Contains(args[0]) || int.TryParse(args[0], out _)));
     }
 
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
-        int? missionID;
-        if (args.Length == 1) missionID = null;    
-        else missionID = int.Parse(args[1]);
-        var yes = YesValues.Contains(args[0]);
-        
-        var result = GwServerPlugin.MissionVote.RegisterRtv(player.SteamID, yes, missionID, out var registerResponse );
+        var missionCount = MissionService.GetAllAvailableMissionOptions().Length;
+        int missionID = -1; // Mission ID will be ignored anyways if a NO vote
+        var yes = true;
+
+        if (NoValues.Contains(args[0]))
+            yes = false;
+        else
+            missionID = int.Parse(args[0]);
+
+        if (missionID < 0 || missionID >= missionCount)
+            return UniTask.FromResult<(bool, string?)>((false, "Invalid mission ID. Pick a valid one."));
+
+        var result = GwServerPlugin.MissionVote.RegisterRtv(player.SteamID, yes, missionID, out var registerResponse);
         var missionText = missionID == null ? "next mission in rotation" : $"mission with ID {missionID}";
-        registerResponse ??= result ? $"You have successfully voted for the {missionText}." : "Your mission vote was unsuccessful.";
+        registerResponse ??= result
+            ? $"You have successfully voted for the {missionText}."
+            : "Your mission vote was unsuccessful.";
         return UniTask.FromResult<(bool, string?)>((result, registerResponse));
     }
-    
+
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

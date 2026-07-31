@@ -47,7 +47,6 @@ internal sealed class MissionVoteService(ConfigFile config)
     private readonly Dictionary<int, List<ulong>> _missionVotes = new();
 
     private MissionOptions[] Missions { get; set; } = null!;
-    private int DefaultMissionIndex { get; set; }
 
     private MissionOptions MapVoteWinner { get; set; }
 
@@ -70,7 +69,7 @@ internal sealed class MissionVoteService(ConfigFile config)
         _rtvInhibited = false;
     }
 
-    public bool RegisterRtv(ulong steamid, bool yes, int? missionIndex, out string? result)
+    public bool RegisterRtv(ulong steamid, bool yes, int missionIndex, out string? result)
     {
         if (_rtvInhibited)
         {
@@ -87,11 +86,10 @@ internal sealed class MissionVoteService(ConfigFile config)
             }
             StartRtv();
         }
-        missionIndex ??= DefaultMissionIndex;
         RemoveVoter(steamid);
         if (yes)
         {
-            RegisterMissionVote(steamid, missionIndex.Value);
+            RegisterMissionVote(steamid, missionIndex);
             _yesVotes.Add(steamid);
         }
         else
@@ -107,9 +105,6 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void StartRtv()
     {
         Missions = MissionService.GetAllAvailableMissionOptions();
-        // ReSharper disable once UsageOfDefaultStructEquality
-        DefaultMissionIndex = Array.IndexOf(Missions, MissionService.GetNextMissionOptions(false) ?? Missions[0]);
-        if (DefaultMissionIndex == -1) DefaultMissionIndex = 0;
         ResetRtv();
         ChatService.SendChatMessageAsServer("-- Rock-The-Vote --");
         ChatService.SendChatMessageAsServer("Mission voting has started!");
@@ -146,7 +141,6 @@ internal sealed class MissionVoteService(ConfigFile config)
     private void RegisterMissionVote(ulong steamid, int missionIndex)
     {
         if (!_rtvActive) return;
-        if (missionIndex < 0 || missionIndex >= Missions.Length) return;
         _missionVotes.TryGetValue(missionIndex, out var missionVotes);
         if (missionVotes == null)
         {
@@ -188,7 +182,7 @@ internal sealed class MissionVoteService(ConfigFile config)
             ClearInhibit();
             ChatService.SendChatMessageAsServer($"Switching map now!");
             MissionService.ConsumeNextMap();
-            _ = MissionService.StartMission(MapVoteWinner);
+            _ = MissionService.SetNextMission(MapVoteWinner);
         }
         catch (Exception e)
         {
