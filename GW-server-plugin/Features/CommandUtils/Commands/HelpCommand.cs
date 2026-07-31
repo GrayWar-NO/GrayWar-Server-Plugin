@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "help";
+    public override string Name {get; } = "help";
 
     /// <inheritdoc />
     public override string Description { get; } =
@@ -41,7 +41,9 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
         var accessibleCommands = CommandService.GetGameCommands()
             .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
         var commandNames = accessibleCommands.Select(c => c.Name).ToList();
-        return UniTask.FromResult<(bool, string?)>((true, $"You have access to the following commands: {string.Join(", ", commandNames)}"));
+        return UniTask.FromResult<(bool, string?)>((true, 
+            $"You have access to the following commands:{string.Join(", ", commandNames)}" +
+            $"\n{PluginConfig.CommandPrefixChar}{Usage} for command details"));
     }
 
     /// <inheritdoc />
