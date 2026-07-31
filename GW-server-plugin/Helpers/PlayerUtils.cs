@@ -8,6 +8,7 @@ using Mirage;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
 using Steamworks;
+using UnityEngine;
 
 namespace GW_server_plugin.Helpers;
 
@@ -48,13 +49,30 @@ public static class PlayerUtils
     public static string GetDisplayName(this Player player)
     {
         var name = player.GetLogName();
-
+        
+        if (TryGetFactionColor(player, out var factionColor))
+            name = $"<color=#{ColorUtility.ToHtmlStringRGB(factionColor)}>{name}</color>";
+        
         if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
             return $"{PluginConfig.StaffPrefix!.Value} {name}";
 
         return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
             ? $"[{id}] {name}"
             : name;
+    }
+
+    private static bool TryGetFactionColor(Player player, out Color factionColor)
+    {
+        factionColor = default;
+        var faction = player.HQ?.faction;
+        if (faction == null ||
+            string.Equals(faction.factionName, FactionHelper.NO_FACTION, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(faction.factionName, FactionHelper.NEUTRAL_FACTION, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(faction.factionName, "Spectator", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        factionColor = faction.color;
+        return true;
     }
 
     /// <summary>
