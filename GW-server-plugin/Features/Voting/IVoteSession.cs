@@ -14,6 +14,11 @@ public interface IVoteSession
     string SessionName { get; }
     
     /// <summary>
+    ///     Short name for the current vote session.
+    /// </summary>
+    string ShortSessionName { get; }
+    
+    /// <summary>
     ///     Reason the vote session was started for.
     /// </summary>
     string? Reason { get; }
@@ -41,6 +46,14 @@ public interface IVoteSession
     /// <param name="response">Descriptive response string</param>
     /// <returns>true if adding a vote was successful</returns>
     bool TryAddVote(Player voter, string outcome, out string response);
+    
+    /// <summary>
+    ///     Returns true if the given outcome is a valid vote, false otherwise.
+    /// </summary>
+    /// <param name="voter"></param>
+    /// <param name="outcome"></param>
+    /// <returns></returns>
+    bool ValidateVote(Player voter, string outcome);
     
     /// <summary>
     /// Gets all outcome strings for this session.

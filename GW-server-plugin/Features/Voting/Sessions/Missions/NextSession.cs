@@ -10,7 +10,7 @@ public sealed class NextSession
     : ConfigurableVoteSession<EquatableMissionOptions>
 {
     /// <inheritdoc />
-    private NextSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
+    public NextSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
         base(reason)
     {
         InitializeConfig(config, $"{SessionName} vote session");
@@ -26,6 +26,9 @@ public sealed class NextSession
     
     /// <inheritdoc />
     public override string SessionName => "Next Mission";
+    
+    /// <inheritdoc />
+    public override string ShortSessionName => "next";
     
     /// <inheritdoc />
     protected override string ValueStringGetter(EquatableMissionOptions value) => value.Options.Key.Name;

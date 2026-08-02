@@ -21,6 +21,7 @@ public abstract class VoteSession<T>(string? reason)
     where T : struct, IEquatable<T>
 {
     private Player _initiator = null!;
+    
     // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<string> NoValues =
         new(StringComparer.OrdinalIgnoreCase)
@@ -75,6 +76,8 @@ public abstract class VoteSession<T>(string? reason)
     /// <inheritdoc />
     public abstract string SessionName { get; }
     
+    public abstract string ShortSessionName { get; }
+    
     /// <inheritdoc />
     public string? Reason { get; } = reason;
     
@@ -83,6 +86,12 @@ public abstract class VoteSession<T>(string? reason)
     {
         TimeEvents.Every30Seconds -= OnTimerTick;
         _votes.Clear();
+    }
+    
+    /// <inheritdoc />
+    public bool ValidateVote(Player voter, string outcome)
+    {
+        return NoValues.Contains(outcome) || YesValues.Contains(outcome) || TryParseValue(outcome, out _);
     }
     
     /// <inheritdoc />
@@ -130,8 +139,9 @@ public abstract class VoteSession<T>(string? reason)
     /// <inheritdoc />
     public IEnumerable<string> GetAllOutcomes()
     {
-        List<string> result = [$"({string.Join("/", NoValues)})", $"({string.Join("/", NoValues)} => {ValueStringGetter(DefaultVote)})"];
-
+        List<string> result =
+            [$"({string.Join("/", NoValues)})", $"({string.Join("/", NoValues)} => {ValueStringGetter(DefaultVote)})"];
+        
         if (AcceptableValues is AcceptableValueList<T> listValues)
         {
             result.AddRange(listValues.AcceptableValues.Select(ValueStringGetter));

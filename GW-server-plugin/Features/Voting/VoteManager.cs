@@ -10,7 +10,7 @@ public static class VoteManager
     /// <summary>
     ///     Currently in use votesession or null
     /// </summary>
-    private static IVoteSession? _session;
+    public static IVoteSession? Session;
     
     /// <summary>
     ///     Starts a voteSession.
@@ -23,10 +23,10 @@ public static class VoteManager
     public static bool TryStartVote(IVoteSession session, Player initiator, string outcome, out string? response)
     {
         response = null;
-        if (_session != null) return false;
-        _session = session;
-        _session.Start(initiator);
-        return _session.TryAddVote(initiator, outcome, out response);
+        if (Session != null) return false;
+        Session = session;
+        Session.Start(initiator);
+        return Session.TryAddVote(initiator, outcome, out response);
     }
     
     /// <summary>
@@ -34,7 +34,7 @@ public static class VoteManager
     /// </summary>
     public static void CancelVote()
     {
-        _session?.Destroy();
-        _session = null;
+        Session?.Destroy();
+        Session = null;
     }
 }

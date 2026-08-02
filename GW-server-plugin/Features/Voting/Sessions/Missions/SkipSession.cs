@@ -9,7 +9,7 @@ public sealed class SkipSession
     : ConfigurableVoteSession<EquatableMissionOptions>
 {
     /// <inheritdoc />
-    private SkipSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
+    public SkipSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
         base(reason)
     {
         InitializeConfig(config, $"{SessionName} vote session");
@@ -25,6 +25,9 @@ public sealed class SkipSession
     
     /// <inheritdoc />
     public override string SessionName => "Mission Skip";
+    
+    /// <inheritdoc />
+    public override string ShortSessionName => "skip";
     
     /// <inheritdoc />
     protected override string ValueStringGetter(EquatableMissionOptions value) => value.Options.Key.Name;
