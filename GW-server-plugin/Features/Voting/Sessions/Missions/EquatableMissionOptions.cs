@@ -15,18 +15,6 @@ public readonly struct EquatableMissionOptions(MissionOptions options) : IEquata
     public MissionOptions Options { get; } = options;
     
     /// <inheritdoc />
-    public override bool Equals(object? obj)
-    {
-        return obj is EquatableMissionOptions other && Equals(other);
-    }
-    
-    /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        return Options.Key.GetHashCode();
-    }
-    
-    /// <inheritdoc />
     public bool Equals(EquatableMissionOptions other) =>
         Options.Key.Equals(other.Options.Key) && Options.MaxTime.Equals(other.Options.MaxTime);
 }

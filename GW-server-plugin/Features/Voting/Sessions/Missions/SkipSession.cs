@@ -12,11 +12,9 @@ public sealed class SkipSession
     : ConfigurableVoteSession<SkipSession, EquatableMissionOptions>
 {
     /// <inheritdoc />
-    public SkipSession(ConfigFile config, string? reason) :
+    public SkipSession(string? reason) :
         base(reason)
     {
-        InitializeConfig(config, $"{SessionName} vote session");
-        
         var acceptableValuesArray = Globals.DedicatedServerManagerInstance.missionRotation.allMissions
             .Select(av => new EquatableMissionOptions(av)).ToArray();
         AcceptableValues = new AcceptableValueList<EquatableMissionOptions>(acceptableValuesArray);
@@ -42,5 +40,20 @@ public sealed class SkipSession
     /// <inheritdoc />
     protected override void OnFail()
     {
+    }
+    
+    /// <inheritdoc />
+    protected override bool TryParseValue(string input, out EquatableMissionOptions? result)
+    {
+        result = null;
+        if (AcceptableValues is AcceptableValueList<EquatableMissionOptions> avl)
+        {
+            var validValues = avl.AcceptableValues.Where(m => ValueStringGetter(m) == input).ToList();
+            if (validValues.Any()) return false;
+            result = validValues.First();
+            return true;
+        }
+        GwServerPlugin.Logger.LogError("AcceptableValues is not the correct type in SkipSession. What the fuck??");
+        return false;
     }
 }

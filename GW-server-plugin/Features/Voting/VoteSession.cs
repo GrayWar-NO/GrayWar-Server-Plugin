@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
-using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Events;
 using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
-using NuclearOption.SavedMission;
 using UnityEngine;
-using Enum = System.Enum;
 
 namespace GW_server_plugin.Features.Voting;
 
@@ -24,19 +21,19 @@ public abstract class VoteSession<T>(string? reason)
     
     // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<string> NoValues =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "n",
-            "no"
-        };
+    [
+        with(StringComparer.OrdinalIgnoreCase),
+        "n",
+        "no"
+    ];
     
     // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<string> YesValues =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "y",
-            "yes"
-        };
+    [
+        with(StringComparer.OrdinalIgnoreCase),
+        "y",
+        "yes"
+    ];
     
     /// <summary>
     ///     Acceptable values for a vote.
@@ -121,10 +118,10 @@ public abstract class VoteSession<T>(string? reason)
             return true;
         }
         
-        if (!(TryParseValue(outcome, out var value) && (AcceptableValues?.IsValid(value) ?? false)))
+        if (!(TryParseValue(outcome, out var value) && AcceptableValues.IsValid(value)))
         {
             response =
-                $"Invalid format. Expected {typeof(T).Name}. Allowed: {AcceptableValues?.ToDescriptionString().TrimStart('#', ' ') ?? "Yes or No"}";
+                $"Invalid format. Expected {typeof(T).Name}. Allowed: {AcceptableValues.ToDescriptionString().TrimStart('#', ' ')}";
             return false;
         }
         
@@ -252,26 +249,13 @@ public abstract class VoteSession<T>(string? reason)
     protected abstract void OnFail();
     
     
-    private static bool TryParseValue(string input, out T result)
-    {
-        result = default!;
-        try
-        {
-            if (typeof(T).IsEnum)
-            {
-                result = (T)Enum.Parse(typeof(T), input, true);
-                return true;
-            }
-            
-            result = (T)Convert.ChangeType(input, typeof(T));
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-    
+    /// <summary>
+    ///     Tries to parse a string to a T value.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <param name="result"></param>
+    /// <returns></returns>
+    protected abstract bool TryParseValue(string input, out T? result);
     
     private sealed class Outcome(bool no, T? value)
     {

@@ -73,7 +73,7 @@ internal static class ChatManagerPatches
             Message = message,
             SenderSteamID = player.SteamID
         };
-        GwServerPlugin.GrpcMgr?.ChatLogStream?.WriteAsync(log);
+        GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
         
         // --- SERVER SIDE MESSAGE VALIDATION ---
         // This is taken from the original function that we skip.
