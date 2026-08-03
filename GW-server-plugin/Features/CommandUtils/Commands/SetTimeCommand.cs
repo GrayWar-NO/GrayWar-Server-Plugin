@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class SetTimeCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class SetTimeCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "settime";

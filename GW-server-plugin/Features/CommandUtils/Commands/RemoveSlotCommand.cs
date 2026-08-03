@@ -10,7 +10,7 @@ using BepInEx.Configuration;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class RemoveSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
+public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name =>  "rmslot";

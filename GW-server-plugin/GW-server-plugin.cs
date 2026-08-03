@@ -106,8 +106,8 @@ public class GwServerPlugin : BaseUnityPlugin
         RankCatchUpService.Initialize(Config);
         Logger.LogInfo("Initialized RankCatchUpService");
         
-        VoteSession.Initialize(Config);
-        Logger.LogInfo("Initialized VoteSession");
+        // VoteSession.Initialize(Config);
+        // Logger.LogInfo("Initialized VoteSession");
         
         try
         {
@@ -131,20 +131,21 @@ public class GwServerPlugin : BaseUnityPlugin
             var commandTypes = assembly.GetTypes()
                 .Where(t => t.IsClass
                             && !t.IsAbstract
-                            && t.IsSubclassOf(typeof(PermissionConfigurableCommand)));
+                            && t.IsSubclassOf(typeof(ConfigurableCommand)));
 
             foreach (var type in commandTypes)
             {
                 try
                 {
-                    var commandInstance = (PermissionConfigurableCommand)Activator.CreateInstance(type, Config);
+                    var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
+
+                    if (!commandInstance.Enable) continue;
 
                     CommandService.AddCommand(commandInstance);
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
                 catch (Exception ex)
                 {
-                    // It's good practice to log this in BepInEx so one broken command doesn't break them all
                     Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
                 }
             }
@@ -272,7 +273,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
         
-        if (RankCatchUpService.RankCatchUp!.Value) RankCatchUpService.CatchUpPlayer(player);
+        if (RankCatchUpService.RankCatchUp.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)

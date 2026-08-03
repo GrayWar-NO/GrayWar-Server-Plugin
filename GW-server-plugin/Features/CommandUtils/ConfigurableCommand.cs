@@ -8,7 +8,7 @@ namespace GW_server_plugin.Features.CommandUtils;
 /// <summary>
 ///     Base class for commands that can be configured with a permission level.
 /// </summary>
-public abstract class PermissionConfigurableCommand : ICommand
+public abstract class ConfigurableCommand : ICommand
 {
     private const string CommandConfigSection = "Commands";
 
@@ -26,25 +26,40 @@ public abstract class PermissionConfigurableCommand : ICommand
     
     /// <inheritdoc />
     public PermissionLevel PermissionLevel => PermissionLevelConfig.Value;
+    
+    /// <summary>
+    ///     Getter for the enable config option.
+    /// </summary>
+    public bool Enable => EnableConfig.Value;
 
     /// <summary>
     ///     The command permission level configuration.
     /// </summary>
     private ConfigEntry<PermissionLevel> PermissionLevelConfig { get; }
+    
+    
+    private ConfigEntry<bool> EnableConfig { get; }
 
     /// <summary>
     ///     The default permission level required to execute the command.
     /// </summary>
     public abstract PermissionLevel DefaultPermissionLevel { get; }
-
+    
+    /// <summary>
+    ///     Default value for the enable toggle of this command.
+    /// </summary>
+    public virtual bool DefaultEnable => true;
+    
     /// <summary>
     ///     Constructor for the base command.
     /// </summary>
     /// <param name="config"> BepInEx configuration file. </param>
-    protected PermissionConfigurableCommand(ConfigFile config)
+    protected ConfigurableCommand(ConfigFile config)
     {
-        // ReSharper disable twice VirtualMemberCallInConstructor
+        // ReSharper disable VirtualMemberCallInConstructor
+        EnableConfig = config.Bind(CommandConfigSection, $"Enable {Name}", DefaultEnable, $"Enable toggle for {Name}");
         PermissionLevelConfig = config.Bind(CommandConfigSection, Name, DefaultPermissionLevel, $"Permission level for command {Name}");
+        // ReShaper restore VirtualMemberCallInConstructor
     }
 }
 

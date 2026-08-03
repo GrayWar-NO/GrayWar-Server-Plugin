@@ -10,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class PlayerInfoCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
+public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "playerinfo";

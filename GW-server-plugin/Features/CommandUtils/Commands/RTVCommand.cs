@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class RtvCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
+public class RtvCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand
 {
     private static readonly HashSet<string> YesValues =
         new(StringComparer.OrdinalIgnoreCase)

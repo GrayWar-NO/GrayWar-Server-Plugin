@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// <param name="config"></param>
 [AutoCommand]
 public class ReloadConfigCommand(ConfigFile config)
-    : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+    : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     private static readonly HashSet<string> AllowedValues =
         new(StringComparer.OrdinalIgnoreCase)
