@@ -7,6 +7,8 @@ using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 using UnityEngine;
 
+// ReSharper disable UseCollectionExpression
+
 namespace GW_server_plugin.Features.Voting;
 
 /// <summary>
@@ -17,32 +19,31 @@ public abstract class VoteSession<T>(string? reason)
     : IVoteSession
     where T : struct, IEquatable<T>
 {
-    private Player _initiator = null!;
-    
     // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<string> NoValues =
-    [
-        with(StringComparer.OrdinalIgnoreCase),
-        "n",
-        "no"
-    ];
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "n",
+            "no"
+        };
     
     // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<string> YesValues =
-    [
-        with(StringComparer.OrdinalIgnoreCase),
-        "y",
-        "yes"
-    ];
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "y",
+            "yes"
+        };
+    
+    private readonly Dictionary<ulong, Outcome> _votes = new();
+    private Player _initiator = null!;
+    
+    private int _timeLeft;
     
     /// <summary>
     ///     Acceptable values for a vote.
     /// </summary>
     protected abstract AcceptableValueBase AcceptableValues { get; }
-    
-    private readonly Dictionary<ulong, Outcome> _votes = new();
-    
-    private int _timeLeft;
     
     /// <summary>
     ///     Minimum number of votes for a vote to be valid.
@@ -93,10 +94,9 @@ public abstract class VoteSession<T>(string? reason)
     }
     
     /// <inheritdoc />
-    public bool ValidateVote(Player voter, string outcome)
-    {
-        return NoValues.Contains(outcome) || YesValues.Contains(outcome) || TryParseValue(outcome, out _);
-    }
+    public bool ValidateVote(Player voter, string outcome) => NoValues.Contains(outcome) ||
+                                                              YesValues.Contains(outcome) ||
+                                                              TryParseValue(outcome, out _);
     
     /// <inheritdoc />
     public bool TryAddVote(Player voter, string outcome, out string response)
@@ -117,6 +117,7 @@ public abstract class VoteSession<T>(string? reason)
                 response = $"cannot vote YES to {SessionName} vote: no default value is set";
                 return false;
             }
+            
             _votes.Add(voter.SteamID, new Outcome(false, DefaultVote));
             response = $"Successfully voted the default outcome {DefaultVote} to the current {SessionName} vote.";
             if (NYesVotes > AutoPassLimit)
@@ -138,21 +139,12 @@ public abstract class VoteSession<T>(string? reason)
         return true;
     }
     
-    /// <summary>
-    /// Gets the string format to display for this session's outcomes.
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    protected abstract string ValueStringGetter(T value);
-    
     /// <inheritdoc />
     public IEnumerable<string> GetAllOutcomes()
     {
         List<string> result = [$"({string.Join("/", NoValues)})"];
         if (DefaultVote != null)
-        {
             result.Add($"({string.Join("/", YesValues)}) => {ValueStringGetter(DefaultVote.Value)}");
-        }
         
         if (AcceptableValues is AcceptableValueList<T> listValues)
         {
@@ -201,6 +193,13 @@ public abstract class VoteSession<T>(string? reason)
             OnFail();
         }
     }
+    
+    /// <summary>
+    ///     Gets the string format to display for this session's outcomes.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    protected abstract string ValueStringGetter(T value);
     
     private static int _getAutoPassLimit()
     {
