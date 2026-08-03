@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class Restart(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "restart";
@@ -21,7 +21,7 @@ public class Restart(ConfigFile config) : PermissionConfigurableCommand(config),
     public override string Description => "restart server after mission ends";
 
     /// <inheritdoc />
-    public override string Usage => $"restart or {PluginConfig.CommandPrefix}restart [f]orce immediate restart or [c]cancel to cancel restart";
+    public override string Usage => $"restart or {PluginConfig.CommandPrefixChar}restart [f]orce immediate restart or [c]cancel to cancel restart";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class WhisperCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "whisper";

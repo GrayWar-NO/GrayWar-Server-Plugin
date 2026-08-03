@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name { get; } = "help";
@@ -59,7 +59,7 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
             return UniTask.FromResult<(bool, string?)>((false, $"Command {commandName} not found."));
         }
 
-        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefix!.Value}{command.Usage}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefixChar}{command.Usage}"));
     }
 
     /// <inheritdoc />

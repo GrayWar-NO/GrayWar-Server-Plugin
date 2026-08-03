@@ -11,6 +11,7 @@ using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.Protobuf_IPC;
+using GW_server_plugin.Features.Voting;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
@@ -30,8 +31,6 @@ public class GwServerPlugin : BaseUnityPlugin
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
     
-    internal static MissionVoteService MissionVote { get; private set; } = null!;
-
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
 
     private static MissionBalanceService MissionBalance { get; set; } = null!;
@@ -88,8 +87,6 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger = base.Logger;
         
         PluginConfig.InitSettings(Config);
-        MissionVote = new MissionVoteService(Config);
-        Logger.LogInfo("Loaded MissionVote");
         
         WarnService = new WarnService(Config);
         Logger.LogInfo("Loaded WarnService");
@@ -106,8 +103,8 @@ public class GwServerPlugin : BaseUnityPlugin
         RankCatchUpService.Initialize(Config);
         Logger.LogInfo("Initialized RankCatchUpService");
         
-        VoteSession.Initialize(Config);
-        Logger.LogInfo("Initialized VoteSession");
+        VoteManager.Initialize(Config);
+        Logger.LogInfo("Initialized VoteManager");
         
         try
         {
@@ -120,8 +117,6 @@ public class GwServerPlugin : BaseUnityPlugin
         
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
         
-        // TimeService.Initialize();
-        
         PatchAll();
         
         // Load all Commands (Inheritors of PermissionConfigurableCommand) using Reflection.
@@ -131,20 +126,21 @@ public class GwServerPlugin : BaseUnityPlugin
             var commandTypes = assembly.GetTypes()
                 .Where(t => t.IsClass
                             && !t.IsAbstract
-                            && t.IsSubclassOf(typeof(PermissionConfigurableCommand)));
+                            && t.IsSubclassOf(typeof(ConfigurableCommand)));
 
             foreach (var type in commandTypes)
             {
                 try
                 {
-                    var commandInstance = (PermissionConfigurableCommand)Activator.CreateInstance(type, Config);
+                    var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
+
+                    if (!commandInstance.Enable) continue;
 
                     CommandService.AddCommand(commandInstance);
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
                 catch (Exception ex)
                 {
-                    // It's good practice to log this in BepInEx so one broken command doesn't break them all
                     Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
                 }
             }
@@ -159,7 +155,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
 
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
-        MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
+        MissionEvents.MissionLoaded += _ => VoteManager.RemoveInhibit(MissionService.VoteInhibitionReason);
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
@@ -272,7 +268,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
         
-        if (RankCatchUpService.RankCatchUp!.Value) RankCatchUpService.CatchUpPlayer(player);
+        if (RankCatchUpService.RankCatchUp.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)
@@ -284,7 +280,7 @@ public class GwServerPlugin : BaseUnityPlugin
         }
 
         Logger.LogInfo($"{logName} : {player.SteamID} - left the game");
-        MissionVote.RemoveVoter(player.SteamID);
+        VoteManager.Session?.RemoveVoter(player);
         PlayerIdentifier.RemovePlayer(player);
         var log = new JoinLeaveLog
         {

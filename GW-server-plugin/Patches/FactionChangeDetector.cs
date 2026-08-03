@@ -1,4 +1,3 @@
-using System;
 using GW_server_plugin.Events;
 using HarmonyLib;
 using NuclearOption.Networking;

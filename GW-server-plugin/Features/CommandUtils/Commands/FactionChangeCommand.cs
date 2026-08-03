@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
-using NuclearOption.SavedMission;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -11,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// Admin command for switching the invoking player's faction after reconnecting.
 /// </summary>
 [AutoCommand]
-public class FactionChangeCommand(ConfigFile config) : PermissionConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name => "factionswitch";

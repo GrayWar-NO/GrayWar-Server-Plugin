@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
+public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand
 {
 
     /// <inheritdoc />
@@ -81,7 +81,7 @@ public class DonateCommand(ConfigFile config): PermissionConfigurableCommand(con
         player.AddAllocation(-sum);
         targetPlayer.AddAllocation(sum);
         
-        ChatService.SendPrivateChatMessage($"{player.GetDisplayName()} has given you {sum} (million)!", targetPlayer);
+        ChatService.SendPrivateChatMessage($"{player.GetColoredDisplayName()} has given you {sum} (million)!", targetPlayer);
         
         // Logging
         var log = new DonationLog

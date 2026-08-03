@@ -9,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class AddSlotCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand
+public class AddSlotCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     public override string Name =>  "addslot";
