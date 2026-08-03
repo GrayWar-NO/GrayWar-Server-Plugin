@@ -96,7 +96,7 @@ internal static class ChatManagerPatches
         }
         // ---
         
-        var displayName = PlayerUtils.GetDisplayName(player);
+        var displayName = player.GetColoredDisplayName();
         if (allChat)
         {
             Globals.ChatManagerInstance.RpcServerMessage($"{displayName}: {message}", true);

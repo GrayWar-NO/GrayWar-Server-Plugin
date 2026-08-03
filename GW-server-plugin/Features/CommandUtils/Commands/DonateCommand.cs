@@ -81,7 +81,7 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
         player.AddAllocation(-sum);
         targetPlayer.AddAllocation(sum);
         
-        ChatService.SendPrivateChatMessage($"{player.GetDisplayName()} has given you {sum} (million)!", targetPlayer);
+        ChatService.SendPrivateChatMessage($"{player.GetColoredDisplayName()} has given you {sum} (million)!", targetPlayer);
         
         // Logging
         var log = new DonationLog

@@ -105,7 +105,7 @@ public static class ChatService
             GwServerPlugin.Logger.LogWarning("Cannot send private chat message.");
             return;
         }
-        actualMessage = sender == null ? $"{PluginConfig.ServerBroadcastName!.Value}: {actualMessage}" : $"{sender.GetDisplayName()}: {actualMessage}";
+        actualMessage = sender == null ? $"{PluginConfig.ServerBroadcastName!.Value}: {actualMessage}" : $"{sender.GetColoredDisplayName()}: {actualMessage}";
 
         while (actualMessage.Length > 128)
         {
