@@ -34,7 +34,7 @@ public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), 
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var session = VoteManager.Factories[args[0]](args.Length > 1 ? string.Join(" ", args.Skip(1)) : null);
-        var rst = VoteManager.TryStartVote(session, player, "y", out var response);
+        var rst = VoteManager.TryStartVote(session, player, out var response);
         return UniTask.FromResult((rst, response));
     }
 }

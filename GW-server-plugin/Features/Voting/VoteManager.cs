@@ -65,10 +65,9 @@ public static class VoteManager
     /// </summary>
     /// <param name="session"></param>
     /// <param name="initiator"></param>
-    /// <param name="outcome"></param>
     /// <param name="response"></param>
     /// <returns></returns>
-    public static bool TryStartVote(IVoteSession session, Player initiator, string outcome, out string? response)
+    public static bool TryStartVote(IVoteSession session, Player initiator, out string? response)
     {
         response = null;
         if (Inhibitors.Any())
@@ -83,7 +82,8 @@ public static class VoteManager
         }
         Session = session;
         Session.Start(initiator);
-        return Session.TryAddVote(initiator, outcome, out response);
+        response = $"{Session.SessionName} vote started! Dont forget to use /vote to vote for the outcome you want!";
+        return true;
     }
     
     /// <summary>
