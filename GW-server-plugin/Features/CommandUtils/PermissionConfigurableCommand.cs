@@ -14,6 +14,9 @@ public abstract class PermissionConfigurableCommand : ICommand
 
     /// <inheritdoc />
     public abstract string Name { get; }
+    
+    /// <inheritdoc />
+    public abstract string? Alias { get; }
 
     /// <inheritdoc />
     public abstract string Description { get; }

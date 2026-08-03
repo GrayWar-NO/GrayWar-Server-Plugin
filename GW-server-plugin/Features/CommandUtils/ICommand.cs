@@ -11,6 +11,12 @@ public interface ICommand
     ///     The command name.
     /// </summary>
     string Name { get; }
+    
+    /// <summary>
+    ///     The command alias.
+    ///     e.g alias /h for /help
+    /// </summary>
+    public string? Alias { get; }
 
     /// <summary>
     ///     The command description.

@@ -49,7 +49,9 @@ public static class CommandService
     /// <returns>true if a command was found, else false</returns>
     public static bool TryGetCommand(string commandName, out ICommand command)
     {
-        command = Commands.Find(c => string.Equals(c.Name, commandName, StringComparison.CurrentCultureIgnoreCase));
+        command = Commands.Find(
+            c => string.Equals(c.Name, commandName, StringComparison.CurrentCultureIgnoreCase) 
+                                || string.Equals(c.Alias, commandName, StringComparison.CurrentCultureIgnoreCase));
         return command != null;
     }
 

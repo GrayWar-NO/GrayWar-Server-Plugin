@@ -16,6 +16,9 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
 {
     /// <inheritdoc />
     public override string Name { get; } = "help";
+    
+    /// <inheritdoc />
+    public override string Alias => "h";
 
     /// <inheritdoc />
     public override string Description { get; } =
@@ -40,7 +43,9 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
         
         var accessibleCommands = CommandService.GetGameCommands()
             .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
-        var commandNames = accessibleCommands.Select(c => c.Name).ToList();
+        var commandNames = accessibleCommands.Select(
+            c => c.Alias != null ? $"{c.Name} (or {c.Alias})" : c.Name
+        ).ToList();
         return UniTask.FromResult<(bool, string?)>((true, $"You have access to the following commands: {string.Join(", ", commandNames)}"));
     }
 
@@ -49,7 +54,9 @@ public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(confi
     {
         if (args.Length == 0)
         {
-            var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
+            var commandNames = CommandService.GetConsoleCommands().Select(
+                c => c.Alias != null ? $"{c.Name} (or {c.Alias})" : c.Name
+            ).ToList();
             return UniTask.FromResult<(bool, string?)>((true, $"Available commands: {string.Join(", ", commandNames)}"));
         }
         
