@@ -41,5 +41,6 @@ public class DifficultyPatches
 
         mission.missionSettings.strategicEscalationThreshold =
             Math.Max(mission.missionSettings.strategicEscalationThreshold, 3000);
+        GwServerPlugin.Logger.LogInfo("Difficulty Patched");
     }
 }
