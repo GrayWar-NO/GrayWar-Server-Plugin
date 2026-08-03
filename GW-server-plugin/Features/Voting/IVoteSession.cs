@@ -48,6 +48,12 @@ public interface IVoteSession
     bool TryAddVote(Player voter, string outcome, out string response);
     
     /// <summary>
+    ///     Removes votes from a player.
+    /// </summary>
+    /// <param name="voter"></param>
+    void RemoveVoter(Player voter);
+    
+    /// <summary>
     ///     Returns true if the given outcome is a valid vote, false otherwise.
     /// </summary>
     /// <param name="voter"></param>

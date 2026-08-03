@@ -87,6 +87,12 @@ public abstract class VoteSession<T>(string? reason)
     }
     
     /// <inheritdoc />
+    public void RemoveVoter(Player voter)
+    {
+        _votes.Remove(voter.SteamID);
+    }
+    
+    /// <inheritdoc />
     public bool ValidateVote(Player voter, string outcome)
     {
         return NoValues.Contains(outcome) || YesValues.Contains(outcome) || TryParseValue(outcome, out _);

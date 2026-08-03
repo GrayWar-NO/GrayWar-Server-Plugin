@@ -27,15 +27,9 @@ public static class RestartService
         set
         {
             if (value)
-            {
-                GwServerPlugin.MissionVote.Inhibit("Awaiting server restart");
                 _ = RestartReminderService.StartRestartReminder();
-            }
             else
-            {
-                GwServerPlugin.MissionVote.ClearInhibit();
                 RestartReminderService.CancelRestart();
-            }
             
             field = value;
         }

@@ -43,7 +43,6 @@ public class NextMissionCommand(ConfigFile config): ConfigurableCommand(config),
     {
         if (args.Length == 0)
         {
-            GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
             if (await MissionService.StartNextMission())
                 return (true, "Next mission started successfully.");
             return (false, "Failed to start next mission.");
@@ -54,7 +53,6 @@ public class NextMissionCommand(ConfigFile config): ConfigurableCommand(config),
         {
             return (false,  "Mission not found.");
         }
-        GwServerPlugin.MissionVote.Inhibit("Switching mission."); // Inhibit is lifted at mission load.
         if (await MissionService.StartMission(missionOption.Value))
             return (true, $"Started mission {missionOption.Value.Key.Name} successfully.");
         return (false, "Failed to start next mission.");

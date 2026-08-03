@@ -14,6 +14,11 @@ namespace GW_server_plugin.Features.Voting;
 public static class VoteManager
 {
     /// <summary>
+    ///     List of active inhibitors for a vote to start.
+    /// </summary>
+    private static readonly HashSet<string> Inhibitors = [];
+    
+    /// <summary>
     ///     Currently in use votesession or null
     /// </summary>
     public static IVoteSession? Session;
@@ -66,6 +71,11 @@ public static class VoteManager
     public static bool TryStartVote(IVoteSession session, Player initiator, string outcome, out string? response)
     {
         response = null;
+        if (Inhibitors.Any())
+        {
+            response = $"Cannot start vote: inhibited:\n{string.Join("\n", Inhibitors)}";
+            return false;
+        }
         if (Session != null)
         {
             response = $"Cannot start vote: there is already a {Session.SessionName} vote ongoing.";
@@ -88,6 +98,25 @@ public static class VoteManager
     {
         Session?.Destroy();
         Session = null;
+    }
+    
+    /// <summary>
+    ///     Adds an inhibition reason to the voting. Also cancels any existing vote if one is active.
+    /// </summary>
+    /// <param name="reason"></param>
+    public static void Inhibit(string reason)
+    {
+        if (!Inhibitors.Any()) CancelVote();
+        Inhibitors.Add(reason);
+    }
+    
+    /// <summary>
+    ///     Removes an inhibitor from the current inhibition reasons.
+    /// </summary>
+    /// <param name="reason"></param>
+    public static bool RemoveInhibit(string reason)
+    {
+        return Inhibitors.Remove(reason);
     }
 }
 

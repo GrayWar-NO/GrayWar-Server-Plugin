@@ -31,8 +31,6 @@ public class GwServerPlugin : BaseUnityPlugin
     internal new static ManualLogSource Logger { get; private set; } = null!;
     internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
     
-    internal static MissionVoteService MissionVote { get; private set; } = null!;
-
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
 
     private static MissionBalanceService MissionBalance { get; set; } = null!;
@@ -89,8 +87,6 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger = base.Logger;
         
         PluginConfig.InitSettings(Config);
-        MissionVote = new MissionVoteService(Config);
-        Logger.LogInfo("Loaded MissionVote");
         
         WarnService = new WarnService(Config);
         Logger.LogInfo("Loaded WarnService");
@@ -159,7 +155,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
 
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
-        MissionEvents.MissionLoaded += _ => MissionVote.ClearInhibit();
+        MissionEvents.MissionLoaded += _ => VoteManager.RemoveInhibit(MissionService.VoteInhibitionReason);
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
@@ -284,7 +280,7 @@ public class GwServerPlugin : BaseUnityPlugin
         }
 
         Logger.LogInfo($"{logName} : {player.SteamID} - left the game");
-        MissionVote.RemoveVoter(player.SteamID);
+        VoteManager.Session?.RemoveVoter(player);
         PlayerIdentifier.RemovePlayer(player);
         var log = new JoinLeaveLog
         {
