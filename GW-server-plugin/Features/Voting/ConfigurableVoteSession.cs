@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using BepInEx.Configuration;
 
 namespace GW_server_plugin.Features.Voting;
@@ -6,10 +7,23 @@ namespace GW_server_plugin.Features.Voting;
 /// <summary>
 ///     VoteSession with ways to configure common parameters
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public abstract class ConfigurableVoteSession<T>(string? r) : VoteSession<T>(r)
-    where T : struct, IEquatable<T>
+public abstract class ConfigurableVoteSession<TSession, TOutcome>(string? r) : VoteSession<TOutcome>(r)
+    where TSession : ConfigurableVoteSession<TSession, TOutcome>
+    where TOutcome : struct, IEquatable<TOutcome>
 {
+    // Caches the attribute once when TSession is first accessed
+    private static readonly AutoVoteSessionAttribute? SessionAttribute =
+        typeof(TSession).GetCustomAttribute<AutoVoteSessionAttribute>();
+    
+    // Properties pull directly from the attribute with fallbacks
+    /// <inheritdoc />
+    public override string SessionName =>
+        SessionAttribute?.SessionName ?? typeof(TSession).Name;
+    
+    /// <inheritdoc />
+    public override string ShortSessionName =>
+        SessionAttribute?.ShortName ?? typeof(TSession).Name.ToLower();
+    
     // ReSharper disable StaticMemberInGenericType
     private static ConfigEntry<int>? _minVoteValidityConfig;
     private static ConfigEntry<float>? _minAttendanceConfig;
@@ -18,6 +32,11 @@ public abstract class ConfigurableVoteSession<T>(string? r) : VoteSession<T>(r)
     private static int _configVoteTimeoutSecs;
     // ReSharper restore StaticMemberInGenericType
     
+    /// <summary>
+    ///     Initialises the config file from a 
+    /// </summary>
+    /// <param name="config"></param>
+    /// <param name="category"></param>
     protected static void InitializeConfig(ConfigFile config, string category)
     {
         _minVoteValidityConfig ??= config.Bind(
@@ -41,6 +60,7 @@ public abstract class ConfigurableVoteSession<T>(string? r) : VoteSession<T>(r)
             "Vote Timeout seconds",
             120,
             "Number of seconds before the vote times out. Only evaluated in increments of 30.");
+            
         _configVoteTimeoutSecs = _voteTimeoutSecs.Value;
     }
     
@@ -51,5 +71,9 @@ public abstract class ConfigurableVoteSession<T>(string? r) : VoteSession<T>(r)
     public override float MinAttendance => _minAttendanceConfig!.Value;
     
     /// <inheritdoc />
-    public override int VoteTimeoutSeconds {get => _configVoteTimeoutSecs; set => _configVoteTimeoutSecs = value; }
+    public override int VoteTimeoutSeconds 
+    {
+        get => _configVoteTimeoutSecs; 
+        set => _configVoteTimeoutSecs = value; 
+    }
 }

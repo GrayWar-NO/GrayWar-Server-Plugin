@@ -20,7 +20,7 @@ public class VoteCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     public override string Description => "Votes for the currently ongoing vote session";
     
     /// <inheritdoc />
-    public override string Usage => $"vote <Outcome>. You can use  \"{PluginConfig.CommandPrefix}vote ?\" to get available options";
+    public override string Usage => $"vote <Outcome>. You can use  \"{PluginConfig.CommandPrefixChar}vote ?\" to get available options";
     
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;

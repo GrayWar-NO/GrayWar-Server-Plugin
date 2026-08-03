@@ -65,7 +65,7 @@ public abstract class VoteSession<T>(string? reason)
     /// <summary>
     ///     Default value of the vote.
     /// </summary>
-    protected abstract T DefaultVote { get; }
+    protected abstract T? DefaultVote { get; }
     
     
     private int NYesVotes => _votes.Count(v => !v.Value.No);
@@ -76,6 +76,7 @@ public abstract class VoteSession<T>(string? reason)
     /// <inheritdoc />
     public abstract string SessionName { get; }
     
+    /// <inheritdoc />
     public abstract string ShortSessionName { get; }
     
     /// <inheritdoc />
@@ -108,6 +109,11 @@ public abstract class VoteSession<T>(string? reason)
         
         if (YesValues.Contains(outcome))
         {
+            if (DefaultVote == null)
+            {
+                response = $"cannot vote YES to {SessionName} vote: no default value is set";
+                return false;
+            }
             _votes.Add(voter.SteamID, new Outcome(false, DefaultVote));
             response = $"Successfully voted the default outcome {DefaultVote} to the current {SessionName} vote.";
             if (NYesVotes > AutoPassLimit)
@@ -115,10 +121,10 @@ public abstract class VoteSession<T>(string? reason)
             return true;
         }
         
-        if (!TryParseValue(outcome, out var value))
+        if (!(TryParseValue(outcome, out var value) && (AcceptableValues?.IsValid(value) ?? false)))
         {
             response =
-                $"Invalid format. Expected {typeof(T).Name}. Allowed: {AcceptableValues.ToDescriptionString().TrimStart('#', ' ')}";
+                $"Invalid format. Expected {typeof(T).Name}. Allowed: {AcceptableValues?.ToDescriptionString().TrimStart('#', ' ') ?? "Yes or No"}";
             return false;
         }
         
@@ -139,8 +145,11 @@ public abstract class VoteSession<T>(string? reason)
     /// <inheritdoc />
     public IEnumerable<string> GetAllOutcomes()
     {
-        List<string> result =
-            [$"({string.Join("/", NoValues)})", $"({string.Join("/", NoValues)} => {ValueStringGetter(DefaultVote)})"];
+        List<string> result = [$"({string.Join("/", NoValues)})"];
+        if (DefaultVote != null)
+        {
+            result.Add($"({string.Join("/", YesValues)}) => {ValueStringGetter(DefaultVote.Value)}");
+        }
         
         if (AcceptableValues is AcceptableValueList<T> listValues)
         {

@@ -21,7 +21,7 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
     public override string Description => "restart server after mission ends";
 
     /// <inheritdoc />
-    public override string Usage => $"restart or {PluginConfig.CommandPrefix}restart [f]orce immediate restart or [c]cancel to cancel restart";
+    public override string Usage => $"restart or {PluginConfig.CommandPrefixChar}restart [f]orce immediate restart or [c]cancel to cancel restart";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

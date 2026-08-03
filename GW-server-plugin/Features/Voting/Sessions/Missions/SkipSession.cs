@@ -1,33 +1,33 @@
+using System.Linq;
 using BepInEx.Configuration;
+using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 
 /// <summary>
 ///     Session for voteSkip.
 /// </summary>
+[AutoVoteSession("Mission Skip", "skip")]
 public sealed class SkipSession
-    : ConfigurableVoteSession<EquatableMissionOptions>
+    : ConfigurableVoteSession<SkipSession, EquatableMissionOptions>
 {
     /// <inheritdoc />
-    public SkipSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
+    public SkipSession(ConfigFile config, string? reason) :
         base(reason)
     {
         InitializeConfig(config, $"{SessionName} vote session");
-        AcceptableValues = missions;
+        
+        var acceptableValuesArray = Globals.DedicatedServerManagerInstance.missionRotation.allMissions
+            .Select(av => new EquatableMissionOptions(av)).ToArray();
+        AcceptableValues = new AcceptableValueList<EquatableMissionOptions>(acceptableValuesArray);
     }
     
     /// <inheritdoc />
     protected override AcceptableValueBase AcceptableValues { get; }
     
     /// <inheritdoc />
-    protected override EquatableMissionOptions DefaultVote { get; } =
+    protected override EquatableMissionOptions? DefaultVote { get; } =
         new(MissionService.GetNextMissionOptions(false)!.Value);
-    
-    /// <inheritdoc />
-    public override string SessionName => "Mission Skip";
-    
-    /// <inheritdoc />
-    public override string ShortSessionName => "skip";
     
     /// <inheritdoc />
     protected override string ValueStringGetter(EquatableMissionOptions value) => value.Options.Key.Name;

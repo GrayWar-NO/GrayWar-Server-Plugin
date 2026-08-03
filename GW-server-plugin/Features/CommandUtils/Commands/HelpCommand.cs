@@ -59,7 +59,7 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
             return UniTask.FromResult<(bool, string?)>((false, $"Command {commandName} not found."));
         }
 
-        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefix!.Value}{command.Usage}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefixChar}{command.Usage}"));
     }
 
     /// <inheritdoc />

@@ -1,3 +1,4 @@
+using System.Linq;
 using BepInEx.Configuration;
 using GW_server_plugin.Helpers;
 
@@ -6,29 +7,24 @@ namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 /// <summary>
 ///     Session for voteNext.
 /// </summary>
+[AutoVoteSession("Next Mission", "name")]
 public sealed class NextSession
-    : ConfigurableVoteSession<EquatableMissionOptions>
+    : ConfigurableVoteSession<NextSession, EquatableMissionOptions>
 {
     /// <inheritdoc />
-    public NextSession(ConfigFile config, string? reason, AcceptableValueList<EquatableMissionOptions> missions) :
+    public NextSession(string? reason) :
         base(reason)
     {
-        InitializeConfig(config, $"{SessionName} vote session");
-        AcceptableValues = missions;
+        var acceptableValuesArray = Globals.DedicatedServerManagerInstance.missionRotation.allMissions
+            .Select(av => new EquatableMissionOptions(av)).ToArray();
+        AcceptableValues = new AcceptableValueList<EquatableMissionOptions>(acceptableValuesArray);
     }
     
     /// <inheritdoc />
     protected override AcceptableValueBase AcceptableValues { get; }
     
     /// <inheritdoc />
-    protected override EquatableMissionOptions DefaultVote { get; } =
-        new(MissionService.GetNextMissionOptions(false)!.Value);
-    
-    /// <inheritdoc />
-    public override string SessionName => "Next Mission";
-    
-    /// <inheritdoc />
-    public override string ShortSessionName => "next";
+    protected override EquatableMissionOptions? DefaultVote => null;
     
     /// <inheritdoc />
     protected override string ValueStringGetter(EquatableMissionOptions value) => value.Options.Key.Name;

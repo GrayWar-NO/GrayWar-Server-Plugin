@@ -11,6 +11,7 @@ using GW_server_plugin.Events;
 using GW_server_plugin.Features;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Features.Protobuf_IPC;
+using GW_server_plugin.Features.Voting;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
@@ -106,8 +107,8 @@ public class GwServerPlugin : BaseUnityPlugin
         RankCatchUpService.Initialize(Config);
         Logger.LogInfo("Initialized RankCatchUpService");
         
-        // VoteSession.Initialize(Config);
-        // Logger.LogInfo("Initialized VoteSession");
+        VoteManager.Initialize(Config);
+        Logger.LogInfo("Initialized VoteManager");
         
         try
         {
@@ -119,8 +120,6 @@ public class GwServerPlugin : BaseUnityPlugin
         }
         
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
-        
-        // TimeService.Initialize();
         
         PatchAll();
         
