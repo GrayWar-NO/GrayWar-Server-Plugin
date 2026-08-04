@@ -7,7 +7,7 @@ namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 /// <summary>
 ///     Session for voteNext.
 /// </summary>
-[AutoVoteSession("Next Mission", "name")]
+[AutoVoteSession("Next Mission", "next")]
 public sealed class NextSession
     : ConfigurableVoteSession<NextSession, EquatableMissionOptions>
 {
