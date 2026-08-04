@@ -214,7 +214,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
     private void _sendReminderMessage()
     {
         ChatService.SendChatMessageAsServer(DefaultVote != null ? 
-            $"Type '{PluginConfig.CommandPrefixChar}vote y' for default \"{ValueStringGetter(DefaultVote.Value)}\", '{PluginConfig.CommandPrefixChar}vote n' for no, or '{PluginConfig.CommandPrefixChar}vote <val> ('{PluginConfig.CommandPrefixChar}vote ?' to get acceptable values)"
+            $"Type '{PluginConfig.CommandPrefixChar}vote y' for default \"{ValueStringGetter(DefaultVote.Value)}\", '{PluginConfig.CommandPrefixChar}vote n' for no, or '{PluginConfig.CommandPrefixChar}vote <val>' ('{PluginConfig.CommandPrefixChar}vote ?' to get acceptable values)"
             :
             $"Type '{PluginConfig.CommandPrefixChar}vote n' for no, or '{PluginConfig.CommandPrefixChar}vote <val>' ('{PluginConfig.CommandPrefixChar}vote ?' to get acceptable values)");
         ChatService.SendChatMessageAsServer(
