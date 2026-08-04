@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name {get; } = "help";
+    public override string Name { get; } = "help";
 
     /// <inheritdoc />
     public override string Description { get; } =
