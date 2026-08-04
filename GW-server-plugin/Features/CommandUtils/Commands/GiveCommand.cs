@@ -22,7 +22,7 @@ public class GiveCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     public override string Description => "Give money to someone out of thin air";
 
     /// <inheritdoc />
-    public override string Usage => "/give <target / targetID> <sum in millions (eg. 10 = 10 million)>";
+    public override string Usage => "give <target / targetID> <sum in millions (eg. 10 = 10 million)>";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 2);

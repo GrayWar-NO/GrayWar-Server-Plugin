@@ -19,7 +19,7 @@ public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(confi
     public override string Description => "Switch to the other faction after reconnecting.";
 
     /// <inheritdoc />
-    public override string Usage => "/factionswitch";
+    public override string Usage => "factionswitch";
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;

@@ -25,7 +25,7 @@ public class LinkmeCommand(ConfigFile config): ConfigurableCommand(config), IGam
     public override string Description => "Use this to link your steam account with your discord in our system";
 
     /// <inheritdoc />
-    public override string Usage => "/linkme (takes no arguments)";
+    public override string Usage => "linkme (takes no arguments)";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);
