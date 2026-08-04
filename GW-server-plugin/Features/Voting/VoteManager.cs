@@ -24,6 +24,11 @@ public static class VoteManager
     public static IVoteSession? Session;
     
     /// <summary>
+    ///     VoteSession factories that exist.
+    /// </summary>
+    public static readonly Dictionary<string, Func<Player, string?, IVoteSession>> Factories = new();
+    
+    /// <summary>
     ///     Initialises all the voteSession configs.
     /// </summary>
     /// <param name="pluginConfig"></param>
@@ -47,8 +52,18 @@ public static class VoteManager
             GwServerPlugin.Logger.LogDebug($"Initializing vote session for {sessionType.Name}");
 
             var categoryName = $"{sessionAttr.SessionName} vote session";
-            var initMethod = sessionType.BaseType?.GetMethod("InitializeConfig",
-                BindingFlags.NonPublic | BindingFlags.Static);
+            
+            MethodInfo? initMethod = null;
+            for (var type = sessionType.BaseType; type != null; type = type.BaseType)
+            {
+                initMethod = type.GetMethod(
+                    "InitializeConfig",
+                    BindingFlags.NonPublic | BindingFlags.Static);
+                
+                if (initMethod != null)
+                    break;
+            }
+            
             if (initMethod == null)
             {
                 GwServerPlugin.Logger.LogWarning($"Failed to initialize vote session for {sessionType.Name}: InitializeConfig method not found");
@@ -57,7 +72,7 @@ public static class VoteManager
             
             initMethod.Invoke(null, [pluginConfig, categoryName]);
             Factories[sessionAttr.ShortName] = (p, s) => (IVoteSession)Activator.CreateInstance(sessionType, p, s);
-            GwServerPlugin.Logger.LogDebug($"Initialized vote session for {sessionType.Name} successfully");
+            GwServerPlugin.Logger.LogInfo($"Initialized vote session for {sessionType.Name} successfully");
         }
     }    
     /// <summary>
@@ -74,21 +89,18 @@ public static class VoteManager
             response = $"Cannot start vote: inhibited:\n{string.Join("\n", Inhibitors)}";
             return false;
         }
+        
         if (Session != null)
         {
             response = $"Cannot start vote: there is already a {Session.SessionName} vote ongoing.";
             return false;
         }
+        
         Session = session;
         Session.Start();
         response = $"{Session.SessionName} vote started! Dont forget to use /vote to vote for the outcome you want!";
         return true;
     }
-    
-    /// <summary>
-    ///     VoteSession factories that exist.
-    /// </summary>
-    public static readonly Dictionary<string, Func<Player, string?, IVoteSession>> Factories = new();    
     
     /// <summary>
     ///     Destroys the current voteSession.
@@ -113,14 +125,11 @@ public static class VoteManager
     ///     Removes an inhibitor from the current inhibition reasons.
     /// </summary>
     /// <param name="reason"></param>
-    public static bool RemoveInhibit(string reason)
-    {
-        return Inhibitors.Remove(reason);
-    }
+    public static bool RemoveInhibit(string reason) => Inhibitors.Remove(reason);
 }
 
 /// <summary>
-/// Attribute to mark a voteSession as implicitly used by the Reflection discovery in the VoteManager class.
+///     Attribute to mark a voteSession as implicitly used by the Reflection discovery in the VoteManager class.
 /// </summary>
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Class)]
@@ -129,7 +138,7 @@ public sealed class AutoVoteSessionAttribute(string sessionName, string shortNam
     /// <summary>
     ///     ShortName for the VoteSession
     /// </summary>
-    public string ShortName { get; } =shortName;
+    public string ShortName { get; } = shortName;
     
     /// <summary>
     ///     SessionName for the voteSession

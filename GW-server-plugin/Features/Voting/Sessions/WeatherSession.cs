@@ -3,7 +3,7 @@ using System.Linq;
 using BepInEx.Configuration;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.Voting.Sessions.Missions;
+namespace GW_server_plugin.Features.Voting.Sessions;
 
 /// <summary>
 ///     VoteSession for weather
