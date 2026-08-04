@@ -1,17 +1,18 @@
 using System;
 using System.Linq;
 using BepInEx.Configuration;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 
 /// <summary>
 ///     VoteSession for weather
 /// </summary>
-[AutoVoteSession("Weather Intenity", "weather")]
+[AutoVoteSession("Weather Intensity", "weather")]
 public class WeatherSession : ConfigurableVoteSession<WeatherSession, EquatableWeatherSet>
 {
     /// <inheritdoc />
-    public WeatherSession(string? response) : base(response)
+    public WeatherSession(Player initiator, string? response) : base(initiator, response)
     {
         var acceptableValuesArray =
             LevelInfo.i.cloudLayer.weatherSets.Select(s => new EquatableWeatherSet(s)).ToArray();

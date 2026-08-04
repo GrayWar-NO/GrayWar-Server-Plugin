@@ -31,7 +31,7 @@ public class ReloadConfigCommand(ConfigFile config)
     public override string Description => "Reload the plugin config, the dedicated server config, or both.";
 
     /// <inheritdoc />
-    public override string Usage => "/reload <bepinex, server or both (keywords)>";
+    public override string Usage => "reload <bepinex, server or both (keywords)>";
 
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;

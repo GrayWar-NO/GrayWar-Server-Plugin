@@ -35,7 +35,7 @@ internal static class ChatManagerPatches
         }
         catch (Exception ex)
         {
-            GwServerPlugin.Logger.LogError($"Error executing async command '{commandName}': {ex.Message}");
+            GwServerPlugin.Logger.LogError($"Error executing async command '{commandName}': {ex.Message}\n{ex.StackTrace}");
         }
     }
     

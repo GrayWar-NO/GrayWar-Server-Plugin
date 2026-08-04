@@ -24,7 +24,7 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
     public override string Description => "Donate your own money to a teammate.";
 
     /// <inheritdoc />
-    public override string Usage => "/donate <target / targetID> <sum in millions (eg. 10 = 10 million)>";
+    public override string Usage => "donate <target / targetID> <sum in millions (eg. 10 = 10 million)>";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 2);

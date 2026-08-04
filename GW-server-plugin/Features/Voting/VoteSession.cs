@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.Voting;
 ///     Abstract class for defining vote sessions.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class VoteSession<T>(string? reason)
+public abstract class VoteSession<T>(Player initiator, string? reason)
     : IVoteSession
     where T : struct, IEquatable<T>
 {
@@ -36,7 +36,6 @@ public abstract class VoteSession<T>(string? reason)
         };
     
     private readonly Dictionary<ulong, Outcome> _votes = new();
-    private Player _initiator = null!;
     
     private int _timeLeft;
     
@@ -105,7 +104,7 @@ public abstract class VoteSession<T>(string? reason)
         {
             _votes.Add(voter.SteamID, new Outcome(true, null));
             response = $"Successfully voted NO to the current {SessionName} vote.";
-            if (NNoVotes > AutoPassLimit)
+            if (NNoVotes >= AutoPassLimit)
                 Resolve();
             return true;
         }
@@ -119,8 +118,9 @@ public abstract class VoteSession<T>(string? reason)
             }
             
             _votes.Add(voter.SteamID, new Outcome(false, DefaultVote));
-            response = $"Successfully voted the default outcome {DefaultVote} to the current {SessionName} vote.";
-            if (NYesVotes > AutoPassLimit)
+            response =
+                $"Successfully voted the default outcome {ValueStringGetter(DefaultVote!.Value)} to the current {SessionName} vote.";
+            if (NYesVotes >= AutoPassLimit)
                 Resolve();
             return true;
         }
@@ -133,8 +133,8 @@ public abstract class VoteSession<T>(string? reason)
         }
         
         _votes.Add(voter.SteamID, new Outcome(false, value));
-        response = $"Successfully voted {value} to the current {SessionName} vote.";
-        if (NYesVotes > AutoPassLimit)
+        response = $"Successfully voted {ValueStringGetter(value!.Value)} to the current {SessionName} vote.";
+        if (NYesVotes >= AutoPassLimit)
             Resolve();
         return true;
     }
@@ -165,12 +165,11 @@ public abstract class VoteSession<T>(string? reason)
     }
     
     /// <inheritdoc />
-    public void Start(Player initiator)
+    public void Start()
     {
         ChatService.SendChatMessageAsServer($"Starting {SessionName} vote session!");
-        _sendReminderMessage();
         _timeLeft = VoteTimeoutSeconds;
-        _initiator = initiator;
+        _sendReminderMessage();
         TimeEvents.Every30Seconds += OnTimerTick;
     }
     
@@ -192,6 +191,7 @@ public abstract class VoteSession<T>(string? reason)
             ChatService.SendChatMessageAsServer($"{SessionName} vote failed!");
             OnFail();
         }
+        Destroy();
     }
     
     /// <summary>
@@ -212,13 +212,15 @@ public abstract class VoteSession<T>(string? reason)
     private void _sendReminderMessage()
     {
         ChatService.SendChatMessageAsServer(
-            $"Type '{PluginConfig.CommandPrefixChar}y' for yes, '{PluginConfig.CommandPrefixChar}n' for no.");
+            $"Type '{PluginConfig.CommandPrefixChar}vote y' for yes, '{PluginConfig.CommandPrefixChar}vote n' for no.");
         ChatService.SendChatMessageAsServer(
             $"({NYesVotes}/{AutoPassLimit} YES votes, {NNoVotes}/{AutoPassLimit} NO votes).");
-        ChatService.SendChatMessageAsServer($"Vote expires in {_timeLeft} seconds. {GetWinningOutcome()} is winning.");
-        ChatService.SendChatMessageAsServer(Reason == null
-            ? $"Target: '{SessionName}, initiated by {_initiator.GetDisplayName()}'"
-            : $"Target: '{SessionName}, Reason: '{Reason}'");
+        ChatService.SendChatMessageAsServer(_votes.Any()
+            ? $"Vote expires in {_timeLeft} seconds. {ValueStringGetter(GetWinningOutcome())} is winning."
+            : $"Vote expires in {_timeLeft} seconds.");
+        ChatService.SendChatMessageAsServer($"Target: '{SessionName}', initiated by {initiator.GetDisplayName()}");
+        if (Reason == null) return;
+        ChatService.SendChatMessageAsServer($"Reason: {Reason}");
     }
     
     private void OnTimerTick()
@@ -230,6 +232,8 @@ public abstract class VoteSession<T>(string? reason)
     
     private T GetWinningOutcome()
     {
+        if (!_votes.Any())
+            throw new InvalidOperationException("Cannot get winning outcome with empty votes dict.");
         Dictionary<T, int> values = [];
         foreach (var vote in _votes)
         {
@@ -237,7 +241,7 @@ public abstract class VoteSession<T>(string? reason)
             values.TryGetValue(outcome, out var value);
             values[outcome] = value + 1;
         }
-        
+
         var val = values.Aggregate((a, b) => a.Value > b.Value ? a : b);
         return val.Key;
     }

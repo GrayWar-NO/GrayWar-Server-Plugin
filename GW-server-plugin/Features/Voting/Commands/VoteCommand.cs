@@ -36,7 +36,7 @@ public class VoteCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         if (VoteManager.Session == null) return UniTask.FromResult((false, "No vote was started"))!;
-        if (args[0] == "?") return UniTask.FromResult((true, string.Join("\n", VoteManager.Session.GetAllOutcomes())))!;
+        if (args[0] == "?") return UniTask.FromResult((true, string.Join("\n", VoteManager.Session.GetAllOutcomes())))!; // TODO fix
         var rst = VoteManager.Session.TryAddVote(player, args[0], out var response);
         return UniTask.FromResult((rst, response))!;
     }
