@@ -2,7 +2,7 @@
 using HarmonyLib;
 using NuclearOption.SavedMission;
 
-namespace GW_server_plugin.Patches;
+namespace GW_server_plugin.CritzOS;
 
 
 
@@ -14,15 +14,13 @@ namespace GW_server_plugin.Patches;
 [HarmonyWrapSafe]
 public class DifficultyPatches
 {
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     [HarmonyPatch(nameof(MissionSaveLoad.TryLoad))]
-    private static void Postfix(
+    private static void Prefix(
         MissionKey item,
         ref Mission? mission,
-        ref string error,
-        ref bool __result)
+        ref string error)
     {
-        if (!__result) return;
         if (mission == null) return;
         
         ModifyDifficulty(ref mission);
