@@ -29,14 +29,14 @@ public class VoteCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     public UniTask<bool> Validate(Player player, string[] args)
     {
         if (args.Length != 1) return UniTask.FromResult(false);
-        return UniTask.FromResult(VoteManager.Session?.ValidateVote(player, args[0]) ?? true);
+        return UniTask.FromResult(args[0] == "?" || (VoteManager.Session?.ValidateVote(player, args[0]) ?? false));
     }
     
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         if (VoteManager.Session == null) return UniTask.FromResult((false, "No vote was started"))!;
-        if (args[0] == "?") return UniTask.FromResult((true, string.Join("\n", VoteManager.Session.GetAllOutcomes())))!; // TODO fix
+        if (args[0] == "?") return UniTask.FromResult((true, string.Join("\n", VoteManager.Session.GetAllOutcomes())))!;
         var rst = VoteManager.Session.TryAddVote(player, args[0], out var response);
         return UniTask.FromResult((rst, response))!;
     }

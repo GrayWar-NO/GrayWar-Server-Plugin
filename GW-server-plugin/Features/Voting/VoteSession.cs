@@ -84,6 +84,8 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
     {
         TimeEvents.Every30Seconds -= OnTimerTick;
         _votes.Clear();
+        if (VoteManager.Session == this)
+            VoteManager.Session = null;
     }
     
     /// <inheritdoc />
@@ -158,7 +160,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
             var min = type.GetProperty("MinValue")?.GetValue(AcceptableValues);
             var max = type.GetProperty("MaxValue")?.GetValue(AcceptableValues);
             
-            result.Add($"{type.Name}[{min} - {max}]");
+            result.Add($"{typeof(T).Name}[{min} - {max}]");
         }
         
         return result;
@@ -183,7 +185,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
         if (nTotalVotes >= MinVotesForValidity && (NYesVotes >= AutoPassLimit || NYesVotes > NNoVotes))
         {
             var outcome = GetWinningOutcome();
-            ChatService.SendChatMessageAsServer($"{SessionName} vote passed with outcome: {outcome}!");
+            ChatService.SendChatMessageAsServer($"{SessionName} vote passed with outcome: {ValueStringGetter(outcome)}!");
             OnPass(outcome);
         }
         else
