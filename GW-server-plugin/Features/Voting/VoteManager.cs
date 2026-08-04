@@ -56,7 +56,7 @@ public static class VoteManager
             }
             
             initMethod.Invoke(null, [pluginConfig, categoryName]);
-            Factories[sessionAttr.ShortName] = s => (IVoteSession)Activator.CreateInstance(sessionType, s);
+            Factories[sessionAttr.ShortName] = (p, s) => (IVoteSession)Activator.CreateInstance(sessionType, p, s);
             GwServerPlugin.Logger.LogDebug($"Initialized vote session for {sessionType.Name} successfully");
         }
     }    
@@ -64,10 +64,9 @@ public static class VoteManager
     ///     Starts a voteSession.
     /// </summary>
     /// <param name="session"></param>
-    /// <param name="initiator"></param>
     /// <param name="response"></param>
     /// <returns></returns>
-    public static bool TryStartVote(IVoteSession session, Player initiator, out string? response)
+    public static bool TryStartVote(IVoteSession session, out string? response)
     {
         response = null;
         if (Inhibitors.Any())
@@ -81,7 +80,7 @@ public static class VoteManager
             return false;
         }
         Session = session;
-        Session.Start(initiator);
+        Session.Start();
         response = $"{Session.SessionName} vote started! Dont forget to use /vote to vote for the outcome you want!";
         return true;
     }
@@ -89,7 +88,7 @@ public static class VoteManager
     /// <summary>
     ///     VoteSession factories that exist.
     /// </summary>
-    public static readonly Dictionary<string, Func<string?, IVoteSession>> Factories = new();    
+    public static readonly Dictionary<string, Func<Player, string?, IVoteSession>> Factories = new();    
     
     /// <summary>
     ///     Destroys the current voteSession.

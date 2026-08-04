@@ -26,7 +26,7 @@ public interface IVoteSession
     /// <summary>
     ///     Starts the voteSession behaviours, like vote reminders and such.
     /// </summary>
-    void Start(Player initiator);
+    void Start();
     
     /// <summary>
     ///     Gets executed when vote ends. Resolves outcomes and executes desired behaviour.

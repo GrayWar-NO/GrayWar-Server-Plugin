@@ -1,6 +1,8 @@
 using System.Linq;
 using BepInEx.Configuration;
 using GW_server_plugin.Helpers;
+using GW_server_plugin.Patches;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 
@@ -12,8 +14,8 @@ public sealed class NextSession
     : ConfigurableVoteSession<NextSession, EquatableMissionOptions>
 {
     /// <inheritdoc />
-    public NextSession(string? reason) :
-        base(reason)
+    public NextSession(Player initiator, string? reason) :
+        base(initiator, reason)
     {
         var acceptableValuesArray = Globals.DedicatedServerManagerInstance.missionRotation.allMissions
             .Select(av => new EquatableMissionOptions(av)).ToArray();
@@ -27,7 +29,12 @@ public sealed class NextSession
     protected override EquatableMissionOptions? DefaultVote => null;
     
     /// <inheritdoc />
-    protected override string ValueStringGetter(EquatableMissionOptions value) => value.Options.Key.Name;
+    protected override string ValueStringGetter(EquatableMissionOptions value)
+    {
+        if (!value.Options.Key.TryGetKey(out var key)) return value.Options.Key.Name;
+        key = MissionNameFix.TranslateWorkshopName(key);
+        return key.Name;
+    }
     
     
     /// <inheritdoc />

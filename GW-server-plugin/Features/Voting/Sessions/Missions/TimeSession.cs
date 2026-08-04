@@ -1,5 +1,6 @@
 using System.Globalization;
 using BepInEx.Configuration;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 
@@ -7,7 +8,7 @@ namespace GW_server_plugin.Features.Voting.Sessions.Missions;
 ///     VoteSession for time of day
 /// </summary>
 [AutoVoteSession("Time of Day", "time")]
-public class TimeSession(string? reason) : ConfigurableVoteSession<TimeSession, int>(reason)
+public class TimeSession(Player initiator, string? reason) : ConfigurableVoteSession<TimeSession, int>(initiator, reason)
 {
     /// <inheritdoc />
     protected override AcceptableValueBase AcceptableValues { get; } = new AcceptableValueRange<int>(0, 23);

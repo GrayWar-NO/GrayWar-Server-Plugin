@@ -1,13 +1,14 @@
 using System;
 using System.Reflection;
 using BepInEx.Configuration;
+using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.Voting;
 
 /// <summary>
 ///     VoteSession with ways to configure common parameters
 /// </summary>
-public abstract class ConfigurableVoteSession<TSession, TOutcome>(string? r) : VoteSession<TOutcome>(r)
+public abstract class ConfigurableVoteSession<TSession, TOutcome>(Player initiator, string? r) : VoteSession<TOutcome>(initiator, r)
     where TSession : ConfigurableVoteSession<TSession, TOutcome>
     where TOutcome : struct, IEquatable<TOutcome>
 {
