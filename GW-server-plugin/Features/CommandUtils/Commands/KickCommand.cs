@@ -15,13 +15,13 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name { get; } = "kick";
+    public override string Name => "kick";
 
     /// <inheritdoc />
-    public override string Description { get; } = "Kicks a player from the  server.";
+    public override string Description => "Kicks a player from the  server.";
 
     /// <inheritdoc />
-    public override string Usage { get; } = "kick <player (by name, steamID or ID tag)> <reason>";
+    public override string Usage => "kick <player (by name, steamID or ID tag)> <reason>";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
