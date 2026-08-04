@@ -212,7 +212,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
     private void _sendReminderMessage()
     {
         ChatService.SendChatMessageAsServer(
-            $"Type '{PluginConfig.CommandPrefixChar}vote y' for yes, '{PluginConfig.CommandPrefixChar}vote n' for no.");
+            $"Type '{PluginConfig.CommandPrefixChar}vote y' for yes, '{PluginConfig.CommandPrefixChar}vote n' for no, or '{PluginConfig.CommandPrefixChar}vote ?' to get acceptable values");
         ChatService.SendChatMessageAsServer(
             $"({NYesVotes}/{AutoPassLimit} YES votes, {NNoVotes}/{AutoPassLimit} NO votes).");
         ChatService.SendChatMessageAsServer(_votes.Any()

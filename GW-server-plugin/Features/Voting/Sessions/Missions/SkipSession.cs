@@ -55,7 +55,7 @@ public sealed class SkipSession
         if (AcceptableValues is AcceptableValueList<EquatableMissionOptions> avl)
         {
             var validValues = avl.AcceptableValues.Where(m => ValueStringGetter(m) == input).ToList();
-            if (validValues.Any()) return false;
+            if (!validValues.Any()) return false;
             result = validValues.First();
             return true;
         }
