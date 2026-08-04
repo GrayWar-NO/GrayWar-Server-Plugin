@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class AddWorkshopMission(ConfigFile config): PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "addmission";

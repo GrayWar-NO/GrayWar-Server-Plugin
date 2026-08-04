@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using GW_server_plugin.Features.Voting;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches;
 using NuclearOption.DedicatedServer;
@@ -146,6 +147,7 @@ public static class MissionService
         Globals.DedicatedServerManagerInstance.missionRotation.GetNext();
     }
     
+    internal const string VoteInhibitionReason = "MissionService is changing mission.";
     
     /// <summary>
     ///     Start a specific mission based on MissionOptions.
@@ -155,6 +157,7 @@ public static class MissionService
     {
         try
         {
+            VoteManager.Inhibit(VoteInhibitionReason);
             if (!missionOptions.Key.TryGetKey(out var key))
             {
                 GwServerPlugin.Logger.LogWarning("Error: could not resolve mission key.");

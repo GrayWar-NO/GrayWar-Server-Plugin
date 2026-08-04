@@ -2,7 +2,6 @@ using System;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
-using GW_server_plugin.Features;
 using HarmonyLib;
 using NuclearOption.DedicatedServer;
 using NuclearOption.SavedMission;
@@ -24,8 +23,18 @@ public class MissionChangeDetector
     static async UniTask<bool> AwaitResult(Mission mission, UniTask<bool> originalTask)
     {
         bool result = await originalTask;
+        if (!result) return false;
 
-        OnMissionChanged(mission);
+        try
+        {
+            OnMissionChanged(mission);
+        }
+        catch (Exception exception)
+        {
+            // Mission reporting is optional and must never make the game server
+            // fail a successfully loaded mission.
+            GwServerPlugin.Logger.LogError($"Failed to report mission change: {exception}");
+        }
 
         return result;
     }
@@ -49,15 +58,18 @@ public class MissionChangeDetector
     internal static void OnMissionChanged(Mission? mission)
     {
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission?.Name ?? "null"}");
-        var name = mission?.Name ?? "null";
+        var name = mission?.Name;
         if (ulong.TryParse(name, out var workshopID))
             if (MissionNameFix.GetMissionName(workshopID, out var workshopName))
                 name = workshopName!;
         var log = new missionStatus
         {
-            MissionName = name,
             Time = DateTime.UtcNow.ToTimestamp()
         };
+        if (name != null)
+        {
+            log.MissionName = name;
+        }
         GwServerPlugin.GrpcMgr.Client?.SendMissionChangeAsync(log);
         
         GwServerPlugin.WarnService.ClearWarns();

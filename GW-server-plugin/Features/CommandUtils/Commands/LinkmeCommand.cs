@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class LinkmeCommand(ConfigFile config): PermissionConfigurableCommand(config), IGameCommand
+public class LinkmeCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand
 {
 
     private HashSet<int> _usedCodes = []; 

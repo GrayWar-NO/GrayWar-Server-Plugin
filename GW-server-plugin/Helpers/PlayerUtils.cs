@@ -8,6 +8,7 @@ using Mirage;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
 using Steamworks;
+using UnityEngine;
 
 namespace GW_server_plugin.Helpers;
 
@@ -37,36 +38,75 @@ public static class PlayerUtils
         playerComponent = networkPlayer.GetPlayer();
         return playerComponent != null;
     }
-
-    /// <summary>
-    /// Gets the name used by this plugin when displaying a connected player.
-    /// </summary>
-    /// <remarks>
-    /// The dedicated server does not receive client names over Mirage. This uses the
-    /// Steam Web API name cached at connection time, rather than Player.GetPlayerName().
-    /// </remarks>
-    public static string GetDisplayName(this Player player)
+    
+    extension(Player player)
     {
-        var name = player.GetLogName();
-
-        if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
-            return $"{PluginConfig.StaffPrefix!.Value} {name}";
-
-        return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
-            ? $"[{id}] {name}"
-            : name;
+        /// <summary>
+        /// Gets the name used by this plugin when displaying a connected player.
+        /// </summary>
+        /// <remarks>
+        /// The dedicated server does not receive client names over Mirage. This uses the
+        /// Steam Web API name cached at connection time, rather than Player.GetPlayerName().
+        /// </remarks>
+        public string GetDisplayName()
+        {
+            var name = player.GetLogName();
+            
+            if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
+                return $"{PluginConfig.StaffPrefix!.Value} {name}";
+            
+            return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
+                ? $"[{id}] {name}"
+                : name;
+        }
+        
+        /// <summary>
+        /// Gets the name used by this plugin when displaying a connected player, with the associated faction colour.
+        /// </summary>
+        /// <remarks>
+        /// The dedicated server does not receive client names over Mirage. This uses the
+        /// Steam Web API name cached at connection time, rather than Player.GetPlayerName().
+        /// </remarks>
+        public string GetColoredDisplayName()
+        {
+            var name = player.GetLogName();
+            
+            if (TryGetFactionColor(player, out var factionColor))
+                name = $"<color=#{ColorUtility.ToHtmlStringRGB(factionColor)}>{name}</color>";
+            
+            if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
+                return $"{PluginConfig.StaffPrefix!.Value} {name}";
+            
+            return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
+                ? $"[{id}] {name}"
+                : name;
+        }
+        
+        /// <summary>
+        /// Gets the plain Steam persona name used in logs and audit records.
+        /// This deliberately omits staff and player-ID display tags.
+        /// </summary>
+        public string GetLogName()
+        {
+            return GwServerPlugin.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
+                   !string.IsNullOrWhiteSpace(cachedName)
+                ? cachedName
+                : player.SteamID.ToString();
+        }
     }
-
-    /// <summary>
-    /// Gets the plain Steam persona name used in logs and audit records.
-    /// This deliberately omits staff and player-ID display tags.
-    /// </summary>
-    public static string GetLogName(this Player player)
+    
+    private static bool TryGetFactionColor(Player player, out Color factionColor)
     {
-        return GwServerPlugin.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
-               !string.IsNullOrWhiteSpace(cachedName)
-            ? cachedName
-            : player.SteamID.ToString();
+        factionColor = default;
+        var faction = player.HQ?.faction;
+        if (faction == null ||
+            string.Equals(faction.factionName, FactionHelper.NO_FACTION, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(faction.factionName, FactionHelper.NEUTRAL_FACTION, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(faction.factionName, "Spectator", StringComparison.OrdinalIgnoreCase))
+            return false;
+        
+        factionColor = faction.color;
+        return true;
     }
     
     /// <summary>
@@ -79,10 +119,10 @@ public static class PlayerUtils
     {
         playerObject = null;
         var normalizedName = StripStaffPrefix(StripIdPrefix(playerName));
-
+        
         if (GwServerPlugin.TryGetConnectedPlayerSteamId(normalizedName, out var steamId))
             TryFindPlayerBySteamId(steamId, out playerObject);
-
+        
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
             ulong? playerSteamId;

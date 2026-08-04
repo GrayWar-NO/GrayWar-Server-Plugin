@@ -11,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 ///     Clear the integrated kick list.    
 /// </summary>
 [AutoCommand]
-public class ClearKickListCommand(ConfigFile config) : PermissionConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class ClearKickListCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "clearkicklist";
