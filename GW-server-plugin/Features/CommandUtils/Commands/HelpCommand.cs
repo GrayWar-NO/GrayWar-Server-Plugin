@@ -41,7 +41,9 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
         var accessibleCommands = CommandService.GetGameCommands()
             .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
         var commandNames = accessibleCommands.Select(c => c.Name).ToList();
-        return UniTask.FromResult<(bool, string?)>((true, $"You have access to the following commands: {string.Join(", ", commandNames)}"));
+        return UniTask.FromResult<(bool, string?)>((true, 
+            $"You have access to the following commands:{string.Join(", ", commandNames)}" +
+            $"\n{PluginConfig.CommandPrefixChar}{Usage} for command details"));
     }
 
     /// <inheritdoc />
