@@ -169,9 +169,9 @@ public static class WeaponLoggingExtensions
         {
             Weapon = killerWeaponName,
             KilledUnit = killedName,
-            KillerUnit = killerName,
             Time = DateTime.UtcNow.ToTimestamp()
         };
+        if (killerName != null) killLog.KillerUnit = killerName;
         if (killerSteamID != null) killLog.Killer = killerSteamID.Value;
         if (killedSteamID != null) killLog.Killed = killedSteamID.Value;
 
