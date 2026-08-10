@@ -164,13 +164,13 @@ public static class MissionService
                 return false;
             }
 
-            if (!MissionSaveLoad.TryLoad(key, out var mission, out var err))
+            if (!MissionSaveLoad.TryLoad(key, out var mission, out var err) || mission == null)
             {
                 GwServerPlugin.Logger.LogWarning($"Load failed: {err}");
                 return false;
             }
 
-            GwServerPlugin.Logger.LogInfo($"Loading next mission: {mission?.Name ?? "<unnamed>"}");
+            GwServerPlugin.Logger.LogInfo($"Loading next mission: {mission.Name ?? "<unnamed>"}");
 
             // Switch to main thread for Unity scene/lobby ops
             await UniTask.SwitchToMainThread();
@@ -191,7 +191,7 @@ public static class MissionService
             dsm.currentMission = mission;
             dsm.currentMissionOption = missionOptions;
             LastMission = mission;
-            MissionChangeDetector.OnMissionChanged(mission);
+            MissionChangeDetector.OnMissionStart(mission);
             return true;
         }
         catch (Exception e)

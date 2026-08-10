@@ -156,6 +156,8 @@ public class GwServerPlugin : BaseUnityPlugin
 
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
         MissionEvents.MissionLoaded += _ => VoteManager.RemoveInhibit(MissionService.VoteInhibitionReason);
+        
+        MissionEvents.MissionEnded += _ => VoteManager.Inhibit(MissionService.VoteInhibitionReason);
 
         TimeEvents.Every10Minutes += BroadcastService.SendBroadcast;
         
