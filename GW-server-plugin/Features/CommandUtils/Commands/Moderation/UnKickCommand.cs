@@ -5,7 +5,7 @@ using GW_server_plugin.Helpers;
 using NuclearOption.Networking;
 using Steamworks;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 
 /// <summary>
 /// Command to kick a player from the server

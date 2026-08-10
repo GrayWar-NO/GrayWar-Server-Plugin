@@ -3,7 +3,7 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
 /// <summary>
 /// Command for switching the currently active mission on the server.
