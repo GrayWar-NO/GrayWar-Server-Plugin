@@ -8,7 +8,7 @@ using NuclearOption.Networking;
 using NuclearOption.Workshop;
 using Steamworks;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
 /// <summary>
 /// Command to add a workshop mission to the server.
