@@ -279,7 +279,6 @@ public class GwServerPlugin : BaseUnityPlugin
 
         _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
         
-        if (RankCatchUpService.RankCatchUp.Value) RankCatchUpService.CatchUpPlayer(player);
     }
 
     private static void OnPlayerLeave(Player player)

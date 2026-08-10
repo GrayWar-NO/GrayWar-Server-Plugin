@@ -16,10 +16,10 @@ public class SetWeatherCommand(ConfigFile config) : ConfigurableCommand(config),
     public override string Name => "setweather";
     
     /// <inheritdoc />
-    public override string Description => "vote the weather";
+    public override string Description => "set the weather";
     
     /// <inheritdoc />
-    public override string Usage => $"setweather <clear/rainy/stormy>";
+    public override string Usage => $"setweather <0-1>";
     
     /// <inheritdoc />
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
