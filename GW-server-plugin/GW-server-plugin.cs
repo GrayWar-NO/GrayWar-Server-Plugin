@@ -57,7 +57,7 @@ public class GwServerPlugin : BaseUnityPlugin
     /// <summary>
     /// Maps each connected player's SteamID to their current display name.
     /// </summary>
-    internal static readonly Dictionary<ulong, string> ConnectedPlayerNames = [];
+    private static readonly Dictionary<ulong, string> ConnectedPlayerNames = [];
 
     private static readonly object ConnectedPlayerNamesLock = new();
 
@@ -162,21 +162,32 @@ public class GwServerPlugin : BaseUnityPlugin
         TimeEvents.Every30Minutes += RestartService.AutoRestart;
         
         TimeService.Initialize();
-        try
+        do
         {
-            GrpcMgr = new GrpcClientManager(Config);
-            var modList = GrpcMgr.Client!.getStaffList(new Empty())!;
-            PluginConfig.UpdateModList(modList);
-            
-            var bans = GrpcMgr.Client.GetBanList(new Empty()).Bans
-                .Select(ban => (id: new CSteamID(ban.SteamID), reason: ban.Reason));
-            
-            _ = UpdateBanListWhenReadyAsync(bans);
-        }
-        catch (Exception e)
-        {
-            Logger.LogError($"Failed to initialize GrpcClientManager: {e}\n{e.StackTrace}");
-        }
+            try
+            {
+                GrpcMgr = new GrpcClientManager(Config);
+                if (GrpcMgr.Client == null)
+                {
+                    Logger.LogInfo("gRPC manager did not initialize: is disabled.");
+                    break;
+                }
+                var modList = GrpcMgr.Client.getStaffList(new Empty())!;
+                PluginConfig.UpdateModList(modList);
+
+                var bans = GrpcMgr.Client.GetBanList(new Empty()).Bans
+                    .Select(ban => (id: new CSteamID(ban.SteamID), reason: ban.Reason));
+
+                _ = UpdateBanListWhenReadyAsync(bans);
+                
+                Logger.LogInfo("gRPC interface started!");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Failed to initialize GrpcClientManager: {e}\n{e.StackTrace}");
+            }
+        } while (false); // Do - while false block is used to have a clean way to exit the try block directly.
+        
     }
     
     private static async Task UpdateBanListWhenReadyAsync(IEnumerable<(CSteamID id, string reason)> bans)
@@ -325,6 +336,7 @@ public class GwServerPlugin : BaseUnityPlugin
         GrpcMgr.Client?.SendPlayerActivityAsync(log);
     }
 
+    // ReSharper disable once InconsistentNaming
     private static void OnPlayerJoinFaction(Player player, FactionHQ HQ)
     {
         Logger.LogInfo($"{player.SteamID} joined {HQ.faction.factionName}");
