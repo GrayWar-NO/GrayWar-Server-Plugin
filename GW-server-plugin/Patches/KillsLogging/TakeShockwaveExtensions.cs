@@ -1,11 +1,20 @@
 using UnityEngine;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace GW_server_plugin.Patches.KillsLogging;
 
+/// <summary>
+///     Extension class for IDamageable.TakeShockwave
+/// </summary>
 public static class TakeShockwaveExtensions
 {
+    /// <summary>
+    ///     Replaces <see cref="IDamageable.TakeShockwave"/> taking a weaponName into account.
+    /// </summary>
+    /// <param name="component"></param>
+    /// <param name="origin"></param>
+    /// <param name="overpressure"></param>
+    /// <param name="blastPower"></param>
+    /// <param name="weaponName"></param>
     public static void TakeShockwave(
         this IDamageable component,
         Vector3 origin,

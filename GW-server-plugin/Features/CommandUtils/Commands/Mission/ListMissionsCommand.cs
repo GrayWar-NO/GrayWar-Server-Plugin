@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using GW_server_plugin.Patches;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
 /// <summary>
 /// Command to list missions on the server
@@ -61,5 +61,5 @@ public class ListMissionsCommand(ConfigFile config): ConfigurableCommand(config)
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
+    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

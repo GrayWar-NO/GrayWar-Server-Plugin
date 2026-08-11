@@ -34,4 +34,3 @@ To get support on how to use this, you can come to the [GrayWar Discord server](
 
 ## Notes
 This plugin is made to be used with the rest of the GrayWar stack, which enable connecting multiple servers together, to enable logging of everything we could think we'd need and remote management from Discord, as well as an API that is still WIP as I'm writing these words.
-These parts are however not publicly available as of right now. They may be publicised in the future but for now we're focussing on making it robust and reliable.

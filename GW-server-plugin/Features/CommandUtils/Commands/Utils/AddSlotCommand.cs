@@ -2,7 +2,7 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
 /// <summary>
 /// Command to add a slot to the server.

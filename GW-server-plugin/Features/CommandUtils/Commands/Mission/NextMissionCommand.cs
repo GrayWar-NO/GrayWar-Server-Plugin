@@ -3,7 +3,7 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
 
-namespace GW_server_plugin.Features.CommandUtils.Commands;
+namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
 /// <summary>
 /// Command for switching the currently active mission on the server.
@@ -41,6 +41,10 @@ public class NextMissionCommand(ConfigFile config): ConfigurableCommand(config),
     /// <inheritdoc />
     public async UniTask<(bool success, string? response)> Execute(string[] args)
     {
+        if (GameManager.gameResolution != GameResolution.Ongoing)
+        {
+            return (false, "Cannot start next mission: current mission has ended");
+        }
         if (args.Length == 0)
         {
             if (await MissionService.StartNextMission())
