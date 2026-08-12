@@ -23,7 +23,7 @@ public static class PluginConfig
     internal const int DefaultMaxWrecks = 100;
 
     internal static ConfigEntry<float>? WrecksDecay;
-    internal const float DefaultWrecksDecay = 300;
+    internal const float DefaultWrecksDecay = 5;
 
     internal static ConfigEntry<int>? MaxFactionPlayerCountDiff;
     internal const int DefaultMaxPlayerCountDiff = 2;
@@ -84,7 +84,7 @@ public static class PluginConfig
         GwServerPlugin.Logger.LogDebug($"ForceLowWreckDespawn: {ForceLowWreckDespawn.Value}");
         MaxWrecks = config.Bind(GeneralSection, "Maximum number of wrecks", DefaultMaxWrecks);
         GwServerPlugin.Logger.LogDebug($"MaxWrecks: {MaxWrecks.Value}");
-        WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time", DefaultWrecksDecay);
+        WrecksDecay = config.Bind(GeneralSection, "Wrecks decay time (in minutes)", DefaultWrecksDecay);
         GwServerPlugin.Logger.LogDebug($"WrecksDecay: {WrecksDecay.Value}");
 
         MaxFactionPlayerCountDiff =
