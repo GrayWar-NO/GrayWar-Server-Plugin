@@ -130,7 +130,7 @@
 
     <Target Name="CopyDebug" AfterTargets="Build" Condition="'$(ModDestination)' != ''">
         <!-- Create an item for all .dll files in the output directory -->
-        <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib">
+        <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib;$(OutDir)*.pdb">
             <Output TaskParameter="Include" ItemName="BuildDeps"/>
         </CreateItem>
         <!-- Copy the build output -->
