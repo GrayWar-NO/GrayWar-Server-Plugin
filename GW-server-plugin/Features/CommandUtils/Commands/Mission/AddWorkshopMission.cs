@@ -59,8 +59,7 @@ public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config),
         {
             return (false, $"Failed to download workshop item: {ex.Message}");
         }
-        if (!keySaveable.TryGetKey(out var key)) return (false, $"{keySaveable.Name} is not a valid key");
-        key = MissionNameFix.TranslateWorkshopName(key);
+        if (!keySaveable.TryGetKey(out var key)) return (false, $"{keySaveable.Name} is not a valid workshopID");
 
         MissionService.AddMission(new MissionOptions{Key = keySaveable, MaxTime = 14400f}, save);
         
