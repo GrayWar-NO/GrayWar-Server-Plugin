@@ -19,7 +19,7 @@ framework, and hence requires a BepInEx installation to run.
 6. After configuring the server, run the script whenever you want to start the server
 
 ## gRPC
-This plugin integrates a gRPC client meant to work with [NOSM](https://https://github.com/GrayWar-NO/NOServerManager) that can be disabled in config.
+This plugin integrates a gRPC client meant to work with [NOSM](https://github.com/GrayWar-NO/NOServerManager) that can be disabled in config.
 This enables remote moderation of the server with [external tools](#Notes).
 
 ## Support
