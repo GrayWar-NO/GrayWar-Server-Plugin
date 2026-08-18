@@ -1,6 +1,7 @@
 using System; 
 using System.Linq;
 using BepInEx.Configuration;
+using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches;
 using NuclearOption.Networking;
@@ -55,8 +56,7 @@ public abstract class CommonMissionSession<TSession>
     {
         var avl = (AcceptableValues as AcceptableValueList<EquatableMissionOptions>)!.AcceptableValues;
         var index = avl.IndexOf(value);
-        if (!value.Options.Key.TryGetKey(out var key)) return value.Options.Key.Name;
-        key = MissionNameFix.TranslateWorkshopName(key);
-        return $"[{index}] {key.Name}";
+        var name = value.Options.Key.TryGetKey(out var key) ? key.Name : value.Options.Key.Name;
+        return $"[{index}] {name}";
     }
 }

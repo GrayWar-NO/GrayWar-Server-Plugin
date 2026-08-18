@@ -46,13 +46,9 @@ public class MissionChangeDetector
     internal static void OnMissionStart(Mission mission)
     {
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission.Name}");
-        var name = mission.Name;
-        if (ulong.TryParse(name, out var workshopID))
-            if (MissionNameFix.GetMissionName(workshopID, out var workshopName))
-                name = workshopName!;
         var log = new missionStatus
         {
-            MissionName = name,
+            MissionName = mission.Name,
             Ended = false,
             Time = DateTime.UtcNow.ToTimestamp()
         };

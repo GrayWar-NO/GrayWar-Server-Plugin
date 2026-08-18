@@ -11,6 +11,7 @@ using Grpc.Core.Utils;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches;
+using NuclearOption.DedicatedServer;
 using Steamworks;
 using UnityEngine;
 
@@ -186,16 +187,8 @@ public class GrpcClientManager
     {
         stream.ResponseStream.ForEachAsync(async data =>
             {
-                var missionName = Globals.DedicatedServerManagerInstance.currentMissionOption.Key.Name ??
-                                  Globals.DedicatedServerManagerInstance.NextMissionOption.Key.Name;
-                if (ulong.TryParse(missionName, out var id))
-                {
-                    var missionNameResult = await MissionNameFix.GetMissionNameAsync(id);
-                    if (missionNameResult.success)
-                    {
-                        missionName = missionNameResult.name!;
-                    }
-                }
+                var missionKey = Globals.DedicatedServerManagerInstance.currentMissionOption.Key;
+                var name = missionKey.TryGetKey(out var key) ? key.Name : missionKey.Name;
 
                 StatusResponse rt;
                 try
@@ -206,7 +199,7 @@ public class GrpcClientManager
                         RequestID = data.RequestID,
                         MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
                         PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
-                        MissionName = missionName ?? "Not started",
+                        MissionName = name ?? "Not started",
                         MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
                         LastRestart = DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
                     };
