@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+// ReSharper disable once RedundantUsingDirective
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
@@ -107,6 +108,7 @@ class PatchFuelTankFire
             // Fallback just in case the method is no longer async in a future update
             return originalMethod!;
         }
+        
         var stateMachineType = asyncAttr.StateMachineType;
         
         return stateMachineType!.GetMethod("MoveNext",
@@ -241,7 +243,36 @@ class PatchUnitHitOnPhysicsFrame
             AccessTools.Method(attr.StateMachineType, "MoveNext");
     }
     
-    
+#if DEBUG
+    static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+    {
+        var list = new List<CodeInstruction>(instructions);
+        FieldInfo? weaponInfoField = null;
+        
+        foreach (var instr in list)
+        {
+            if (instr.opcode != OpCodes.Stfld || instr.operand is not FieldInfo field)
+                continue;
+            
+            if (field.FieldType == typeof(WeaponInfo))
+            {
+                weaponInfoField = field;
+                break;
+            }
+        }
+        
+        if (weaponInfoField is null) throw new NullReferenceException("No weaponInfo in provided method");
+        
+        var weaponNameField = AccessTools.Field(typeof(WeaponInfo), nameof(WeaponInfo.weaponName));
+        var loader = new[]
+        {
+            new CodeInstruction(OpCodes.Ldarg_0),
+            new CodeInstruction(OpCodes.Ldfld, weaponInfoField),
+            new CodeInstruction(OpCodes.Ldfld, weaponNameField)
+        };
+        return ArmorPenetrateTranspiler.Inject(list, loader);
+    }
+#else
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var list = new List<CodeInstruction>(instructions);
@@ -266,6 +297,7 @@ class PatchUnitHitOnPhysicsFrame
         };
         return ArmorPenetrateTranspiler.Inject(list, loader);
     }
+#endif
 }
 
 [HarmonyPatch(typeof(Missile), nameof(Missile.PenetrateObject))]
