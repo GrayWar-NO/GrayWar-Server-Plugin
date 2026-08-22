@@ -36,7 +36,7 @@ public static class SteamWebApi
 
         var requestUri = new Uri(
             "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" +
-            Uri.EscapeDataString(apiKey) +
+            Uri.EscapeDataString(apiKey!) +
             "&steamids=" + steamId);
 
         try

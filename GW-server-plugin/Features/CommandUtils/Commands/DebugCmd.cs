@@ -46,7 +46,7 @@ public class DebugCmd(ConfigFile config): ConfigurableCommand(config), IGameComm
     public UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
-        return UniTask.FromResult((true, (string?)$"DSMtf:{dsm.currentMission.environment.timeFactor}"));
+        return UniTask.FromResult((true, $"DSMtf:{dsm.currentMission.environment.timeFactor}"))!;
     }
 }
 #endif

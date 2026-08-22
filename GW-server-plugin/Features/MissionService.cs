@@ -76,11 +76,6 @@ public static class MissionService
     public static MissionOptions? GetNextMissionOptions(bool consume = true)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
-        if (dsm == null)
-        {
-            GwServerPlugin.Logger.LogWarning("dsm is null");
-            return null;
-        }
 
         var mr = dsm.missionRotation;
         if (mr == null)

@@ -22,7 +22,7 @@ public static class WeaponLoggingExtensions
     /// <param name="weaponName"></param>
     // ReSharper disable once ConvertToExtensionBlock
     public static void RecordDamage(
-        this Unit unit,
+        this Unit? unit,
         PersistentID lastDamagedBy,
         float damageAmount,
         string weaponName)

@@ -20,9 +20,7 @@ public static class ChatService
 
         try
         {
-            if (Globals.ChatManagerInstance == null)
-            {
-            }
+            _ = Globals.ChatManagerInstance;
         }
         catch (NullReferenceException)
         {
