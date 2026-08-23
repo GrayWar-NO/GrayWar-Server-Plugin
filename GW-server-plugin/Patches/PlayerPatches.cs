@@ -23,7 +23,7 @@ public class PlayerPatches
     [HarmonyPatch(nameof(Player.FlyOwnedAirframe))]
     public static void AttachPatch(Player __instance, AircraftDefinition airframe)
     {
-        var log = new sortieStatus
+        var log = new SortieStatus
         {
             Start = true,
             SteamID = __instance.SteamID,
@@ -42,7 +42,7 @@ public class PlayerPatches
     [HarmonyPatch(nameof(Player.RecoverAirframeInUse))]
     public static void RecoverPatch(Player __instance, AircraftDefinition airframe)
     {
-        var log = new sortieStatus
+        var log = new SortieStatus
         {
             Start = false,
             SteamID = __instance.SteamID,

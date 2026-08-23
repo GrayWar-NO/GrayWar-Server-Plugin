@@ -250,7 +250,7 @@ public static class PluginConfig
     /// Updates the modlist by adding entries. does never remove any entry.
     /// </summary>
     /// <param name="modlist"></param>
-    public static void UpdateModList(permissionBreakdown modlist)
+    public static void UpdateModList(PermissionBreakdown modlist)
     {
         foreach (var steamid in modlist.Admins)
         {

@@ -46,7 +46,7 @@ public class MissionChangeDetector
     internal static void OnMissionStart(Mission mission)
     {
         GwServerPlugin.Logger.LogDebug($"Mission changed: {mission.Name}");
-        var log = new missionStatus
+        var log = new MissionStatus
         {
             MissionName = mission.Name,
             Ended = false,

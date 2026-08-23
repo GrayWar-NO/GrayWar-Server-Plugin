@@ -32,7 +32,7 @@ public class ReportCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
     {
         var content = string.Join(" ", args);
-        GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new serverReport
+        GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new ServerReport
         {
             Content = content,
             Username = player.GetLogName()
