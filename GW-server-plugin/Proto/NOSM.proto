@@ -28,13 +28,7 @@ message StatusResponse {
   string missionName = 4;
   google.protobuf.Timestamp missionStart = 5;
   google.protobuf.Timestamp lastRestart = 6;
-  string requestID = 7;
 }
-
-message StatusRequest {
-  string requestID = 1;
-}
-
 
 message BanRequest {
   bool shouldBeBanned = 1;
@@ -175,7 +169,7 @@ service EdgeAgentService {
   rpc getStaffList(google.protobuf.Empty) returns (permissionBreakdown);
   rpc GetBanList(google.protobuf.Empty) returns (BanList);
 
-  rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
+  rpc StatusStream(stream StatusResponse) returns (google.protobuf.Empty);
   rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
   rpc SubscribeToBans(google.protobuf.Empty) returns (stream BanRequest);
   rpc SubscribeToCommands(stream CommandResult) returns (stream Command);

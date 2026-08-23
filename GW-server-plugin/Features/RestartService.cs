@@ -187,7 +187,7 @@ public static class RestartReminderService
         try
         {
 
-            while (true)
+            while (!GwServerPlugin.shutdownCts.Token.IsCancellationRequested)
             {
                 ChatService.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
                 await Task.Delay(TimeSpan.FromSeconds(180), ct);

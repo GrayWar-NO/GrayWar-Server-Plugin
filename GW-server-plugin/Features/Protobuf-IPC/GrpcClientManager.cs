@@ -135,7 +135,7 @@ public class GrpcClientManager
 
         BanInputBehaviour(Client.SubscribeToBans(new Empty()));
         CommandBehaviour(Client.SubscribeToCommands());
-        StatusRequestBehaviour(Client.StatusStream());
+        _ = StatusRequestBehaviour(Client.StatusStream(), GwServerPlugin.shutdownCts.Token);
         ProcessDiscordMessages(chatStream.ResponseStream);
     }
 
@@ -145,11 +145,11 @@ public class GrpcClientManager
         {
             if (!data.Result)
             {
-                _ = CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
+                _ = CommandService.TryExecuteCommand(data.Name, [.. data.Arguments], data.PermLevel);
                 return;
             }
 
-            var result = await CommandService.TryExecuteCommand(data.Name, data.Arguments.ToArray(), data.PermLevel);
+            var result = await CommandService.TryExecuteCommand(data.Name, [.. data.Arguments], data.PermLevel);
             await stream.RequestStream.WriteAsync(new CommandResult
             {
                 RequestID = data.RequestID,
@@ -180,42 +180,35 @@ public class GrpcClientManager
             }
         });
     }
-
-    private static void StatusRequestBehaviour(AsyncDuplexStreamingCall<StatusResponse, StatusRequest> stream)
+    
+    
+    private static StatusResponse GetCurrentStatus()
     {
-        stream.ResponseStream.ForEachAsync(async data =>
-            {
-                var missionKey = Globals.DedicatedServerManagerInstance.currentMissionOption.Key;
-                var name = missionKey.TryGetKey(out var key) ? key.Name : missionKey.Name;
-
-                StatusResponse rt;
-                try
-                {
-                    rt = new StatusResponse
-                    {
-                        Ok = true,
-                        RequestID = data.RequestID,
-                        MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
-                        PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
-                        MissionName = name ?? "Not started",
-                        MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
-                        LastRestart = DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
-                    };
-                }
-                catch (Exception e)
-                {
-                    GwServerPlugin.Logger.LogError(e.ToString());
-                    rt = new StatusResponse
-                    {
-                        Ok = false
-                    };
-                }
-
-                await stream.RequestStream.WriteAsync(rt);
-            }
-        );
+        var missionKey = Globals.DedicatedServerManagerInstance.currentMissionOption.Key;
+        var name = missionKey.TryGetKey(out var key) ? key.Name : missionKey.Name;
+        
+        return new StatusResponse
+        {
+            Ok = true,
+            MaxPlayers = (uint)Globals.NetworkManagerNuclearOptionInstance.Server.PeerConfig.MaxConnections,
+            PlayerNumber = (uint)PlayerUtils.GetPlayerCount(),
+            MissionName = name ?? "Not started",
+            MissionStart = DateTime.UtcNow.AddSeconds(-MissionService.CurrentMissionTime).ToTimestamp(),
+            LastRestart = DateTime.UtcNow.AddSeconds(-Time.realtimeSinceStartup).ToTimestamp()
+        };
     }
-
+    
+    private static async Task StatusRequestBehaviour(
+        AsyncClientStreamingCall<StatusResponse, Empty> stream,
+        CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await stream.RequestStream.WriteAsync(GetCurrentStatus());
+            
+            await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
+        }
+    }
     private static void ProcessDiscordMessages(IAsyncStreamReader<ChatBack> inputStream)
     {
         inputStream.ForEachAsync(data =>
