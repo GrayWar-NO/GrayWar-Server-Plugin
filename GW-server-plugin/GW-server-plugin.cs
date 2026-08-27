@@ -89,6 +89,8 @@ public class GwServerPlugin : BaseUnityPlugin
         Instance = this;
         Logger = base.Logger;
         
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => OnProcessExit();
+        
         PluginConfig.InitSettings(Config);
         
         WarnService = new WarnService(Config);
@@ -195,8 +197,9 @@ public class GwServerPlugin : BaseUnityPlugin
         
     }
     
-    private void OnDestroy()
+    private void OnProcessExit()
     {
+        Logger.LogInfo("Plugin was destroyed, shutting down.");
         shutdownCts.Cancel();
         shutdownCts.Dispose();
     }
