@@ -14,9 +14,9 @@ public class DownedPilotNameFix
 {
     
     
-    private static PilotDismounted SetupEjectingPilotName(PilotDismounted original, Player owner)
+    private static PilotDismounted SetupEjectingPilotName(PilotDismounted original, Player? owner)
     {
-        original.NetworkunitName = "[" + owner.GetDisplayName() + "] " + original.unitName;
+        if (owner != null) original.NetworkunitName = "[" + owner.GetDisplayName() + "] " + original.unitName;
         return original;
     }
     
