@@ -16,7 +16,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class DebugCmd(ConfigFile config): ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "dbg";
+    public override string OutputName => "dbg";
 
     /// <inheritdoc />
     public override string Description => "debug-only command";

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Com.Graywar.NoServerManager.Proto;
 
 namespace GW_server_plugin.Features.CommandUtils;
@@ -8,9 +9,14 @@ namespace GW_server_plugin.Features.CommandUtils;
 public interface ICommand
 {
     /// <summary>
-    ///     The command name.
+    ///     Command names to be used when executing it.
     /// </summary>
-    string Name { get; }
+    IEnumerable<string> Names { get; }
+    
+    /// <summary>
+    ///     The command name that will be used in config and in /help.
+    /// </summary>
+    string OutputName { get; }
 
     /// <summary>
     ///     The command description.

@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class SetWeatherCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "setweather";
+    public override string OutputName => "setweather";
     
     /// <inheritdoc />
     public override string Description => "set the weather";

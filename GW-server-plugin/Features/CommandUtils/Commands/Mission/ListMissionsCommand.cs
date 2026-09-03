@@ -35,7 +35,7 @@ public class ListMissionsCommand(ConfigFile config) : ConfigurableCommand(config
     }
     
     /// <inheritdoc />
-    public override string Name => "missions";
+    public override string OutputName => "missions";
     
     /// <inheritdoc />
     public override string Description => "List all currently available missions";

@@ -18,7 +18,7 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
 {
 
     /// <inheritdoc />
-    public override string Name => "donate";
+    public override string OutputName => "donate";
 
     /// <inheritdoc />
     public override string Description => "Donate your own money to a teammate.";

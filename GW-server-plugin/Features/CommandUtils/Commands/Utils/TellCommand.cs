@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class TellCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "tell";
+    public override string OutputName => "tell";
 
     /// <inheritdoc />
     public override string Description => "Broadcast a message to everyone on the server.";

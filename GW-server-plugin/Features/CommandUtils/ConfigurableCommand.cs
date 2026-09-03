@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using JetBrains.Annotations;
@@ -11,9 +12,12 @@ namespace GW_server_plugin.Features.CommandUtils;
 public abstract class ConfigurableCommand : ICommand
 {
     private const string CommandConfigSection = "Commands";
-
+    
     /// <inheritdoc />
-    public abstract string Name { get; }
+    public virtual IEnumerable<string> Names => [OutputName];
+    
+    /// <inheritdoc />
+    public abstract string OutputName { get; }
 
     /// <inheritdoc />
     public abstract string Description { get; }
@@ -54,8 +58,8 @@ public abstract class ConfigurableCommand : ICommand
     protected ConfigurableCommand(ConfigFile config)
     {
         // ReSharper disable VirtualMemberCallInConstructor
-        EnableConfig = config.Bind(CommandConfigSection, $"Enable {Name}", DefaultEnable, $"Enable toggle for {Name}");
-        PermissionLevelConfig = config.Bind(CommandConfigSection, Name, DefaultPermissionLevel, $"Permission level for command {Name}");
+        EnableConfig = config.Bind(CommandConfigSection, $"Enable {OutputName}", DefaultEnable, $"Enable toggle for {OutputName}");
+        PermissionLevelConfig = config.Bind(CommandConfigSection, OutputName, DefaultPermissionLevel, $"Permission level for command {OutputName}");
         // ReShaper restore VirtualMemberCallInConstructor
     }
 }

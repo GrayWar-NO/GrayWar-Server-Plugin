@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class SetPermissionLevelCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "setpermissionlevel";
+    public override string OutputName => "setpermissionlevel";
 
     /// <inheritdoc />
     public override string Description => "Set the permission level of a player.";

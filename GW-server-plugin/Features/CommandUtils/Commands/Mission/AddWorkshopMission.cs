@@ -17,7 +17,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "addmission";
+    public override string OutputName => "addmission";
 
 
     /// <inheritdoc />

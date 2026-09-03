@@ -25,7 +25,7 @@ public class ReloadConfigCommand(ConfigFile config)
         };
 
     /// <inheritdoc />
-    public override string Name => "reload";
+    public override string OutputName => "reload";
 
     /// <inheritdoc />
     public override string Description => "Reload the plugin config, the dedicated server config, or both.";

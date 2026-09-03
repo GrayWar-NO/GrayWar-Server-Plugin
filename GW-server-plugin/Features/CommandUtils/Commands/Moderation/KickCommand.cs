@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "kick";
+    public override string OutputName => "kick";
 
     /// <inheritdoc />
     public override string Description => "Kicks a player from the  server.";

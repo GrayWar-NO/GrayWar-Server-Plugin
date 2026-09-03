@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name =>  "rmslot";
+    public override string OutputName =>  "rmslot";
 
     /// <inheritdoc />
     public override string Description => "Removes a slot from the server";

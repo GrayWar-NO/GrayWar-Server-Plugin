@@ -17,7 +17,7 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     public override bool DefaultEnable => false;
     
     /// <inheritdoc />
-    public override string Name => "gamble";
+    public override string OutputName => "gamble";
     
     /// <inheritdoc />
     public override string Description =>

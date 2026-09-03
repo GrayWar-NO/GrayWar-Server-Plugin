@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
@@ -15,7 +16,10 @@ namespace GW_server_plugin.Features.Voting.Commands;
 public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "startvote";
+    public override IEnumerable<string> Names => ["startvote", "votestart", "sv", "vs"];
+    
+    /// <inheritdoc />
+    public override string OutputName => "startvote";
     
     /// <inheritdoc />
     public override string Description => "Starts a vote session";

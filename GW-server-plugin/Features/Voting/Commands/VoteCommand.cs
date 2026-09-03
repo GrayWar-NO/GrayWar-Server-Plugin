@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.Voting.Commands;
 public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "vote";
+    public override string OutputName => "vote";
     
     /// <inheritdoc />
     public override string Description => "Votes for the currently ongoing vote session";

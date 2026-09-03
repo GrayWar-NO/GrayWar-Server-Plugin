@@ -25,7 +25,7 @@ public class DiscordCommand: ConfigurableCommand, IGameCommand
     private readonly ConfigEntry<string> _url;
     
     /// <inheritdoc />
-    public override string Name => "discord";
+    public override string OutputName => "discord";
 
     /// <inheritdoc />
     public override string Description => "Get instructions on how to join the discord server.";

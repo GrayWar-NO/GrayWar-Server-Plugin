@@ -17,7 +17,7 @@ public class ReportCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override string Name => "report";
+    public override string OutputName => "report";
     
     /// <inheritdoc />
     public override string Description => "Reports something to staff";

@@ -49,7 +49,7 @@ public static class CommandService
     /// <returns>true if a command was found, else false</returns>
     public static bool TryGetCommand(string commandName, out ICommand command)
     {
-        command = Commands.Find(c => string.Equals(c.Name, commandName, StringComparison.CurrentCultureIgnoreCase));
+        command = Commands.Find(c => c.Names.Contains(commandName, StringComparer.OrdinalIgnoreCase));
         return command != null;
     }
 
@@ -111,8 +111,8 @@ public static class CommandService
     {
         if (PermissionLevelUtils.GetPlayerPermissionLevel(player) < command.PermissionLevel)
         {
-            GwServerPlugin.Logger.LogWarning($"Player {player.GetLogName()} does not have permission to execute command {command.Name}");
-            return (false, $"You are not authorized to execute command {command.Name}");
+            GwServerPlugin.Logger.LogWarning($"Player {player.GetLogName()} does not have permission to execute command {command.OutputName}");
+            return (false, $"You are not authorized to execute command {command.OutputName}");
         }
         string? response;
         if (await command.Validate(player, args))
@@ -122,19 +122,19 @@ public static class CommandService
             if (executionResult.success)
             {
                 GwServerPlugin.Logger.LogInfo(
-                    $"Command {command.Name} executed successfully by {player.GetLogName()} with argument(s): {string.Join(", ", args)}"
+                    $"Command {command.OutputName} executed successfully by {player.GetLogName()} with argument(s): {string.Join(", ", args)}"
                 );
                 return (true, response);
             }
 
             GwServerPlugin.Logger.LogWarning(
-                $"Failed to execute command {command.Name} by {player.GetLogName()} with argument(s): {string.Join(", ", args)}");
-            response ??= $"Failed to execute command {command.Name}";
+                $"Failed to execute command {command.OutputName} by {player.GetLogName()} with argument(s): {string.Join(", ", args)}");
+            response ??= $"Failed to execute command {command.OutputName}";
             return (false, response);
         }
 
         GwServerPlugin.Logger.LogInfo(
-            $"Failed validation for command {command.Name} by {player.GetLogName()} with argument(s): {string.Join(", ", args)}");
+            $"Failed validation for command {command.OutputName} by {player.GetLogName()} with argument(s): {string.Join(", ", args)}");
         response = $"Invalid arguments: {PluginConfig.CommandPrefixChar}{command.Usage}";
         return (false, response);
     }
@@ -151,8 +151,8 @@ public static class CommandService
     {
         if (level < command.PermissionLevel)
         {
-            GwServerPlugin.Logger.LogWarning($"The remote process does not have permission to execute command {command.Name}");
-            return (false, $"You are not authorized to execute command {command.Name}");
+            GwServerPlugin.Logger.LogWarning($"The remote process does not have permission to execute command {command.OutputName}");
+            return (false, $"You are not authorized to execute command {command.OutputName}");
         }
 
         string? response;
@@ -163,20 +163,20 @@ public static class CommandService
             if (executionResult.success)
             {
                 GwServerPlugin.Logger.LogInfo(
-                    $"Command {command.Name} executed successfully by remote process with argument(s): {string.Join(", ", args)}"
+                    $"Command {command.OutputName} executed successfully by remote process with argument(s): {string.Join(", ", args)}"
                 );
-                return (true, response ?? $"executed {command.Name} successfully!");
+                return (true, response ?? $"executed {command.OutputName} successfully!");
             }
 
             GwServerPlugin.Logger.LogWarning(
-                $"Failed to execute command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
-            response ??= $"Failed to execute command {command.Name}";
+                $"Failed to execute command {command.OutputName} by remote process with argument(s): {string.Join(", ", args)}");
+            response ??= $"Failed to execute command {command.OutputName}";
             return (false, response);
         }
 
         GwServerPlugin.Logger.LogWarning(
-            $"Failed validation for command {command.Name} by remote process with argument(s): {string.Join(", ", args)}");
-        response = $"Invalid arguments for command {command.Name}\n{PluginConfig.CommandPrefixChar}{command.Usage}\nDescription: {command.Description}";
+            $"Failed validation for command {command.OutputName} by remote process with argument(s): {string.Join(", ", args)}");
+        response = $"Invalid arguments for command {command.OutputName}\n{PluginConfig.CommandPrefixChar}{command.Usage}\nDescription: {command.Description}";
         return (false, response);
     }
 }

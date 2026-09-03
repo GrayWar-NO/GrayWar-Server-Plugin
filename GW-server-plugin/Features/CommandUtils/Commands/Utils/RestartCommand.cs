@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "restart";
+    public override string OutputName => "restart";
 
     /// <inheritdoc />
     public override string Description => "restart server after mission ends";

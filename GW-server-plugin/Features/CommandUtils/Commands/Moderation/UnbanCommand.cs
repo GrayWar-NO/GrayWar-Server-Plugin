@@ -18,7 +18,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class UnbanCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "unban";
+    public override string OutputName => "unban";
 
     /// <inheritdoc />
     public override string Description => "Unbans a player from the server.";

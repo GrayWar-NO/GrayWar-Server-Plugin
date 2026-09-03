@@ -14,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class ClearKickListCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "clearkicklist";
+    public override string OutputName => "clearkicklist";
 
     /// <inheritdoc />
     public override string Description => "Clears the integrated kick list. Manual or vote clears only the manual kicks or the votekicks. Defaults to both.";

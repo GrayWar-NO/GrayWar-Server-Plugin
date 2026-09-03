@@ -16,7 +16,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class WarnCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "warn";
+    public override string OutputName => "warn";
     
     /// <inheritdoc />
     public override string Description => "Warns a player.";

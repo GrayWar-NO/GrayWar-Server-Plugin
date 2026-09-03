@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class SetTimeCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "settime";
+    public override string OutputName => "settime";
     
     /// <inheritdoc />
     public override string Description => "set the time of day";

@@ -19,7 +19,7 @@ public class LinkmeCommand(ConfigFile config): ConfigurableCommand(config), IGam
     private Random _rnd = new();
     
     /// <inheritdoc />
-    public override string Name => "linkme";
+    public override string OutputName => "linkme";
 
     /// <inheritdoc />
     public override string Description => "Use this to link your steam account with your discord in our system";

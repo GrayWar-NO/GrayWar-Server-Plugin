@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class ListPlayersCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "listplayers";
+    public override string OutputName => "listplayers";
 
     /// <inheritdoc />
     public override string Description => "Returns the list of players currently on the server.";

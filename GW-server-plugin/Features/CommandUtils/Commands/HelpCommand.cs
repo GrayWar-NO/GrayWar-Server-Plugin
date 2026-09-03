@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
@@ -15,7 +16,10 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override string Name => "help";
+    public override IEnumerable<string> Names => ["help", "h", "?"];
+    
+    /// <inheritdoc />
+    public override string OutputName => "help";
 
     /// <inheritdoc />
     public override string Description =>
@@ -40,7 +44,7 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
         
         var accessibleCommands = CommandService.GetGameCommands()
             .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
-        var commandNames = accessibleCommands.Select(c => c.Name).ToList();
+        var commandNames = accessibleCommands.Select(c => c.OutputName).ToList();
         return UniTask.FromResult<(bool, string?)>((true, 
             $"You have access to the following commands:{string.Join(", ", commandNames)}" +
             $"\n{PluginConfig.CommandPrefixChar}{Usage} for command details"));
@@ -51,7 +55,7 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
     {
         if (args.Length == 0)
         {
-            var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
+            var commandNames = CommandService.GetConsoleCommands().Select(c => c.OutputName).ToList();
             return UniTask.FromResult<(bool, string?)>((true, $"Available commands: {string.Join(", ", commandNames)}"));
         }
         
@@ -61,7 +65,7 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
             return UniTask.FromResult<(bool, string?)>((false, $"Command {commandName} not found."));
         }
 
-        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.Name}': {command.Description}\nUsage: {PluginConfig.CommandPrefixChar}{command.Usage}"));
+        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.OutputName}': {command.Description}\nUsage: {PluginConfig.CommandPrefixChar}{command.Usage}"));
     }
 
     /// <inheritdoc />

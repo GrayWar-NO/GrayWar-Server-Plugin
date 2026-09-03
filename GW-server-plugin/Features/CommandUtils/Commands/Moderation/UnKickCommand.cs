@@ -15,7 +15,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class UnKickCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "unkick";
+    public override string OutputName => "unkick";
 
     /// <inheritdoc />
     public override string Description => "Unkicks a player from the  server.";

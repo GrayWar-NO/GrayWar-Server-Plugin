@@ -16,7 +16,7 @@ public class GiveCommand(ConfigFile config): ConfigurableCommand(config), IGameC
 {
 
     /// <inheritdoc />
-    public override string Name => "give";
+    public override string OutputName => "give";
 
     /// <inheritdoc />
     public override string Description => "Give money to someone out of thin air";

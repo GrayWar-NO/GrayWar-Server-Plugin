@@ -51,7 +51,7 @@ public class NextMissionCommand(ConfigFile config) : ConfigurableCommand(config)
     }
     
     /// <inheritdoc />
-    public override string Name => "nextmission";
+    public override string OutputName => "nextmission";
     
     /// <inheritdoc />
     public override string Description => "Starts the next mission, or a selected mission from index";

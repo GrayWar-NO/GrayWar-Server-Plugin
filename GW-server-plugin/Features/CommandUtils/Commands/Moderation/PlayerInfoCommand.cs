@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
-    public override string Name => "playerinfo";
+    public override string OutputName => "playerinfo";
 
     /// <inheritdoc />
     public override string Description => "Gets a player's name from their steamID";
