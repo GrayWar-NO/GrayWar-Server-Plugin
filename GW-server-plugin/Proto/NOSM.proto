@@ -28,13 +28,7 @@ message StatusResponse {
   string missionName = 4;
   google.protobuf.Timestamp missionStart = 5;
   google.protobuf.Timestamp lastRestart = 6;
-  string requestID = 7;
 }
-
-message StatusRequest {
-  string requestID = 1;
-}
-
 
 message BanRequest {
   bool shouldBeBanned = 1;
@@ -86,14 +80,14 @@ message FactionLog{
   string faction = 2;
 }
 
-message missionStatus{
+message MissionStatus{
   optional string missionName = 1;
   bool ended = 2;
   optional string winnerName = 3;
   google.protobuf.Timestamp time = 4;
 }
 
-message sortieStatus{
+message SortieStatus{
   uint64 steamID = 1;
   bool start = 2;
   optional string planeName = 3;
@@ -108,7 +102,7 @@ message KillLog{
   optional string killerUnit = 4;
   optional string killedUnit = 5;
   google.protobuf.Timestamp time = 6;
-} 
+}
 
 message Command{
   string requestID = 1;
@@ -145,12 +139,12 @@ message DonationLog{
   google.protobuf.Timestamp time = 4;
 }
 
-message serverReport{
+message ServerReport{
   string username = 1;
   string content = 2;
 }
 
-message permissionBreakdown {
+message PermissionBreakdown {
   repeated uint64 admins = 2;
   repeated uint64 mods = 3;
 }
@@ -165,17 +159,17 @@ service EdgeAgentService {
   rpc SendWarn(WarnLog) returns (Ack);
   rpc SendPlayerActivity(JoinLeaveLog) returns (Ack);
   rpc SendPlayerJoinFac(FactionLog) returns (Ack);
-  rpc SendMissionChange(missionStatus) returns (Ack);
-  rpc SendSortieChange(sortieStatus) returns (Ack);
+  rpc SendMissionChange(MissionStatus) returns (Ack);
+  rpc SendSortieChange(SortieStatus) returns (Ack);
   rpc SendKill(KillLog) returns (Ack);
   rpc SendTeamKill(KillLog) returns (Ack);
   rpc sendLinkCode(LinkUser) returns (Ack);
   rpc sendDonation(DonationLog) returns (Ack);
-  rpc sendReport(serverReport) returns (Ack);
-  rpc getStaffList(google.protobuf.Empty) returns (permissionBreakdown);
+  rpc sendReport(ServerReport) returns (Ack);
+  rpc getStaffList(google.protobuf.Empty) returns (PermissionBreakdown);
   rpc GetBanList(google.protobuf.Empty) returns (BanList);
 
-  rpc StatusStream(stream StatusResponse) returns (stream StatusRequest);
+  rpc StatusStream(stream StatusResponse) returns (google.protobuf.Empty);
   rpc SendChatLogsStream(stream ChatLog) returns (stream ChatBack);
   rpc SubscribeToBans(google.protobuf.Empty) returns (stream BanRequest);
   rpc SubscribeToCommands(stream CommandResult) returns (stream Command);

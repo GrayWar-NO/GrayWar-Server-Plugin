@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Logging;
@@ -26,6 +27,8 @@ namespace GW_server_plugin;
 [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
 public class GwServerPlugin : BaseUnityPlugin
 {
+    internal static readonly CancellationTokenSource shutdownCts = new();
+    
     internal static GwServerPlugin Instance { get; private set; } = null!;
     
     internal new static ManualLogSource Logger { get; private set; } = null!;
@@ -85,6 +88,8 @@ public class GwServerPlugin : BaseUnityPlugin
         ServerStartTime = DateTime.Now;
         Instance = this;
         Logger = base.Logger;
+        
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => OnProcessExit();
         
         PluginConfig.InitSettings(Config);
         
@@ -190,6 +195,13 @@ public class GwServerPlugin : BaseUnityPlugin
             }
         } while (false); // Do - while false block is used to have a clean way to exit the try block directly.
         
+    }
+    
+    private void OnProcessExit()
+    {
+        Logger.LogInfo("Plugin was destroyed, shutting down.");
+        shutdownCts.Cancel();
+        shutdownCts.Dispose();
     }
     
     private static async Task UpdateBanListWhenReadyAsync(IEnumerable<(CSteamID id, string reason)> bans)

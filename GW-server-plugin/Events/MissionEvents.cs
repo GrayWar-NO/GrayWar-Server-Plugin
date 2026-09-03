@@ -20,7 +20,7 @@ public static class MissionEvents
     /// </summary>
     public static event Action<FactionHQ> MissionEnded = winner =>
     {
-        var packet = new missionStatus
+        var packet = new MissionStatus
         {
             Ended = true,
             WinnerName = winner.faction.factionName,

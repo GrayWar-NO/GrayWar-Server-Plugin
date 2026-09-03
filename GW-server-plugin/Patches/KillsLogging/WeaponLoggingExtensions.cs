@@ -214,7 +214,7 @@ public static class WeaponLoggingExtensions
 
         if (killedSteamID != null)
         {
-            var sortieEndLog = new sortieStatus
+            var sortieEndLog = new SortieStatus
             {
                 SteamID = killedSteamID.Value,
                 Start = false,
