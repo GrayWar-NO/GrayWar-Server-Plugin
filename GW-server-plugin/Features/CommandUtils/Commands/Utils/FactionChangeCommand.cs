@@ -22,7 +22,7 @@ public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(confi
     public override string Usage => "factionswitch";
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);

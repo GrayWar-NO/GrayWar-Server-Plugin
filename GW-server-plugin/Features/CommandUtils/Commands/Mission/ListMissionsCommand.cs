@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class ListMissionsCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);

@@ -23,7 +23,7 @@ public class QueueMission(ConfigFile config) : ConfigurableCommand(config), IGam
     public override string Usage => $"queue <mission ID (from {PluginConfig.CommandPrefixChar}mission)>";
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

@@ -76,5 +76,5 @@ public class UnbanCommand(ConfigFile config) : ConfigurableCommand(config), IGam
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
 }

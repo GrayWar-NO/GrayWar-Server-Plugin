@@ -40,5 +40,5 @@ public class SetPermissionLevelCommand(ConfigFile config) : ConfigurableCommand(
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Owner;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Owner;
 }

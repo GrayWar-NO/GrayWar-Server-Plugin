@@ -66,5 +66,5 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

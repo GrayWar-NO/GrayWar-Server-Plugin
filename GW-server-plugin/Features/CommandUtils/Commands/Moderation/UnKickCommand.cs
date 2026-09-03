@@ -43,7 +43,7 @@ public class UnKickCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     private static void UnKickPlayer(ulong steamID)
     {

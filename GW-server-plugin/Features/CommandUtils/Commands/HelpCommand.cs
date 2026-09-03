@@ -16,7 +16,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override IEnumerable<string> Names => ["help", "h", "?"];
+    public override IEnumerable<string> DefaultAliases => ["help", "h", "?"];
     
     /// <inheritdoc />
     public override string OutputName => "help";
@@ -69,5 +69,5 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
 }

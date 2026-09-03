@@ -75,6 +75,6 @@ public class GiveCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
 }

@@ -22,7 +22,7 @@ public class SetWeatherCommand(ConfigFile config) : ConfigurableCommand(config),
     public override string Usage => $"setweather <0-1>";
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);

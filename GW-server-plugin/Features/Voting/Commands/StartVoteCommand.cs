@@ -16,7 +16,7 @@ namespace GW_server_plugin.Features.Voting.Commands;
 public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
-    public override IEnumerable<string> Names => ["startvote", "votestart", "sv", "vs"];
+    public override IEnumerable<string> DefaultAliases => ["startvote", "votestart", "sv", "vs"];
     
     /// <inheritdoc />
     public override string OutputName => "startvote";
@@ -28,7 +28,7 @@ public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), 
     public override string Usage => $"startvote <{string.Join("/", VoteManager.Factories.Keys)}> <reason>";
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) =>

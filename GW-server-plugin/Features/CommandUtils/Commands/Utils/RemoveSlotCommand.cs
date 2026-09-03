@@ -38,5 +38,5 @@ public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), 
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

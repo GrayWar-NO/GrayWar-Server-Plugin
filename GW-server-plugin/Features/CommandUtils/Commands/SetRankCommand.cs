@@ -55,5 +55,5 @@ public class SetRankCommand(ConfigFile config): ConfigurableCommand(config), IGa
     }
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

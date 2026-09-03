@@ -72,5 +72,5 @@ public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config),
     public async UniTask<(bool success, string? response)> Execute(Player player, string[] args) => await Execute(args);
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

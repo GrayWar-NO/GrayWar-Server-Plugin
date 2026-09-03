@@ -69,5 +69,5 @@ public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IC
 
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

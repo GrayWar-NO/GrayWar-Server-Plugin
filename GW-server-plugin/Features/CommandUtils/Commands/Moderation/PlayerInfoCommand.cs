@@ -22,7 +22,7 @@ public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), 
     public override string Usage => "playerinfo <SteamID>";
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)

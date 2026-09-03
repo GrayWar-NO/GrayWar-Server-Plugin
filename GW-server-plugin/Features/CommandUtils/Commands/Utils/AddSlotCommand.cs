@@ -34,5 +34,5 @@ public class AddSlotCommand(ConfigFile config): ConfigurableCommand(config), ICo
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

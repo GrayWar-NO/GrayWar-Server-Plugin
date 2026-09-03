@@ -42,5 +42,5 @@ public class TellCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

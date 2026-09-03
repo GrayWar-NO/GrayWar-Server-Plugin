@@ -58,6 +58,6 @@ public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConso
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
     
 }

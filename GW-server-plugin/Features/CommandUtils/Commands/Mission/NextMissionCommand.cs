@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class NextMissionCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)

@@ -51,5 +51,5 @@ public class LinkmeCommand(ConfigFile config): ConfigurableCommand(config), IGam
     }
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

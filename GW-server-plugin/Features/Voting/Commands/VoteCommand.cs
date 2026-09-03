@@ -24,7 +24,7 @@ public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGame
         $"vote <Outcome>. You can use  \"{PluginConfig.CommandPrefixChar}vote ?\" to get available options";
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)

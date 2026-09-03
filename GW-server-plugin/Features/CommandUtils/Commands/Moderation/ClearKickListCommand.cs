@@ -50,5 +50,5 @@ public class ClearKickListCommand(ConfigFile config) : ConfigurableCommand(confi
         return UniTask.FromResult<(bool, string?)>((true, $"{mode}Kick list cleared successfully!"));
     }
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
 }

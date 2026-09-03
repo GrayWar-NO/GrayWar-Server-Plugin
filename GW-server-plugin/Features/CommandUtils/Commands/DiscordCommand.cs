@@ -43,5 +43,5 @@ public class DiscordCommand: ConfigurableCommand, IGameCommand
     }
     
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

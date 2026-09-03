@@ -68,5 +68,5 @@ public class WarnCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     }
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
+    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
 }
