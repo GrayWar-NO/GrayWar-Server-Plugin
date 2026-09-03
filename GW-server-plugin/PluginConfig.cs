@@ -43,6 +43,9 @@ public static class PluginConfig
     internal static ConfigEntry<bool>? EnableTeamDamageAutoWarning;
     internal const bool DefaultEnableTeamDamageAutoWarning = true;
 
+    internal static ConfigEntry<bool>? WarnStaff;
+    internal const bool DefaultWarnStaff = true;
+
     internal static ConfigEntry<string>? UnitsForAutoWarn;
 
     internal const string DefaultUnitsForAutoWarn =
@@ -125,6 +128,8 @@ public static class PluginConfig
 
         EnableTeamDamageAutoWarning = config.Bind(GeneralSection, "Enable team damage automatic warning",
             DefaultEnableTeamDamageAutoWarning);
+        
+        WarnStaff = config.Bind(GeneralSection, "Warn staff automatically", DefaultWarnStaff);
 
         UnitsForAutoWarn = config.Bind(GeneralSection, "Units for auto warn", DefaultUnitsForAutoWarn,
             "; separated list of unit name parts.\nWith this empty, team damage warns for player on player teamkills only. If any of those strings is found within the killed unit's name, a warning will be issued regardless.");

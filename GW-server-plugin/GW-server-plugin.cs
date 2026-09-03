@@ -363,6 +363,7 @@ public class GwServerPlugin : BaseUnityPlugin
     public static void OnTeamkill(Player killer, string killedName, string weaponName)
     {
         if (!PluginConfig.EnableTeamDamageAutoWarning!.Value) return;
+        if (!PluginConfig.WarnStaff!.Value && PlayerUtils.IsStaff(killer)) return;
         var reason = $"Teamkilled player {killedName} with weapon {weaponName}";
         WarnService.AddWarn(killer.SteamID, reason);
     }
