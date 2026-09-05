@@ -138,15 +138,21 @@ public class GwServerPlugin : BaseUnityPlugin
                 try
                 {
                     var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
-
+                    
                     if (!commandInstance.Enable) continue;
-
+                    
                     CommandService.AddCommand(commandInstance);
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
+                catch (TargetInvocationException ex)
+                {
+                    Logger.LogError(ex.InnerException != null
+                        ? $"Failed to load command {type.Name}: {ex.InnerException.Message}\n{ex.InnerException.StackTrace}"
+                        : $"Failed to load command {type.Name}: {ex.Message}\n{ex.StackTrace}");
+                }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"Failed to load command {type.Name}: {ex.Message}");
+                    Logger.LogError($"Failed to load command {type.Name}: {ex.Message}\n{ex.StackTrace}");
                 }
             }
         }

@@ -15,12 +15,12 @@ public abstract class ConfigurableCommand : ICommand
     private const string CommandConfigSection = "Commands";
     
     /// <inheritdoc />
-    public IEnumerable<string> Names => Aliases.Value.Append(OutputName);
+    public IEnumerable<string> Names => Aliases.Value.Split(';').Append(OutputName);
     
     /// <summary>
     ///     Default alias names for this command.
     /// </summary>
-    public virtual IEnumerable<string> DefaultAliases => [];
+    protected virtual string[] DefaultAliases => [];
     
     /// <inheritdoc />
     public abstract string OutputName { get; }
@@ -44,7 +44,7 @@ public abstract class ConfigurableCommand : ICommand
     /// </summary>
     private ConfigEntry<PermissionLevel> PermissionLevelConfig { get; }
     
-    private ConfigEntry<string[]> Aliases { get; }
+    private ConfigEntry<string> Aliases { get; }
     
     private ConfigEntry<bool> EnableConfig { get; }
     
@@ -69,8 +69,8 @@ public abstract class ConfigurableCommand : ICommand
             $"Enable toggle for {OutputName}");
         PermissionLevelConfig = config.Bind(CommandConfigSection, OutputName, DefaultPermissionLevel,
             $"Permission level for command {OutputName}");
-        Aliases = config.Bind(CommandConfigSection, "Aliases", DefaultAliases.ToArray(),
-            "Alias names for this command");
+        Aliases = config.Bind(CommandConfigSection, "Aliases", string.Join(";", DefaultAliases),
+            "Alias names for this command. ; separated value list.");
         // ReShaper restore VirtualMemberCallInConstructor
     }
 }

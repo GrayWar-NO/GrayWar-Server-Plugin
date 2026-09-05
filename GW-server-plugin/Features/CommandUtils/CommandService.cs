@@ -49,6 +49,10 @@ public static class CommandService
     /// <returns>true if a command was found, else false</returns>
     public static bool TryGetCommand(string commandName, out ICommand command)
     {
+        foreach (var cmd in Commands)
+        {
+            GwServerPlugin.Logger.LogDebug($"Command {cmd.OutputName}: {cmd.Names}; {cmd.Names.Contains(commandName, StringComparer.OrdinalIgnoreCase)}");
+        }
         command = Commands.Find(c => c.Names.Contains(commandName, StringComparer.OrdinalIgnoreCase));
         return command != null;
     }

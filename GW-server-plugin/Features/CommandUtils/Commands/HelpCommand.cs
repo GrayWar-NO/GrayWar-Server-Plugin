@@ -16,7 +16,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public override IEnumerable<string> DefaultAliases => ["help", "h", "?"];
+    protected override string[] DefaultAliases => ["help", "h", "?"];
     
     /// <inheritdoc />
     public override string OutputName => "help";
