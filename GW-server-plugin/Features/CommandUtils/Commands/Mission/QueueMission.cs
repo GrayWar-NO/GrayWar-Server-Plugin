@@ -50,7 +50,9 @@ public class QueueMission(ConfigFile config) : ConfigurableCommand(config), IGam
         if (missionOption == null) return UniTask.FromResult((false, "Mission not found."))!;
         {
             Globals.DedicatedServerManagerInstance.missionRotation.OverrideNext(missionOption.Value);
+#pragma warning disable CS8619
             return UniTask.FromResult((true, $"Queued mission {missionOption.Value.Key.Name} successfully."));
+#pragma warning restore CS8619
         }
 
     }
