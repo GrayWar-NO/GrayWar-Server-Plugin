@@ -21,7 +21,7 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
     public override string Description => "restart server after mission ends";
 
     /// <inheritdoc />
-    public override string Usage => $"restart or {PluginConfig.CommandPrefixChar}restart [f]orce immediate restart or [c]cancel to cancel restart";
+    public override string Usage => $"restart <(optional) [f]orce OR [c]ancel> <(optional) reason>. e.g: /restart c server update";
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
@@ -29,10 +29,7 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
     /// <inheritdoc />
     public UniTask<bool> Validate(string[] args)
     {
-        if (args.Length == 1 && args[0] != "force" && args[0] != "f" && args[0] != "cancel" && args[0] != "c")
-            return UniTask.FromResult(false);
-
-        return UniTask.FromResult(args.Length <= 1);
+        return UniTask.FromResult(true);
     }
 
     /// <inheritdoc />
@@ -44,9 +41,10 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
     {
         try
         {
-            if (args.Length == 1 && (args[0] == "cancel" || args[0] == "c"))
+            if (args.Length >= 1 && (args[0] == "cancel" || args[0] == "c"))
             {
-                RestartService.AwaitingRestart = false;
+                string? cancelReason = (args.Length >= 2) ? string.Join(" ", args, 1, args.Length - 1) : null;
+                RestartService.CancelScheduledRestart(cancelReason);
                 return UniTask.FromResult<(bool, string?)>((true, "Restart canceled"));
             }
             
@@ -54,8 +52,9 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
             var playerCount = PlayerUtils.GetPlayerCount();
             if (playerCount == 0 || (args.Length == 1 && (args[0] == "force" || args[0] == "f")))
                 return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), "Server restarting..."));
-            
-            RestartService.AwaitingRestart = true;
+
+            var reason = (args.Length != 0) ? string.Join(" ", args) : null;
+            RestartService.ScheduleRestart(reason);
             return UniTask.FromResult<(bool, string?)>((true, "Server has been scheduled to restart after mission"));
         }
         catch (Exception e)

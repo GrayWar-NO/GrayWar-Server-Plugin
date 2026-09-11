@@ -18,23 +18,37 @@ public static class RestartService
     private static ConfigEntry<uint> _noPlayersRestartTimeout = null!;
     private static ConfigEntry<uint> _forceRestartMaxInterval = null!;
     
+    private static DateTime? _serverStartTime; // Used to restart server over 24 hours
+    
     /// <summary>
     /// Used to check if server is awaiting a restart after mission ends
     /// </summary>
     public static bool AwaitingRestart
     {
         get;
-        set
-        {
-            if (value)
-                _ = RestartReminderService.StartRestartReminder();
-            else
-                RestartReminderService.CancelRestart();
-            
-            field = value;
-        }
+        private set;
     }
-    
+
+    /// <summary>
+    /// Schedule a restart after mission ends
+    /// </summary>
+    /// <param name="reason"></param>
+    public static void ScheduleRestart(string? reason = null)
+    {
+        AwaitingRestart = true;
+        _ = RestartReminderService.StartRestartReminder(reason);
+    }
+
+    /// <summary>
+    /// Cancel the scheduled restart
+    /// </summary>
+    /// <param name="reason"></param>
+    public static void CancelScheduledRestart(string? reason = null)
+    {
+        AwaitingRestart = false;
+        RestartReminderService.Reason = null;
+        RestartReminderService.CancelRestart(reason);
+    }
     private static CancellationTokenSource? _restartCts;
 
     /// <summary>
@@ -147,73 +161,85 @@ public static class RestartService
     /// </summary>
     public static void AutoRestart()
     {
-        if (!_enableForceRestart.Value) return;
-        if (DateTime.Now.Subtract(GwServerPlugin.ServerStartTime).Hours < _forceRestartMaxInterval.Value) return;
+        if (!_enableForceRestart.Value || _serverStartTime == null) return;
+        if (DateTime.Now.Subtract((DateTime)_serverStartTime).Hours < _forceRestartMaxInterval.Value) return;
         GwServerPlugin.Logger.LogInfo("AUTO-RESTARTING SERVER");
-        ChatService.SendChatMessageAsServer(
-            "This server has been running for 24 hours. To keep everything running smoothly, it will restart after this mission ends");
-        AwaitingRestart = true;
+        var reason =
+            "This server has been running for 24 hours. To keep everything running smoothly, it will restart after this mission ends";
+        ScheduleRestart(reason);
     }
-}
-
-
-/// <summary>
-///     Sends server messages reminding of pending restart to players
-/// </summary>
-public static class RestartReminderService
-{
-    private static CancellationTokenSource? _restartCts;
 
     /// <summary>
-    ///     starts the restart reminder
+    ///     Resets the initial datetime reference variable "ServerStartTime".
     /// </summary>
-    public static async Task StartRestartReminder()
+    public static void ResetAutoRestart()
     {
-        if (_restartCts != null)
+        _serverStartTime = DateTime.Now;
+        GwServerPlugin.Logger.LogInfo($"AutoRestart timer reset, starting at {_serverStartTime}");
+    }
+    /// <summary>
+    ///     Sends server messages reminding of pending restart to players
+    /// </summary>
+    private static class RestartReminderService
+    {
+        private static CancellationTokenSource? _restartCts;
+
+        public static string? Reason;
+
+        /// <summary>
+        ///     starts the restart reminder
+        /// </summary>
+        public static async Task StartRestartReminder(string? reason = null)
         {
-            GwServerPlugin.Logger.LogWarning("RestartReminderService has been called but already started");
-            return;
+            if (reason != null) Reason = reason;
+            if (_restartCts != null)
+            {
+                GwServerPlugin.Logger.LogWarning("RestartReminderService has been called but already started");
+                return;
+            }
+
+            _restartCts = new CancellationTokenSource();
+            await ScheduleRestartReminder(_restartCts.Token);
         }
 
-        _restartCts = new CancellationTokenSource();
-        await ScheduleRestartReminder(_restartCts.Token);
-    }
-
-    /// <summary>
-    ///     schedules the restart reminder
-    /// </summary>
-    private static async Task ScheduleRestartReminder(CancellationToken ct)
-    {
-        try
+        /// <summary>
+        ///     schedules the restart reminder
+        /// </summary>
+        private static async Task ScheduleRestartReminder(CancellationToken ct)
         {
-
-            while (!GwServerPlugin.shutdownCts.Token.IsCancellationRequested)
+            try
             {
-                ChatService.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
-                await Task.Delay(TimeSpan.FromSeconds(180), ct);
+                while (true)
+                {
+                    ChatService.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
+                    if (Reason != null) ChatService.SendChatMessageAsServer($"Reason: {Reason}");
+                    await Task.Delay(TimeSpan.FromSeconds(180), ct);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (Exception e)
+            {
+                GwServerPlugin.Logger.LogError(e);
+            }
+            finally
+            {
+                _restartCts = null;
             }
         }
-        catch (TaskCanceledException)
-        {
-        }
-        catch (Exception e)
-        {
-            GwServerPlugin.Logger.LogError(e);
-        }
-        finally
-        {
-            _restartCts = null;
-        }
-    }
 
-    /// <summary>
-    ///     Cancel Restart Reminder.
-    /// </summary>
-    public static void CancelRestart()
-    {
-        if (_restartCts == null) return;
-        _restartCts.Cancel();
-        _restartCts = null;
-        ChatService.SendChatMessageAsServer("WARNING: Server restart has been canceled");
+        /// <summary>
+        ///     Cancel Restart Reminder.
+        /// </summary>
+        public static void CancelRestart(string? cancelReason = null)
+        {
+            if (_restartCts == null) return;
+            _restartCts.Cancel();
+            _restartCts = null;
+            Reason = null;
+            ChatService.SendChatMessageAsServer("WARNING: Server restart has been canceled");
+            if (cancelReason != null) ChatService.SendChatMessageAsServer($"Reason: {cancelReason}");
+        }
     }
 }
