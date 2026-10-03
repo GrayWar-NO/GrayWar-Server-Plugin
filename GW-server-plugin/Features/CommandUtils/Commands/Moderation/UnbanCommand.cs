@@ -5,7 +5,6 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 using Steamworks;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
@@ -15,7 +14,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class UnbanCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "unban";
@@ -25,22 +24,16 @@ public class UnbanCommand(ConfigFile config) : ConfigurableCommand(config), IGam
 
     /// <inheritdoc />
     public override string Usage => "unban <Player (by name, steamID or playerID)>";
-
+    
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(args.Length == 1 &&
                                   (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
     }
-
+    
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         string? response;
         var target = args[0];

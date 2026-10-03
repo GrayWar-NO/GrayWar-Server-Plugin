@@ -2,7 +2,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -11,7 +10,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class QueueMission(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "queue";
@@ -26,13 +25,7 @@ public class QueueMission(ConfigFile config) : ConfigurableCommand(config), IGam
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-    
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(args.Length switch
         {
@@ -43,7 +36,7 @@ public class QueueMission(ConfigFile config) : ConfigurableCommand(config), IGam
     }
     
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);

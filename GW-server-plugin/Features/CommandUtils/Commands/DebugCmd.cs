@@ -4,7 +4,6 @@ using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using Com.Graywar.NoServerManager.Proto;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -13,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class DebugCmd(ConfigFile config): ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class DebugCmd(ConfigFile config): CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "dbg";
@@ -26,24 +25,15 @@ public class DebugCmd(ConfigFile config): ConfigurableCommand(config), IGameComm
 
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
-
+    
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(true);
     }
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(true);
-    }
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
         return UniTask.FromResult((true, $"DSMtf:{dsm.currentMission.environment.timeFactor}"))!;
