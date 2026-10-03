@@ -25,7 +25,7 @@ public class DebugCmd(ConfigFile config): ConfigurableCommand(config), IGameComm
     public override string Usage => "take a guess bro";
 
     /// <inheritdoc />
-    public override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 
     /// <inheritdoc />
     public UniTask<bool> Validate(Player player, string[] args)
