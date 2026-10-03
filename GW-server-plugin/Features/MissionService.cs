@@ -145,9 +145,8 @@ public static class MissionService
         
         oldMr.allMissions.RemoveAll((Predicate<MissionOptions>) (m => m.Key.Equals(mission.Key)));
         
-        var ml = new MissionOptions[oldMr.allMissions.Count + 1];
+        var ml = new MissionOptions[oldMr.allMissions.Count];
         oldMr.allMissions.CopyTo(ml);
-        ml[ml.Length - 1] = mission;
         
         dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
         
