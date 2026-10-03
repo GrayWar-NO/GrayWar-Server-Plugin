@@ -130,9 +130,49 @@ public static class MissionService
         
         if (!save) return;
         
-        Globals.DedicatedServerManagerInstance.Config.MissionRotation = ml;
         DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
     }
+    
+    /// <summary>
+    ///     Removes a mission from rotation.
+    /// </summary>
+    /// <param name="mission"></param>
+    /// <param name="save"></param>
+    public static void RemoveMission(MissionOptions mission, bool save = false)
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        var oldMr = dsm.missionRotation!;
+        
+        oldMr.allMissions.RemoveAll((Predicate<MissionOptions>) (m => m.Key.Equals(mission.Key)));
+        
+        var ml = new MissionOptions[oldMr.allMissions.Count + 1];
+        oldMr.allMissions.CopyTo(ml);
+        ml[ml.Length - 1] = mission;
+        
+        dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
+        
+        switch (oldMr.rotationType)
+        {
+            case RotationType.RandomQueue:
+            case RotationType.Sequence:
+                var i = 0;
+                while (!dsm.missionRotation.GetNext().Key.Equals(dsm.currentMissionOption.Key))
+                {
+                    if (i >= dsm.missionRotation.allMissions.Count) break;
+                    i++;
+                }
+                break;
+            case RotationType.PureRandom:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        if (!save) return;
+        
+        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
+    }
+    
 
     /// <summary>
     /// Consumes the next map in rotation without outputting it.
