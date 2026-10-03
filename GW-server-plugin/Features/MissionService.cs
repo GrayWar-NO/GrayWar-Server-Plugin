@@ -96,7 +96,25 @@ public static class MissionService
             _ => throw new ArgumentOutOfRangeException(nameof(mr.rotationType))
         };
     }
-
+    
+    /// <summary>
+    ///     Reloads the mission rotation based on a given mission list.
+    /// </summary>
+    /// <param name="missionList"></param>
+    /// <param name="save">whether to save the new rotation to the config file or not.</param>
+    public static void ReloadMissionRotation(MissionOptions[] missionList, bool save = false)
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        var oldMr = dsm.missionRotation!;
+        dsm.ReloadMissionRotation(missionList, oldMr.rotationType, false);
+        
+        EnsureCurrentMapCorrect(oldMr.rotationType);
+        
+        if (!save) return;
+        
+        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
+    }
+    
     /// <summary>
     /// Adds a mission to the rotation
     /// </summary>
@@ -108,29 +126,7 @@ public static class MissionService
         var ml = new MissionOptions[oldMr.allMissions.Count + 1];
         oldMr.allMissions.CopyTo(ml);
         ml[ml.Length - 1] = mission;
-        var dsm = Globals.DedicatedServerManagerInstance;
-        dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
-        
-        switch (oldMr.rotationType)
-        {
-            case RotationType.RandomQueue:
-            case RotationType.Sequence:
-                var i = 0;
-                while (!dsm.missionRotation.GetNext().Key.Equals(dsm.currentMissionOption.Key))
-                {
-                    if (i >= dsm.missionRotation.allMissions.Count) break;
-                    i++;
-                }
-                break;
-            case RotationType.PureRandom:
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        
-        if (!save) return;
-        
-        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
+        ReloadMissionRotation(ml, save);
     }
     
     /// <summary>
@@ -148,9 +144,14 @@ public static class MissionService
         var ml = new MissionOptions[oldMr.allMissions.Count];
         oldMr.allMissions.CopyTo(ml);
         
-        dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
-        
-        switch (oldMr.rotationType)
+        ReloadMissionRotation(ml, save);
+    }
+    
+    
+    private static void EnsureCurrentMapCorrect(RotationType rt)
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        switch (rt)
         {
             case RotationType.RandomQueue:
             case RotationType.Sequence:
@@ -166,12 +167,7 @@ public static class MissionService
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
-        if (!save) return;
-        
-        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
     }
-    
 
     /// <summary>
     /// Consumes the next map in rotation without outputting it.
@@ -210,8 +206,7 @@ public static class MissionService
             await UniTask.SwitchToMainThread();
             var dsm = Globals.DedicatedServerManagerInstance;
 
-            // ReSharper disable once UsageOfDefaultStructEquality
-            while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
+            while (!missionOptions.Key.Equals(dsm.missionRotation.GetNext().Key)){}
             
             dsm.UpdateLobby(mission, false);
             var ok = await dsm.LoadNext(mission);
