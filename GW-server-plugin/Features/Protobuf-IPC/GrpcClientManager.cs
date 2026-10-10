@@ -44,18 +44,26 @@ public class GrpcClientManager
             "Hostname or IP of the manager");
         _centralPort = config.Bind(PluginConfig.RpcSection, "central port", 50051u,
             new ConfigDescription("Port of the manager", new AcceptableValueRange<uint>(0, 65535)));
-
+        
         if (!enable.Value) return;
-        _sslCredentials = new SslCredentials(
-            File.ReadAllText("CA/ca.crt"),
-            new KeyCertificatePair(
-                File.ReadAllText($"CA/{_serverName.Value}.crt"),
-                File.ReadAllText($"CA/{_serverName.Value}.key")
-            )
-        );
+        try {
+            _sslCredentials = new SslCredentials(
+                File.ReadAllText("CA/ca.crt"),
+                new KeyCertificatePair(
+                    File.ReadAllText($"CA/{_serverName.Value}.crt"),
+                    File.ReadAllText($"CA/{_serverName.Value}.key")
+                )
+            );
+        }
+        catch (FileNotFoundException e)
+        {
+            GwServerPlugin.Logger.LogInfo($"Failed to find file: {e.FileName}. Disabling gRPC.");
+            return;
+        }
+        
         ConnectAndMonitor();
     }
-
+    
     private async void ConnectAndMonitor()
     {
         try
