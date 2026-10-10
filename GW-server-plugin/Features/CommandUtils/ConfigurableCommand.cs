@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils;
 /// </summary>
 public abstract class ConfigurableCommand : ICommand
 {
-    private const string CommandConfigSection = "Commands";
+    private string CommandConfigSection => $"{OutputName} command";
     
     /// <inheritdoc />
     public IEnumerable<string> Names => Aliases.Value.Split(';').Append(OutputName);
@@ -65,9 +65,9 @@ public abstract class ConfigurableCommand : ICommand
     protected ConfigurableCommand(ConfigFile config)
     {
         // ReSharper disable VirtualMemberCallInConstructor
-        EnableConfig = config.Bind(CommandConfigSection, $"Enable {OutputName}", DefaultEnable,
+        EnableConfig = config.Bind(CommandConfigSection, "Enable", DefaultEnable,
             $"Enable toggle for {OutputName}");
-        PermissionLevelConfig = config.Bind(CommandConfigSection, OutputName, DefaultPermissionLevel,
+        PermissionLevelConfig = config.Bind(CommandConfigSection, "Permission level", DefaultPermissionLevel,
             $"Permission level for command {OutputName}");
         Aliases = config.Bind(CommandConfigSection, "Aliases", string.Join(";", DefaultAliases),
             "Alias names for this command. ; separated value list.");
