@@ -57,7 +57,7 @@ public class GrpcClientManager
         }
         catch (FileNotFoundException e)
         {
-            GwServerPlugin.Logger.LogInfo($"Failed to find file: {e.FileName}. Disabling gRPC.");
+            GwServerPlugin.Logger.LogWarning($"Failed to find file: {e.FileName}. Disabling gRPC.");
             return;
         }
         
