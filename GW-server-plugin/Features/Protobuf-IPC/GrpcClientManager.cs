@@ -37,7 +37,7 @@ public class GrpcClientManager
     /// <param name="config"></param>
     public GrpcClientManager(ConfigFile config)
     {
-        var enable = config.Bind(PluginConfig.RpcSection, "enable", false);
+        var enable = config.Bind(PluginConfig.RpcSection, "enable", true);
         _serverName = config.Bind(PluginConfig.RpcSection, "server name", "graywar",
             "Name the server will report to the manager");
         _centralHost = config.Bind(PluginConfig.RpcSection, "central hostname", "graywar.no",
