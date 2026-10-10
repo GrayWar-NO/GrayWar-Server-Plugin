@@ -3,6 +3,7 @@
         <NUCLEAR_OPTION_SERVER_REFERENCES>$(HOME)/.local/share/Steam/steamapps/common/NuclearOptionServer/NuclearOptionServer_Data/Managed</NUCLEAR_OPTION_SERVER_REFERENCES>
 
         <ReleaseDestination>$(HOME)</ReleaseDestination>
+        <DebugDestination>$(HOME)</DebugDestination>
         <!-- General Project Information -->
         <TargetFramework>net48</TargetFramework>
         <AssemblyName>GrayWar.ServerPlugin</AssemblyName>
@@ -128,7 +129,7 @@
               SkipUnchangedFiles="true"
               Condition="Exists('$(ReleaseDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll')" />    </Target>
 
-    <Target Name="CopyDebug" AfterTargets="Build" Condition="'$(ModDestination)' != ''">
+    <Target Name="CopyAny" AfterTargets="Build" Condition="'$(ModDestination)' != ''">
         <!-- Create an item for all .dll files in the output directory -->
         <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib;$(OutDir)*.pdb">
             <Output TaskParameter="Include" ItemName="BuildDeps"/>
@@ -158,5 +159,37 @@
               DestinationFiles="$(ModDestination)\$(AssemblyName)\grpc_csharp_ext.dll"
               SkipUnchangedFiles="true"
               Condition="Exists('$(ModDestination)\$(AssemblyName)\grpc_csharp_ext.x64.dll')" />
+    </Target>
+
+    <Target Name="CopyDebug" AfterTargets="Build" Condition="'$(DebugDestination)' != '' AND '$(Configuration)' == 'Debug'">
+        <!-- Create an item for all .dll files in the output directory -->
+        <CreateItem Include="$(OutDir)*.dll;$(OutDir)*.so;$(OutDir)*.dylib;$(OutDir)*.pdb">
+            <Output TaskParameter="Include" ItemName="BuildDeps"/>
+        </CreateItem>
+        <!-- Copy the build output -->
+        <Message Text="Copying build output assemblies from $(OutDir)*.dll to $(DebugDestination)\$(AssemblyName)-DEBUG" Importance="high"/>
+        <Copy SourceFiles="@(BuildDeps)" DestinationFolder="$(DebugDestination)\$(AssemblyName)-DEBUG"/>
+
+        <!-- Copy README & CHANGELOG -->
+        <Message Text="Copying README from $(ProjectDir)..\README.md to $(DebugDestination)\$(AssemblyName)-DEBUG" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\README.md" DestinationFolder="$(DebugDestination)\$(AssemblyName)-DEBUG"/>
+        <Message Text="Copying CHANGELOG from $(ProjectDir)..\CHANGELOG.md to $(DebugDestination)" Importance="high"/>
+        <Copy SourceFiles="$(ProjectDir)..\CHANGELOG.md" DestinationFolder="$(DebugDestination)\$(AssemblyName)-DEBUG"/>
+
+        <!-- Create generic names for Grpc.Core native libraries -->
+        <Copy SourceFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.x64.so"
+              DestinationFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.so"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.x64.so')" />
+
+        <Copy SourceFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.x64.dylib"
+              DestinationFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.dylib"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(DebugDestination)\$(AssemblyName)-DEBUG\libgrpc_csharp_ext.x64.dylib')" />
+
+        <Copy SourceFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\grpc_csharp_ext.x64.dll"
+              DestinationFiles="$(DebugDestination)\$(AssemblyName)-DEBUG\grpc_csharp_ext.dll"
+              SkipUnchangedFiles="true"
+              Condition="Exists('$(DebugDestination)\$(AssemblyName)-DEBUG\grpc_csharp_ext.x64.dll')" />
     </Target>
 </Project>
