@@ -49,7 +49,8 @@ public static class RestartService
         RestartReminderService.Reason = null;
         RestartReminderService.CancelRestart(reason);
     }
-    private static CancellationTokenSource? _restartCts;
+    private static CancellationTokenSource? 
+        _restartCts;
 
     /// <summary>
     ///     Initializes the config variables for the Restart Service.
@@ -182,7 +183,7 @@ public static class RestartService
     /// </summary>
     private static class RestartReminderService
     {
-        private static CancellationTokenSource? _restartCts;
+        private static CancellationTokenSource? _restartReminderCts;
 
         public static string? Reason;
 
@@ -192,14 +193,14 @@ public static class RestartService
         public static async Task StartRestartReminder(string? reason = null)
         {
             if (reason != null) Reason = reason;
-            if (_restartCts != null)
+            if (_restartReminderCts != null)
             {
                 GwServerPlugin.Logger.LogWarning("RestartReminderService has been called but already started");
                 return;
             }
 
-            _restartCts = new CancellationTokenSource();
-            await ScheduleRestartReminder(_restartCts.Token);
+            _restartReminderCts = new CancellationTokenSource();
+            await ScheduleRestartReminder(_restartReminderCts.Token);
         }
 
         /// <summary>
@@ -225,7 +226,7 @@ public static class RestartService
             }
             finally
             {
-                _restartCts = null;
+                _restartReminderCts = null;
             }
         }
 
@@ -234,9 +235,9 @@ public static class RestartService
         /// </summary>
         public static void CancelRestart(string? cancelReason = null)
         {
-            if (_restartCts == null) return;
-            _restartCts.Cancel();
-            _restartCts = null;
+            if (_restartReminderCts == null) return;
+            _restartReminderCts.Cancel();
+            _restartReminderCts = null;
             Reason = null;
             ChatService.SendChatMessageAsServer("WARNING: Server restart has been canceled");
             if (cancelReason != null) ChatService.SendChatMessageAsServer($"Reason: {cancelReason}");

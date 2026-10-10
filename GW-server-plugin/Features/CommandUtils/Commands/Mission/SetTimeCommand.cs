@@ -1,7 +1,6 @@
 ﻿using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -10,7 +9,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class SetTimeCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class SetTimeCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "settime";
@@ -23,12 +22,9 @@ public class SetTimeCommand(ConfigFile config) : ConfigurableCommand(config), IG
     
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         if (args.Length != 1)
             return UniTask.FromResult(false);
@@ -37,12 +33,9 @@ public class SetTimeCommand(ConfigFile config) : ConfigurableCommand(config), IG
 
         return UniTask.FromResult(true);
     }
-
+    
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var timeOfDay = int.Parse(args[0]);
         LevelInfo.i.SetTimeOfDay(timeOfDay);

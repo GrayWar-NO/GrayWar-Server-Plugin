@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.DedicatedServer;
-using NuclearOption.Networking;
 using NuclearOption.Workshop;
 using Steamworks;
 
@@ -14,20 +13,21 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "addmission";
-
-
+    
+    
     /// <inheritdoc />
-    public override string Description => "Adds a mission to the server from it's workshopID.\nThis has temporary effect and won't be persisted after a server restart.";
-
+    public override string Description =>
+        "Adds a mission to the server from it's workshopID.\nThis has temporary effect and won't be persisted after a server restart.";
+    
     /// <inheritdoc />
     public override string Usage => "addmission <workshopID> <Optional bool save, default false>";
-
+    
     /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(args.Length switch
         {
@@ -38,7 +38,7 @@ public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config),
     }
     
     /// <inheritdoc />
-    public async UniTask<(bool success, string? response)> Execute(string[] args)
+    public override async UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var keySaveable = new MissionKeySaveable
         {
@@ -58,19 +58,14 @@ public class AddWorkshopMission(ConfigFile config): ConfigurableCommand(config),
         {
             return (false, $"Failed to download workshop item: {ex.Message}");
         }
+        
         if (!keySaveable.TryGetKey(out var key)) return (false, $"{keySaveable.Name} is not a valid workshopID");
-
-        MissionService.AddMission(new MissionOptions{Key = keySaveable, MaxTime = 14400f}, save);
+        
+        MissionService.AddMission(new MissionOptions { Key = keySaveable, MaxTime = 14400f }, save);
         
         return (true, $"Added mission {key.Name} to rotation successfully.");
     }
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public async UniTask<(bool success, string? response)> Execute(Player player, string[] args) => await Execute(args);
-
+    
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

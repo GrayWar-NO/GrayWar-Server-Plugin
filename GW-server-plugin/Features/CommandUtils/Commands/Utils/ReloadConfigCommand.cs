@@ -4,7 +4,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -13,8 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class ReloadConfigCommand(ConfigFile config)
-    : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class ReloadConfigCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     private static readonly HashSet<string> AllowedValues =
         new(StringComparer.OrdinalIgnoreCase)
@@ -26,30 +24,24 @@ public class ReloadConfigCommand(ConfigFile config)
 
     /// <inheritdoc />
     public override string OutputName => "reload";
-
+    
     /// <inheritdoc />
     public override string Description => "Reload the plugin config, the dedicated server config, or both.";
-
+    
     /// <inheritdoc />
     public override string Usage => "reload <bepinex, server or both (keywords)>";
-
+    
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
-
+    
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(args.Length == 1 && AllowedValues.Contains(args[0]));
     }
-
+    
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         string? response;
         switch (args[0].ToLowerInvariant())
@@ -71,7 +63,7 @@ public class ReloadConfigCommand(ConfigFile config)
                 response = $"Unknown config source '{args[0]}'. Validation was not called correctly.";
                 break;
         }
-
+        
         return UniTask.FromResult<(bool, string?)>((true, response));
     }
 }

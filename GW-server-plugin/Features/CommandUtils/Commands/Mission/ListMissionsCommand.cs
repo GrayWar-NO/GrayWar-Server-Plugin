@@ -1,7 +1,6 @@
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -10,16 +9,16 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class ListMissionsCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
+    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
     
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         if (missions.Length == 0) return UniTask.FromResult((true, "No available missions"))!;
@@ -42,10 +41,4 @@ public class ListMissionsCommand(ConfigFile config) : ConfigurableCommand(config
     
     /// <inheritdoc />
     public override string Usage => "missions (takes no arguments)";
-    
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
 }

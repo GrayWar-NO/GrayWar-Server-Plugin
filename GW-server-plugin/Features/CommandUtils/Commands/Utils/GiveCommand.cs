@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -12,7 +11,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class GiveCommand(ConfigFile config): ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class GiveCommand(ConfigFile config): CommonBehaviourCommand(config)
 {
 
     /// <inheritdoc />
@@ -25,18 +24,10 @@ public class GiveCommand(ConfigFile config): ConfigurableCommand(config), IGameC
     public override string Usage => "give <target / targetID> <sum in millions (eg. 10 = 10 million)>";
 
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 2);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 2);
-
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-    
+    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 2);
     
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
         if (!found || targetPlayer == null)

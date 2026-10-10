@@ -132,6 +132,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
             foreach (var type in commandTypes)
             {
+                Logger.LogDebug($"Starting load for command type {type.Name}");
                 try
                 {
                     var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
