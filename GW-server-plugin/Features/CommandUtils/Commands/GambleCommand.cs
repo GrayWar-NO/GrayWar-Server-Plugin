@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.Networking;
+using GW_server_plugin.Helpers;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -69,18 +70,18 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
         var bet = int.Parse(args[0]);
         if (GambleService.CoinFlip())
         {
-            ChatService.SendChatMessageAsServer($"{player.SteamID} has won +${bet}m!");
+            ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has won +${bet}m!");
             player.SetAllocation(player.Allocation + bet);
             ChatService.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
         }
         else
         {
-            ChatService.SendChatMessageAsServer($"{player.SteamID} has lost -${bet}m!", player);
+            ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has lost -${bet}m!", player);
             player.SetAllocation(player.Allocation - bet);
             var punishment = GambleService.Rnd.NextDouble() * 100;
             if (punishment <= 20)
             {
-                ChatService.SendChatMessageAsServer($"{player.SteamID} has ejected out of rage!", player);
+                ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has ejected out of rage!", player);
                 player.Aircraft.StartEjectionSequence();
             }
             
