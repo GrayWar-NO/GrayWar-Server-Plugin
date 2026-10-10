@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class ListPlayersCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
+public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "listplayers";
@@ -22,19 +22,12 @@ public class ListPlayersCommand(ConfigFile config) : ConfigurableCommand(config)
 
     /// <inheritdoc />
     public override string Usage => "listplayers (takes no arguments)";
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
     
-
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
+    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
+    
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         var players = Globals.AuthenticatedPlayers;
         var playerNames = "";

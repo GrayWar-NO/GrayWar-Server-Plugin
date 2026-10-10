@@ -3,7 +3,6 @@ using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -12,32 +11,26 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
+public class Restart(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string OutputName => "restart";
-
+    
     /// <inheritdoc />
     public override string Description => "restart server after mission ends";
-
+    
     /// <inheritdoc />
-    public override string Usage => $"restart <(optional) [f]orce OR [c]ancel> <(optional) reason>. e.g: /restart c server update";
-
+    public override string Usage =>
+        $"restart <(optional) [f]orce OR [c]ancel> <(optional) reason>. e.g: /restart c server update";
+    
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public override UniTask<bool> Validate(string[] args)
     {
         return UniTask.FromResult(true);
     }
-
+    
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args) => Execute(args);
-
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<(bool success, string? response)> Execute(string[] args)
     {
         try
         {
@@ -52,7 +45,7 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
             var playerCount = PlayerUtils.GetPlayerCount();
             if (playerCount == 0 || (args.Length == 1 && (args[0] == "force" || args[0] == "f")))
                 return UniTask.FromResult<(bool, string?)>((RestartService.Restart(), "Server restarting..."));
-
+            
             var reason = (args.Length != 0) ? string.Join(" ", args) : null;
             RestartService.ScheduleRestart(reason);
             return UniTask.FromResult<(bool, string?)>((true, "Server has been scheduled to restart after mission"));
@@ -63,7 +56,7 @@ public class Restart(ConfigFile config) : ConfigurableCommand(config), IGameComm
             return UniTask.FromResult<(bool, string?)>((false, e.Message));
         }
     }
-
+    
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 }

@@ -96,7 +96,25 @@ public static class MissionService
             _ => throw new ArgumentOutOfRangeException(nameof(mr.rotationType))
         };
     }
-
+    
+    /// <summary>
+    ///     Reloads the mission rotation based on a given mission list.
+    /// </summary>
+    /// <param name="missionList"></param>
+    /// <param name="save">whether to save the new rotation to the config file or not.</param>
+    public static void ReloadMissionRotation(MissionOptions[] missionList, bool save = false)
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        var oldMr = dsm.missionRotation!;
+        dsm.ReloadMissionRotation(missionList, oldMr.rotationType, false);
+        
+        EnsureCurrentMapCorrect(oldMr.rotationType);
+        
+        if (!save) return;
+        
+        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
+    }
+    
     /// <summary>
     /// Adds a mission to the rotation
     /// </summary>
@@ -108,10 +126,32 @@ public static class MissionService
         var ml = new MissionOptions[oldMr.allMissions.Count + 1];
         oldMr.allMissions.CopyTo(ml);
         ml[ml.Length - 1] = mission;
+        ReloadMissionRotation(ml, save);
+    }
+    
+    /// <summary>
+    ///     Removes a mission from rotation.
+    /// </summary>
+    /// <param name="mission"></param>
+    /// <param name="save"></param>
+    public static void RemoveMission(MissionOptions mission, bool save = false)
+    {
         var dsm = Globals.DedicatedServerManagerInstance;
-        dsm.ReloadMissionRotation(ml, oldMr.rotationType, false);
+        var oldMr = dsm.missionRotation!;
         
-        switch (oldMr.rotationType)
+        oldMr.allMissions.RemoveAll((Predicate<MissionOptions>) (m => m.Key.Equals(mission.Key)));
+        
+        var ml = new MissionOptions[oldMr.allMissions.Count];
+        oldMr.allMissions.CopyTo(ml);
+        
+        ReloadMissionRotation(ml, save);
+    }
+    
+    
+    private static void EnsureCurrentMapCorrect(RotationType rt)
+    {
+        var dsm = Globals.DedicatedServerManagerInstance;
+        switch (rt)
         {
             case RotationType.RandomQueue:
             case RotationType.Sequence:
@@ -127,11 +167,6 @@ public static class MissionService
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
-        if (!save) return;
-        
-        Globals.DedicatedServerManagerInstance.Config.MissionRotation = ml;
-        DedicatedServerConfig.Save("DedicatedServerConfig.json", Globals.DedicatedServerManagerInstance.Config, true);
     }
 
     /// <summary>
@@ -171,8 +206,7 @@ public static class MissionService
             await UniTask.SwitchToMainThread();
             var dsm = Globals.DedicatedServerManagerInstance;
 
-            // ReSharper disable once UsageOfDefaultStructEquality
-            while (!missionOptions.Equals(dsm.missionRotation.GetNext())){}
+            while (!missionOptions.Key.Equals(dsm.missionRotation.GetNext().Key)){}
             
             dsm.UpdateLobby(mission, false);
             var ok = await dsm.LoadNext(mission);

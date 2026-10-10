@@ -1,13 +1,14 @@
 # Graywar's server plugin
 
-This plugin is a dedicated server management solution for Nuclear Option. It is built on top of the [BepInEx](https://docs.bepinex.dev/index.html) modding
+This plugin is a dedicated server management solution for Nuclear Option. It is built on top of
+the [BepInEx](https://docs.bepinex.dev/index.html) modding
 framework, and hence requires a BepInEx installation to run.
 
 ## Features
 
 - Native support for chat commands with permission levels, with a number of default commands such as `ban`, `kick`,
   `tell`, `nextmission`, and `setpermissionlevel`.
-- Those commands can also be ran from a TCP connection via our [IPC](#IPC)
+- Those commands can also be run from a TCP connection via [gRPC](#grpc)
 
 ## Installation
 
@@ -19,8 +20,12 @@ framework, and hence requires a BepInEx installation to run.
 6. After configuring the server, run the script whenever you want to start the server
 
 ## gRPC
-This plugin integrates a gRPC client meant to work with [NOSM](https://github.com/GrayWar-NO/NOServerManager) that can be disabled in config.
+
+This plugin integrates a gRPC client meant to work with [NOSM](https://github.com/GrayWar-NO/NOServerManager) that can
+be disabled in config.
 This enables remote moderation of the server with [external tools](#Notes).
+
+For advanced use, the gRPC protobuf contract is available [here](GW-server-plugin/Proto/NOSM.proto).
 
 ## Support
 
@@ -30,7 +35,12 @@ To get support on how to use this, you can come to the [GrayWar Discord server](
 
 - [Nuclear Option](https://store.steampowered.com/app/2168680/Nuclear_Option/), since without it, we couldn't make mods
   for it.
-- [MaxWasUnavailable](https://github.com/MaxWasUnavailable/Nuclei/commits?author=MaxWasUnavailable), creator of [Nuclei](https://github.com/MaxWasUnavailable/Nuclei), which we have used as a concept base to create what is concretely a full rewrite.
+- [MaxWasUnavailable](https://github.com/MaxWasUnavailable/Nuclei/commits?author=MaxWasUnavailable), creator
+  of [Nuclei](https://github.com/MaxWasUnavailable/Nuclei), which we have used as a concept base to create what is
+  concretely a full rewrite.
 
 ## Notes
-This plugin is made to be used with the rest of the GrayWar stack, which enable connecting multiple servers together, to enable logging of everything we could think we'd need and remote management from Discord, as well as an API that is still WIP as I'm writing these words.
+
+This plugin is made to be used with the rest of the GrayWar stack, which enable connecting multiple servers together,
+to enable logging of everything we could think we'd need and remote management from Discord, as well as an API that is
+still WIP as I'm writing these words.
