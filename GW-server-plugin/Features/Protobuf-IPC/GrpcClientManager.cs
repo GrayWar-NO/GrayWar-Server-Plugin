@@ -46,7 +46,8 @@ public class GrpcClientManager
             new ConfigDescription("Port of the manager", new AcceptableValueRange<uint>(0, 65535)));
         
         if (!enable.Value) return;
-        try {
+        try
+        {
             _sslCredentials = new SslCredentials(
                 File.ReadAllText("CA/ca.crt"),
                 new KeyCertificatePair(
@@ -60,6 +61,16 @@ public class GrpcClientManager
             GwServerPlugin.Logger.LogWarning($"Failed to find file: {e.FileName}. Disabling gRPC.");
             return;
         }
+        catch (DirectoryNotFoundException)
+        {
+            GwServerPlugin.Logger.LogWarning("Failed to find CA Directory. Disabling gRPC.");
+            return;
+        }
+        catch (Exception e)
+        {
+            GwServerPlugin.Logger.LogError($"Failed to find load gRPC: {e.Message}. Disabling gRPC. Stacktrace:\n{e.StackTrace}");
+        }
+        
         
         ConnectAndMonitor();
     }
