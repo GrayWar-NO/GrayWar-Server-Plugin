@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using BepInEx.Configuration;
-using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -15,14 +12,6 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 [AutoCommand]
 public class ReloadConfigCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
-    private static readonly HashSet<string> AllowedValues =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            "server",
-            "bepinex",
-            "both"
-        };
-
     /// <inheritdoc />
     public override string Name => "reload";
     
