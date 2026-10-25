@@ -1,7 +1,7 @@
+using System.Linq;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
-using Cysharp.Threading.Tasks;
-using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -10,40 +10,40 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class SetRankCommand(ConfigFile config) : CommonBehaviourCommand(config)
+public class SetRankCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
-    public override string OutputName => "setrank";
+    public override string Name => "setrank";
     
     /// <inheritdoc />
     public override string Description => "Set a rank to a player";
     
     /// <inheritdoc />
-    public override string Usage => "setrank <target / targetID> <rank>";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("player", ChatArgumentType.Player),
+        ChatCommandArgument.FromChoices("rank", [.. Enumerable.Range(0, 7).Select(n => n.ToString())])
+    ];
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 2);
-    
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public ChatCommandResult Execute(ChatCommandRequest request)
     {
-        var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
-        if (!found || targetPlayer == null)
-            return UniTask.FromResult<(bool, string?)>((false, $"Could not find a player by {args[0]}"));
+        var args = request.Args;
+        
+        if (!request.TryGetTargetPlayer(0, out var target, out var error))
+        {
+            return ChatCommandResult.ClientError(error);
+        }
         
         var rankInput = args[1].Trim();
         
-        if (!int.TryParse(rankInput, out var rank))
-            return UniTask.FromResult<(bool, string?)>((false, $"Could not parse '{args[1]}' as an integer."));
+        if (!int.TryParse(rankInput, out var rank) || rank is <= 0 or > 6)
+            return ChatCommandResult.ClientError($"Invalid rank {rankInput}.");
         
-        if (rank is <= 0 or > 6)
-            return UniTask.FromResult<(bool, string?)>((false, "Rank must be 0-6"));
+        target.player.SetRank(rank, false);
+        ChatService.SendPrivateChatMessage($"Staff has set your rank to {rank}!", target.player);
         
-        targetPlayer.SetRank(rank, false);
-        ChatService.SendPrivateChatMessage($"Staff has set your rank to {rank}!", targetPlayer);
-        
-        return UniTask.FromResult<(bool, string?)>((true,
-            $"You have successfully set rank {rank} to {targetPlayer.GetDisplayName()}."));
+        return ChatCommandResult.Ok($"Successfully set {target.Mention}'s rank to {rank}!");
     }
     
     /// <inheritdoc />

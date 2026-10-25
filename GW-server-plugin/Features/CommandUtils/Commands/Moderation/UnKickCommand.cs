@@ -1,8 +1,9 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
 using Steamworks;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 
@@ -14,25 +15,22 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class UnKickCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "unkick";
+    public override string Name => "unkick";
 
     /// <inheritdoc />
     public override string Description => "Unkicks a player from the  server.";
-
-    /// <inheritdoc />
-    public override string Usage => "unkick <player (by steamID only)>";
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length == 1 && ulong.TryParse(args[0], out _));
-    }
-
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("player (steamID)", ChatArgumentType.Text) // TODO wait for ulong type
+    ];
+    
     /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         UnKickPlayer(ulong.Parse(args[0]));
-        return UniTask.FromResult<(bool, string?)>((true, $"Unkicked player with steamID {args[0]}"));
+        return ChatCommandResult.Ok($"Unkicked player with steamID {args[0]}");
     }
 
     /// <inheritdoc />

@@ -1,8 +1,9 @@
 using System;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 
@@ -13,25 +14,19 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class ClearKickListCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "clearkicklist";
+    public override string Name => "clearkicklist";
 
     /// <inheritdoc />
     public override string Description => "Clears the integrated kick list. Manual or vote clears only the manual kicks or the votekicks. Defaults to both.";
-
+    
     /// <inheritdoc />
-    public override string Usage => "clearkicklist <optional 'manual' or 'vote'>";
-
+    public override ChatCommandArgument[] Arguments =>
+    [
+        ChatCommandArgument.FromChoices("list", ["manual", "vote"], true)
+    ];
+    
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length == 0 ||
-                                  (args.Length == 1 &&
-                                   (StringComparer.OrdinalIgnoreCase.Equals(args[0], "manual") ||
-                                    StringComparer.OrdinalIgnoreCase.Equals(args[0], "vote"))));
-    }
-
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         var mode = args.Length > 0 ? args[0] : null;
 
@@ -40,7 +35,7 @@ public class ClearKickListCommand(ConfigFile config) : CommonBehaviourCommand(co
 
         if (!StringComparer.OrdinalIgnoreCase.Equals(mode, "manual"))
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Clear();
-        return UniTask.FromResult<(bool, string?)>((true, $"{mode}Kick list cleared successfully!"));
+        return ChatCommandResult.Ok($"{mode}Kick list cleared successfully!");
     }
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;

@@ -11,10 +11,10 @@ namespace GW_server_plugin.Features.Voting.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
+public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister
 {
     /// <inheritdoc />
-    public override string OutputName => "vote";
+    public override string Name => "vote";
     
     /// <inheritdoc />
     public override string Description => "Votes for the currently ongoing vote session";

@@ -1,7 +1,8 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -13,38 +14,31 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "queue";
+    public override string Name => "queue";
     
     /// <inheritdoc />
     public override string Description => "Queue a mission to be loaded next on the server.";
     
+    
     /// <inheritdoc />
-    public override string Usage => $"queue <mission ID (from {PluginConfig.CommandPrefixChar}mission)>";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("MissionID", ChatArgumentType.Text) // TODO waiting for INT type
+    ];
     
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length switch
-        {
-            > 1 => false,
-            <= 0 => false,
-            1 => int.TryParse(args[0], out _)
-        });
-    }
-    
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
-        if (missionOption == null) return UniTask.FromResult((false, "Mission not found."))!;
+        if (missionOption == null) return ChatCommandResult.ClientError("Mission not found.");
         {
             Globals.DedicatedServerManagerInstance.missionRotation.OverrideNext(missionOption.Value);
 #pragma warning disable CS8619
-            return UniTask.FromResult((true, $"Queued mission {missionOption.Value.Key.Name} successfully."));
+            return ChatCommandResult.Ok($"Queued mission {missionOption.Value.Key.Name} successfully.");
 #pragma warning restore CS8619
         }
 

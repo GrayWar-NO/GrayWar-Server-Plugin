@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using JetBrains.Annotations;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils;
 
@@ -12,27 +11,27 @@ namespace GW_server_plugin.Features.CommandUtils;
 /// </summary>
 public abstract class ConfigurableCommand : ICommand
 {
-    private string CommandConfigSection => $"{OutputName} command";
+    private string CommandConfigSection => $"{Name} command";
     
     /// <inheritdoc />
-    public IEnumerable<string> Names => Aliases.Value.Split(';').Append(OutputName);
-    
-    /// <summary>
-    ///     Default alias names for this command.
-    /// </summary>
-    protected virtual string[] DefaultAliases => [];
-    
-    /// <inheritdoc />
-    public abstract string OutputName { get; }
+    public abstract string Name { get; }
     
     /// <inheritdoc />
     public abstract string Description { get; }
     
+    /// <summary>
+    ///     default aliases for this command.
+    /// </summary>
+    protected virtual string[] DefaultAliases => [];
+    
     /// <inheritdoc />
-    public abstract string Usage { get; }
+    public virtual ChatCommandArgument[] Arguments => [];
     
     /// <inheritdoc />
     public PermissionLevel PermissionLevel => PermissionLevelConfig.Value;
+    
+    /// <inheritdoc />
+    public string[] Aliases => AliasesConfig.Value.Split(';');
     
     /// <summary>
     ///     Getter for the enable config option.
@@ -44,7 +43,7 @@ public abstract class ConfigurableCommand : ICommand
     /// </summary>
     private ConfigEntry<PermissionLevel> PermissionLevelConfig { get; }
     
-    private ConfigEntry<string> Aliases { get; }
+    private ConfigEntry<string> AliasesConfig { get; }
     
     private ConfigEntry<bool> EnableConfig { get; }
     
@@ -66,10 +65,10 @@ public abstract class ConfigurableCommand : ICommand
     {
         // ReSharper disable VirtualMemberCallInConstructor
         EnableConfig = config.Bind(CommandConfigSection, "Enable", DefaultEnable,
-            $"Enable toggle for {OutputName}");
+            $"Enable toggle for {Name}");
         PermissionLevelConfig = config.Bind(CommandConfigSection, "Permission level", DefaultPermissionLevel,
-            $"Permission level for command {OutputName}");
-        Aliases = config.Bind(CommandConfigSection, "Aliases", string.Join(";", DefaultAliases),
+            $"Permission level for command {Name}");
+        AliasesConfig = config.Bind(CommandConfigSection, "Aliases", string.Join(";", DefaultAliases),
             "Alias names for this command. ; separated value list.");
         // ReShaper restore VirtualMemberCallInConstructor
     }

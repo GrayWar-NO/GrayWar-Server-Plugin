@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -12,26 +13,23 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class TellCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "tell";
+    public override string Name => "tell";
 
     /// <inheritdoc />
     public override string Description => "Broadcast a message to everyone on the server.";
-
-    /// <inheritdoc />
-    public override string Usage => "tell <message>";
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length > 0);
-    }
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("message", ChatArgumentType.Text)
+    ];
     
     /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         var message = string.Join(" ", args);
         ChatService.SendChatMessageAsServer(message);
-        return new UniTask<(bool success, string? response)>((true, null));
+        return ChatCommandResult.Ok();
     }
 
     /// <inheritdoc />

@@ -1,10 +1,11 @@
 using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 
@@ -16,36 +17,33 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand, IConsoleCommand
 {
     /// <inheritdoc />
-    public override string OutputName => "ban";
+    public override string Name => "ban";
     
     /// <inheritdoc />
     public override string Description => "Bans a player from the server.";
     
     /// <inheritdoc />
-    public override string Usage => "ban <Player (by name, steamID or playerID)> <Optional string Reason> <Optional duration (Xh or Xd)>";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("player", ChatArgumentType.Player),
+        new("reason", ChatArgumentType.Text, true),
+        new("duration (in [d]ays or [h]ours)", ChatArgumentType.Text, true)
+    ];
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
+    public ChatCommandResult Execute(ChatCommandRequest request)
     {
-        return UniTask.FromResult(
-            args.Length >= 1 && 
-            (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
-    }
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
-    {
+        var args = request.Args;
+        var player = request.Sender.player;
+        
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute(args);
-        return UniTask.FromResult<(bool, string?)>((false, "You cannot ban yourself!"));
+        if (targetPlayer != player) return Execute([.. args]);
+        return ChatCommandResult.ClientError("You cannot ban yourself!");
     }
 
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public ChatCommandResult Execute(string[] args)
     {
         var target = args[0];
         string? duration = null;
@@ -99,7 +97,7 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
         }
 
         PlayerUtils.BanPlayer(banSteamID, reason, duration);
-        return UniTask.FromResult<(bool, string?)>((true, response));
+        return ChatCommandResult.Ok(response);
     }
 
     /// <inheritdoc />

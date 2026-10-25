@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -12,25 +13,16 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class AddSlotCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
-    public override string OutputName =>  "addslot";
+    public override string Name =>  "addslot";
 
     /// <inheritdoc />
     public override string Description => "Adds a slot to the server";
 
     /// <inheritdoc />
-    public override string Usage => "addslot (takes no arguments)";
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length == 0);
-    }
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public ChatCommandResult Execute(string[] args)
     {
         StaffSlotService.AddStaffSlot();
-        return UniTask.FromResult<(bool, string?)>((true, "Successfully added a slot to the server."));
+        return ChatCommandResult.Ok("Successfully added a slot to the server.");
     }
 
     /// <inheritdoc />

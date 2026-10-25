@@ -1,6 +1,5 @@
 using BepInEx.Configuration;
-using Cysharp.Threading.Tasks;
-using NuclearOption.Networking;
+using NuclearOption.ModdingApi;
 
 namespace GW_server_plugin.Features.CommandUtils;
 
@@ -9,15 +8,10 @@ namespace GW_server_plugin.Features.CommandUtils;
 /// </summary>
 public abstract class CommonBehaviourCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
-    /// <inheritdoc />
-    public async UniTask<bool> Validate(Player player, string[] args) => await Validate(args);
     
     /// <inheritdoc />
-    public async UniTask<(bool success, string? response)> Execute(Player player, string[] args) => await Execute(args);
+    public ChatCommandResult Execute(ChatCommandRequest rq) => Execute([.. rq.Args]);
     
     /// <inheritdoc />
-    public abstract UniTask<(bool success, string? response)> Execute(string[] args);
-    
-    /// <inheritdoc />
-    public abstract UniTask<bool> Validate(string[] args);
+    public abstract ChatCommandResult Execute(string[] args);
 }

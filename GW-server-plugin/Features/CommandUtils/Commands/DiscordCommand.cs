@@ -1,7 +1,6 @@
 ﻿using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
-using Cysharp.Threading.Tasks;
-using NuclearOption.Networking;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -25,21 +24,15 @@ public class DiscordCommand: ConfigurableCommand, IGameCommand
     private readonly ConfigEntry<string> _url;
     
     /// <inheritdoc />
-    public override string OutputName => "discord";
+    public override string Name => "discord";
 
     /// <inheritdoc />
     public override string Description => "Get instructions on how to join the discord server.";
-
+    
     /// <inheritdoc />
-    public override string Usage => "discord (takes no arguments)";
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length == 0);
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
+    public ChatCommandResult Execute(ChatCommandRequest request)
     {
-        return UniTask.FromResult<(bool, string?)>((true, $"Discord join code: {_joinCode.Value} \nor go to {_url.Value}"));
+        return ChatCommandResult.Ok($"Discord join code: {_joinCode.Value} \nor go to {_url.Value}");
     }
     
     /// <inheritdoc />

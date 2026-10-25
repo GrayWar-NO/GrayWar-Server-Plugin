@@ -5,7 +5,9 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
 using Steamworks;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 
@@ -17,23 +19,19 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
 public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "unban";
+    public override string Name => "unban";
 
     /// <inheritdoc />
     public override string Description => "Unbans a player from the server.";
-
-    /// <inheritdoc />
-    public override string Usage => "unban <Player (by name, steamID or playerID)>";
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length == 1 &&
-                                  (PlayerUtils.TryFindPlayer(args[0], out _) || ulong.TryParse(args[0], out _)));
-    }
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("player (steamID)", ChatArgumentType.Text) // TODO wait for ulong type
+    ];
     
     /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         string? response;
         var target = args[0];
@@ -65,7 +63,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
             ShouldBeBanned = false
         };
         GwServerPlugin.GrpcMgr.Client?.SendBanAsync(log);
-        return UniTask.FromResult<(bool, string?)>((true, response));
+        return ChatCommandResult.Ok(response);
     }
 
     /// <inheritdoc />

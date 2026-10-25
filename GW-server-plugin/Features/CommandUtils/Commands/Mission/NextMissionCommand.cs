@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -15,18 +16,13 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length switch
-        {
-            > 1 => false,
-            0 => true,
-            _ => int.TryParse(args[0], out _)
-        });
-    }
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("MissionID", ChatArgumentType.Text, true)
+    ];
     
     /// <inheritdoc />
-    public override async UniTask<(bool success, string? response)> Execute(string[] args)
+    public override async ChatCommandResult Execute(string[] args) // TODO waiting for async
     {
         if (GameManager.gameResolution != GameResolution.Ongoing)
             return (false, "Cannot start next mission: current mission has ended");
@@ -50,7 +46,7 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     }
     
     /// <inheritdoc />
-    public override string OutputName => "nextmission";
+    public override string Name => "nextmission";
     
     /// <inheritdoc />
     public override string Description => "Starts the next mission, or a selected mission from index";

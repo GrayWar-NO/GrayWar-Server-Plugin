@@ -1,8 +1,8 @@
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
-using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -17,27 +17,25 @@ public class ReportCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override string OutputName => "report";
+    public override string Name => "report";
     
     /// <inheritdoc />
     public override string Description => "Reports something to staff";
     
     /// <inheritdoc />
-    public override string Usage => "report <reason>";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("reason", ChatArgumentType.Text)
+    ];
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => UniTask.FromResult(args.Length != 0);
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
+    public ChatCommandResult Execute(ChatCommandRequest request)
     {
-        var content = string.Join(" ", args);
         GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new ServerReport
         {
-            Content = content,
-            Username = player.GetLogName()
+            Content = request.Args[0],
+            Username = request.Sender.player.GetLogName()
         });
-        
-        return UniTask.FromResult((true, (string?)$"{content} reported to staff successfully."));
+        return ChatCommandResult.Ok($"Reported {request.Args[0]} to staff successfully!");
     }
 }

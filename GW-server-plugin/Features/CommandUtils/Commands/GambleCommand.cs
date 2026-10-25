@@ -1,9 +1,8 @@
 using System;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
-using Cysharp.Threading.Tasks;
-using NuclearOption.Networking;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -18,54 +17,34 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     protected override bool DefaultEnable => false;
     
     /// <inheritdoc />
-    public override string OutputName => "gamble";
+    public override string Name => "gamble";
     
     /// <inheritdoc />
     public override string Description =>
         "50% chance you receive 2x your bet. IF you lose, 20% chance you eject out of rage";
     
     /// <inheritdoc />
-    public override string Usage =>
-        $"gamble <$ in million>. eg: '{PluginConfig.CommandPrefixChar}gamble 100' gambles 100m";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("amount (in millions)", ChatArgumentType.Text)
+    ];
     
     /// <inheritdoc />
-    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
+    public ChatCommandResult Execute(ChatCommandRequest request)
     {
-        if (!int.TryParse(args[0], out _))
-        {
-            return UniTask.FromResult(false);
-        }
-        
-        if (int.Parse(args[0]) <= 0)
-            return UniTask.FromResult(false);
-        
-        
-        return UniTask.FromResult(true);
-    }
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
-    {
+        var args = request.Args;
+        var player = request.Sender.player;
         if (int.Parse(args[0]) > player.Allocation)
-        {
-            var r = "You don't have that much money. Please try again";
-            return UniTask.FromResult<(bool success, string? response)>((false, r));
-        }
+            return ChatCommandResult.Error(0, "You don't have that much money. Please try again");
         
         if (player.Aircraft == null)
-        {
-            var r = "You must be spawned in before you can gamble!";
-            return UniTask.FromResult<(bool success, string? response)>((false, r));
-        }
+            return ChatCommandResult.Error(0, "You must be spawned in before you can gamble!");
         
         if (!player.Aircraft.airborne)
-        {
-            var r = "You must be airborne before you can gamble!";
-            return UniTask.FromResult<(bool success, string? response)>((false, r));
-        }
+            return ChatCommandResult.Error(0, "You must be airborne before you can gamble!");
         
         var bet = int.Parse(args[0]);
         if (GambleService.CoinFlip())
@@ -88,7 +67,7 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
             ChatService.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
         }
         
-        return UniTask.FromResult<(bool success, string? response)>((true, null));
+        return ChatCommandResult.Ok();
     }
 }
 
@@ -100,7 +79,7 @@ public static class GambleService
     /// <summary>
     /// Randomizer
     /// </summary>
-    public static readonly Random Rnd = new Random();
+    public static readonly Random Rnd = new();
     
     /// <summary>
     /// 50% chance it returns either 0 and 1

@@ -139,7 +139,7 @@ public class GwServerPlugin : BaseUnityPlugin
                     
                     if (!commandInstance.Enable) continue;
                     
-                    CommandService.AddCommand(commandInstance);
+                    // TODO call command registration here;
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
                 catch (TargetInvocationException ex)

@@ -1,10 +1,11 @@
 using System;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using NuclearOption.DedicatedServer;
+using NuclearOption.ModdingApi;
 using NuclearOption.Workshop;
 using Steamworks;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -16,29 +17,23 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "addmission";
+    public override string Name => "addmission";
     
     
     /// <inheritdoc />
     public override string Description =>
         "Adds a mission to the server from it's workshopID.\nThis has temporary effect and won't be persisted after a server restart.";
     
-    /// <inheritdoc />
-    public override string Usage => "addmission <workshopID> <Optional bool save, default false>";
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length switch
-        {
-            2 => ulong.TryParse(args[0], out _) && bool.TryParse(args[1], out _),
-            1 => ulong.TryParse(args[0], out _),
-            _ => false
-        });
-    }
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("WorkshopID", ChatArgumentType.Text),
+        new("save", ChatArgumentType.Text, true)
+    ];
     
     /// <inheritdoc />
-    public override async UniTask<(bool success, string? response)> Execute(string[] args)
+    public override async UniTask<(bool success, string? response)> Execute(string[] args) // TODO waiting for Async things
     {
         var keySaveable = new MissionKeySaveable
         {

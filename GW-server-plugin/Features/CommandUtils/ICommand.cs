@@ -1,5 +1,5 @@
-using System.Collections.Generic;
-using Com.Graywar.NoServerManager.Proto;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils;
 
@@ -9,28 +9,29 @@ namespace GW_server_plugin.Features.CommandUtils;
 public interface ICommand
 {
     /// <summary>
-    ///     Command names to be used when executing it.
-    /// </summary>
-    IEnumerable<string> Names { get; }
-    
-    /// <summary>
     ///     The command name that will be used in config and in /help.
     /// </summary>
-    string OutputName { get; }
-
+    string Name { get; }
+    
     /// <summary>
     ///     The command description.
     /// </summary>
     string Description { get; }
-
+    
     /// <summary>
-    ///     The command usage.
+    ///     Arguments to be used when calling the command.
     /// </summary>
-    string Usage { get; }
-
+    ChatCommandArgument[] Arguments { get; }
+    
+    
     /// <summary>
     ///     The permission level required to execute the command.
     /// </summary>
     public PermissionLevel PermissionLevel { get; }
+    
+    /// <summary>
+    ///     Aliases the command can be called with.
+    /// </summary>
+    string[] Aliases { get; }
 
 }

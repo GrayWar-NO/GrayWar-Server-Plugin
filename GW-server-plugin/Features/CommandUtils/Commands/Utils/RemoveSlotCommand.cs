@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -12,29 +13,20 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
-    public override string OutputName =>  "rmslot";
+    public override string Name =>  "rmslot";
 
     /// <inheritdoc />
     public override string Description => "Removes a slot from the server";
-
-    /// <inheritdoc />
-    public override string Usage => "rmslot (takes no arguments)";
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length == 0);
-    }
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public ChatCommandResult Execute(string[] args)
     {
         var result = StaffSlotService.RemoveStaffSlot();
         if (!result)
         {
-            return UniTask.FromResult<(bool, string?)>((false, "Failed to remove staff slot: No staff slots left to remove."));
+            return ChatCommandResult.ClientError("Failed to remove staff slot: No staff slots left to remove.");
         }
-        return UniTask.FromResult<(bool, string?)>((true, "Successfully removed a slot from the server."));
+        return ChatCommandResult.Ok("Successfully removed a slot from the server.");
     }
 
     /// <inheritdoc />

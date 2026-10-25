@@ -1,9 +1,10 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using Mirage;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 
@@ -15,19 +16,13 @@ namespace GW_server_plugin.Features.CommandUtils.Commands.Utils;
 public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "listplayers";
+    public override string Name => "listplayers";
 
     /// <inheritdoc />
     public override string Description => "Returns the list of players currently on the server.";
-
-    /// <inheritdoc />
-    public override string Usage => "listplayers (takes no arguments)";
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
-    
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         var players = Globals.AuthenticatedPlayers;
         var playerNames = "";
@@ -42,7 +37,7 @@ public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(conf
         }
         var response = $"[{players.Count - 1}] ";
         response += playerNames;
-        return UniTask.FromResult<(bool, string?)>((true, response));
+        return ChatCommandResult.Ok(response);
     }
 
     /// <inheritdoc />

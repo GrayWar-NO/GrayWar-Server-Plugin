@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Mission;
 
@@ -15,13 +16,10 @@ public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(con
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args) => UniTask.FromResult(args.Length == 0);
-    
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandResult Execute(string[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
-        if (missions.Length == 0) return UniTask.FromResult((true, "No available missions"))!;
+        if (missions.Length == 0) return ChatCommandResult.Ok("No available missions")!;
         
         var response = "Available missions:\n";
         for (var i = 0; i < missions.Length; i++)
@@ -30,15 +28,12 @@ public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(con
             response += $"[{i}] {name}\n";
         }
         
-        return UniTask.FromResult((true, response))!;
+        return ChatCommandResult.Ok(response)!;
     }
     
     /// <inheritdoc />
-    public override string OutputName => "missions";
+    public override string Name => "missions";
     
     /// <inheritdoc />
     public override string Description => "List all currently available missions";
-    
-    /// <inheritdoc />
-    public override string Usage => "missions (takes no arguments)";
 }
