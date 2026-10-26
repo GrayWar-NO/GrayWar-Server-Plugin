@@ -1,9 +1,10 @@
 using System.Linq;
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -12,48 +13,51 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConsoleCommand
+public class HelpCommand(ConfigFile config) : ConfigurableCommand(config), IConsoleCommand
 {
     /// <inheritdoc />
     protected override string[] DefaultAliases => ["help", "h", "?"];
     
     /// <inheritdoc />
-    public override string OutputName => "help";
-
+    public override string Name => "help";
+    
     /// <inheritdoc />
     public override string Description =>
         "Get help on other commands, or the list of commands you have available.";
-
-    /// <inheritdoc />
-    public override string Usage => "help <command name>";
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args) => Validate(args);
-
-    /// <inheritdoc />
-    public UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(args.Length <= 1);
-    }
     
     /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(string[] args)
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("command", ChatArgumentType.Command, true)
+    ];
+    
+    /// <inheritdoc />
+    public UniTask<ChatCommandResult> Execute(string[] args)
     {
         if (args.Length == 0)
         {
-            var commandNames = CommandService.GetConsoleCommands().Select(c => c.OutputName).ToList();
-            return UniTask.FromResult<(bool, string?)>((true, $"Available commands: {string.Join(", ", commandNames)}"));
+            var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
+            return UniTask.FromResult(ChatCommandResult.Ok($"Available commands: {string.Join(", ", commandNames)}"));
         }
         
         var commandName = args[0];
         if (!CommandService.TryGetCommand(commandName, out var command))
         {
-            return UniTask.FromResult<(bool, string?)>((false, $"Command {commandName} not found."));
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Command {commandName} not found."));
         }
-
-        return UniTask.FromResult<(bool, string?)>((true, $"Command '{command.OutputName}': {command.Description}\nUsage: {PluginConfig.CommandPrefixChar}{command.Usage}"));
+        
+        var response = $"Command '{command!.Name}': {command.Description}\nArguments";
+        
+        foreach (var arg in command.Arguments)
+        {
+            response += $"{arg.Name}: {arg.Type}";
+            if (arg.Optional) response += ", optional";
+            response += ";\t";
+        }
+        
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
-
+    
     /// <inheritdoc />
-    protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Everyone;
+    protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
 }

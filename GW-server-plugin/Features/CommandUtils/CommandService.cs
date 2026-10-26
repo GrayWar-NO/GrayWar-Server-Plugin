@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -56,6 +57,21 @@ public static class CommandService
             default:
                 return NuclearOption.ModdingApi.PermissionLevel.Player;
         }
+    }
+    
+    public static bool TryGetCommand(string name, out IConsoleCommand? command)
+    {
+        try
+        {
+            command = RegisteredConsoleCommands.First(c => c.MatchesNameOrAlias(name));
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            command = null;
+            return false;
+        }    
+        return false;
     }
     
     public static UniTask<ChatCommandResult> TryExecuteConsoleCommand(string name, string[] args,
