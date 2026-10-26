@@ -13,5 +13,5 @@ public interface IConsoleCommand: ICommand
     /// </summary>
     /// <param name="args"> The command arguments. </param>
     /// <returns> Whether the command was executed successfully, aswell as the command response string. </returns>
-    ChatCommandResult Execute(string[] args);
+    UniTask<ChatCommandResult> Execute(string[] args);
 }

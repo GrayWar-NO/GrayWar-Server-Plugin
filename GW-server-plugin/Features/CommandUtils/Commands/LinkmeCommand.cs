@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -24,7 +25,7 @@ public class LinkmeCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     public override string Description => "Use this to link your steam account with your discord in our system";
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var steamID = request.Sender.SteamId;
         var code = _rnd.Next(1000000);
@@ -41,8 +42,8 @@ public class LinkmeCommand(ConfigFile config) : ConfigurableCommand(config), IGa
             SenderSteamID = steamID,
         };
         _ = GwServerPlugin.GrpcMgr.Client?.sendLinkCodeAsync(log);
-        return ChatCommandResult.Ok(
-            $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes.");
+        return UniTask.FromResult(ChatCommandResult.Ok(
+            $"Your code is {code} . Use /linkme <CODE> in discord to link your accounts. Valid 10 minutes."));
     }
     
     /// <inheritdoc />

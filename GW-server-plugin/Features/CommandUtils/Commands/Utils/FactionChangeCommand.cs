@@ -1,5 +1,6 @@
 using System.Linq;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -21,19 +22,19 @@ public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(confi
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var player = request.Sender.player;
         var currentHq = player.HQ;
         if (currentHq == null)
         {
-            return ChatCommandResult.ClientError("You must be in a faction before you can switch factions.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("You must be in a faction before you can switch factions."));
         }
 
         var mission = MissionManager.CurrentMission;
         if (mission == null)
         {
-            return ChatCommandResult.ClientError("Cannot switch factions because no mission is currently loaded.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("Cannot switch factions because no mission is currently loaded."));
         }
 
         var newHq = mission.factions
@@ -42,7 +43,7 @@ public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(confi
 
         if (newHq == null)
         {
-            return ChatCommandResult.ClientError("There is no other joinable faction to switch to.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("There is no other joinable faction to switch to."));
         }
 
         // Match the game's reconnect flow: RemovePlayer saves the player state,
@@ -54,6 +55,6 @@ public class FactionChangeCommand(ConfigFile config) : ConfigurableCommand(confi
         // and save the old HQ a second time, overwriting the requested faction.
         player.HQ = null;
 
-        return ChatCommandResult.Ok($"Your faction will change to {newHq.faction.factionName} when you reconnect. Please relog now.");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Your faction will change to {newHq.faction.factionName} when you reconnect. Please relog now."));
     }
 }

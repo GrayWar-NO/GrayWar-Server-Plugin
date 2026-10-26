@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.DedicatedServer;
 using NuclearOption.ModdingApi;
@@ -36,7 +37,7 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         
@@ -48,8 +49,8 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
             save = bool.Parse(args[2]);
         
         if (startingID >= missions.Length || targetID >= missions.Length)
-            return ChatCommandResult.ClientError(
-                $"One of {startingID} or {targetID} is not a valid missionID. Max is {missions.Length - 1}. Use {PluginConfig.CommandPrefixChar}missions to get list.");
+            return UniTask.FromResult(ChatCommandResult.ClientError(
+                $"One of {startingID} or {targetID} is not a valid missionID. Max is {missions.Length - 1}. Use {PluginConfig.CommandPrefixChar}missions to get list."));
         
         var dsm = Globals.DedicatedServerManagerInstance;
         var oldMr = dsm.missionRotation!;
@@ -69,6 +70,6 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
         ml[targetID] = mission;
         
         MissionService.ReloadMissionRotation(ml, save ?? false);
-        return ChatCommandResult.Ok($"Mission at index {startingID} successfully moved to {targetID}!");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Mission at index {startingID} successfully moved to {targetID}!"));
     }
 }

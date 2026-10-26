@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -24,11 +25,11 @@ public class TellCommand(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var message = string.Join(" ", args);
         ChatService.SendChatMessageAsServer(message);
-        return ChatCommandResult.Ok();
+        return UniTask.FromResult(ChatCommandResult.Ok());
     }
 
     /// <inheritdoc />

@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using Mirage;
 using NuclearOption.ModdingApi;
@@ -21,7 +22,7 @@ public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(conf
     public override string Description => "Returns the list of players currently on the server.";
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var players = Globals.AuthenticatedPlayers;
         var playerNames = "";
@@ -36,7 +37,7 @@ public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(conf
         }
         var response = $"[{players.Count - 1}] ";
         response += playerNames;
-        return ChatCommandResult.Ok(response);
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 
     /// <inheritdoc />

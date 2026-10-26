@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -25,7 +26,7 @@ public class ClearKickListCommand(ConfigFile config) : CommonBehaviourCommand(co
     ];
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var mode = args.Length > 0 ? args[0] : null;
 
@@ -34,7 +35,7 @@ public class ClearKickListCommand(ConfigFile config) : CommonBehaviourCommand(co
 
         if (!StringComparer.OrdinalIgnoreCase.Equals(mode, "manual"))
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Clear();
-        return ChatCommandResult.Ok($"{mode}Kick list cleared successfully!");
+        return UniTask.FromResult(ChatCommandResult.Ok($"{mode}Kick list cleared successfully!"));
     }
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;

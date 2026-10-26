@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -29,15 +30,15 @@ public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
-        if (missionOption == null) return ChatCommandResult.ClientError("Mission not found.");
+        if (missionOption == null) return UniTask.FromResult(ChatCommandResult.ClientError("Mission not found."));
         {
             Globals.DedicatedServerManagerInstance.missionRotation.OverrideNext(missionOption.Value);
 #pragma warning disable CS8619
-            return ChatCommandResult.Ok($"Queued mission {missionOption.Value.Key.Name} successfully.");
+            return UniTask.FromResult(ChatCommandResult.Ok($"Queued mission {missionOption.Value.Key.Name} successfully."));
 #pragma warning restore CS8619
         }
 

@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -28,19 +29,19 @@ public class WarnCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     ];
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public async UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         var player = request.Sender.player;
         
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute([.. args]);
+        if (targetPlayer != player) return await Execute([.. args]);
         return ChatCommandResult.ClientError("You cannot warn yourself!");
     }
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string[] args)
     {
         var target = args[0];
         var reason = string.Join(" ", args.Skip(1));
@@ -62,9 +63,11 @@ public class WarnCommand(ConfigFile config) : ConfigurableCommand(config), IGame
             response = $"Warned player {player.GetDisplayName()} for reason {reason}";
         }
         
-        return GwServerPlugin.WarnService.AddWarn(warnSteamID, reason)
+        return UniTask.FromResult(
+            GwServerPlugin.WarnService.AddWarn(warnSteamID, reason)
             ? ChatCommandResult.Ok(response)
-            : ChatCommandResult.ClientError($"failed to warn {target}: is no longer on server.");
+            : ChatCommandResult.ClientError($"failed to warn {target}: is no longer on server.")
+            );
     }
     
     /// <inheritdoc />

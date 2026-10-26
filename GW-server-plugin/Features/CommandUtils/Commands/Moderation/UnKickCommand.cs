@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using Steamworks;
@@ -26,10 +27,10 @@ public class UnKickCommand(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         UnKickPlayer(ulong.Parse(args[0]));
-        return ChatCommandResult.Ok($"Unkicked player with steamID {args[0]}");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Unkicked player with steamID {args[0]}"));
     }
 
     /// <inheritdoc />

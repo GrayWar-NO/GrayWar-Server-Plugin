@@ -168,7 +168,7 @@ public class GrpcClientManager
                 return;
             }
             
-            var result = CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel); // TODO await when async is available.
+            var result = await CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
             
             await stream.RequestStream.WriteAsync(new CommandResult
             {

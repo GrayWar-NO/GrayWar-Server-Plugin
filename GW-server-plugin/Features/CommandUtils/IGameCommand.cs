@@ -11,5 +11,5 @@ public interface IGameCommand: ICommand
     /// <summary>
     ///     Callback to apply the function's behaviour.
     /// </summary>
-    ChatCommandResult Execute(ChatCommandRequest request);
+    UniTask<ChatCommandResult> Execute(ChatCommandRequest request);
 }

@@ -2,6 +2,7 @@
 using System.Linq;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -30,12 +31,12 @@ public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IG
     public override string Description => "Send a private message to a specified user.";
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         if (!request.TryGetTargetPlayer(0, out var target, out var error))
         {
-            return ChatCommandResult.ClientError(error);
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
         }
 
         var message = string.Join(" ", args.Skip(1));
@@ -53,7 +54,7 @@ public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IG
         };
         GwServerPlugin.GrpcMgr.ChatLogStream?.WriteAsync(log);
         
-        return ChatCommandResult.Ok($"Message sent to {request.Sender.Mention} successfully.");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Message sent to {request.Sender.Mention} successfully."));
     }
 
 

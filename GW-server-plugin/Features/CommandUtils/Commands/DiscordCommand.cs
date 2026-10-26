@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -30,9 +31,9 @@ public class DiscordCommand: ConfigurableCommand, IGameCommand
     public override string Description => "Get instructions on how to join the discord server.";
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        return ChatCommandResult.Ok($"Discord join code: {_joinCode.Value} \nor go to {_url.Value}");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Discord join code: {_joinCode.Value} \nor go to {_url.Value}"));
     }
     
     /// <inheritdoc />

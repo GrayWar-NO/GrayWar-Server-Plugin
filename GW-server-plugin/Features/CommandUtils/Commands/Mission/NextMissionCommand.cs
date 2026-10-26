@@ -22,26 +22,28 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     ];
     
     /// <inheritdoc />
-    public override async ChatCommandResult Execute(string[] args) // TODO waiting for async
+    public override async UniTask<ChatCommandResult> Execute(string[] args)
     {
         if (GameManager.gameResolution != GameResolution.Ongoing)
-            return (false, "Cannot start next mission: current mission has ended");
+            return ChatCommandResult.ClientError("Cannot start next mission: current mission has ended");
         
         if (args.Length == 0)
         {
             var (valid, _) = await MissionService.StartNextMission();
-            return valid ? (true, "Next mission started successfully.") : (false, "Failed to start next mission.");
+            return valid
+                ? ChatCommandResult.Ok("Next mission started successfully.")
+                : ChatCommandResult.ClientError("Failed to start next mission.");
         }
         
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
-        if (missionOption == null) return (false, "Mission not found.");
+        if (missionOption == null) return ChatCommandResult.ClientError("Mission not found.");
         
         {
             var (valid, mission) = await MissionService.StartMission(missionOption.Value);
             return valid
-                ? (true, $"Started mission {mission!.Name} successfully.")
-                : (false, "Failed to start next mission.");
+                ? ChatCommandResult.Ok($"Started mission {mission!.Name} successfully.")
+                : ChatCommandResult.ClientError("Failed to start next mission.");
         }
     }
     
@@ -50,8 +52,4 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     
     /// <inheritdoc />
     public override string Description => "Starts the next mission, or a selected mission from index";
-    
-    /// <inheritdoc />
-    public override string Usage =>
-        "nextmission <int MissionIndex?> (omitting mission index will use the mission rotation instead)";
 }

@@ -33,7 +33,7 @@ public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(conf
     ];
     
     /// <inheritdoc />
-    public override async UniTask<(bool success, string? response)> Execute(string[] args) // TODO waiting for Async things
+    public override async UniTask<ChatCommandResult> Execute(string[] args)
     {
         var keySaveable = new MissionKeySaveable
         {
@@ -47,18 +47,18 @@ public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(conf
         try
         {
             var downloadResult = await SteamWorkshop.DownloadItemServer(new PublishedFileId_t(workshopID));
-            if (!downloadResult) return (false, "Failed to download workshop item");
+            if (!downloadResult) return ChatCommandResult.ClientError("Failed to download workshop item");
         }
         catch (Exception ex)
         {
-            return (false, $"Failed to download workshop item: {ex.Message}");
+            return ChatCommandResult.Error(1, $"Failed to download workshop item: {ex.Message}");
         }
         
-        if (!keySaveable.TryGetKey(out var key)) return (false, $"{keySaveable.Name} is not a valid workshopID");
+        if (!keySaveable.TryGetKey(out var key)) return ChatCommandResult.ClientError($"{keySaveable.Name} is not a valid workshopID");
         
         MissionService.AddMission(new MissionOptions { Key = keySaveable, MaxTime = 14400f }, save);
         
-        return (true, $"Added mission {key.Name} to rotation successfully.");
+        return ChatCommandResult.Ok($"Added mission {key.Name} to rotation successfully.");
     }
     
     /// <inheritdoc />

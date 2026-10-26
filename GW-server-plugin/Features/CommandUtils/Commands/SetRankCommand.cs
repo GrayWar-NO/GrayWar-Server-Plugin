@@ -1,5 +1,6 @@
 using System.Linq;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -26,24 +27,24 @@ public class SetRankCommand(ConfigFile config) : ConfigurableCommand(config), IG
     ];
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         
         if (!request.TryGetTargetPlayer(0, out var target, out var error))
         {
-            return ChatCommandResult.ClientError(error);
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
         }
         
         var rankInput = args[1].Trim();
         
         if (!int.TryParse(rankInput, out var rank) || rank is <= 0 or > 6)
-            return ChatCommandResult.ClientError($"Invalid rank {rankInput}.");
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid rank {rankInput}."));
         
         target.player.SetRank(rank, false);
         ChatService.SendPrivateChatMessage($"Staff has set your rank to {rank}!", target.player);
         
-        return ChatCommandResult.Ok($"Successfully set {target.Mention}'s rank to {rank}!");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Successfully set {target.Mention}'s rank to {rank}!"));
     }
     
     /// <inheritdoc />

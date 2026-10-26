@@ -58,17 +58,17 @@ public static class CommandService
         }
     }
     
-    public static ChatCommandResult TryExecuteConsoleCommand(string name, string[] args,
+    public static UniTask<ChatCommandResult> TryExecuteConsoleCommand(string name, string[] args,
         PermissionLevel permissionLevel)
     {
         var command = RegisteredConsoleCommands.FirstOrDefault(c => c.MatchesNameOrAlias(name));
-        if (command == null) return ChatCommandResult.ClientError($"No such command: {name}");
+        if (command == null) return UniTask.FromResult(ChatCommandResult.ClientError($"No such command: {name}"));
         if (permissionLevel < command.PermissionLevel)
         {
             GwServerPlugin.Logger.LogWarning(
                 $"Remote user with permission level {permissionLevel.ToString()} tried to execute command {command.Name} (level {command.PermissionLevel.ToString()}");
-            return ChatCommandResult.ClientError(
-                $"You are not authorized to execute command {command.Name}, as it requires the {command.PermissionLevel.ToString()} permission level.");
+            return UniTask.FromResult(ChatCommandResult.ClientError(
+                $"You are not authorized to execute command {command.Name}, as it requires the {command.PermissionLevel.ToString()} permission level."));
         }
         
         return command.Execute(args);// TODO async

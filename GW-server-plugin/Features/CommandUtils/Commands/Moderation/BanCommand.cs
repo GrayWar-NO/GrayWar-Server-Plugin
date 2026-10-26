@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Security;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -29,19 +30,19 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
     ];
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public async UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         var player = request.Sender.player;
         
         var target = args[0];
         PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return Execute([.. args]);
+        if (targetPlayer != player) return await Execute([.. args]);
         return ChatCommandResult.ClientError("You cannot ban yourself!");
     }
 
     /// <inheritdoc />
-    public ChatCommandResult Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string[] args)
     {
         var target = args[0];
         string? duration = null;
@@ -95,7 +96,7 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
         }
 
         PlayerUtils.BanPlayer(banSteamID, reason, duration);
-        return ChatCommandResult.Ok(response);
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 
     /// <inheritdoc />

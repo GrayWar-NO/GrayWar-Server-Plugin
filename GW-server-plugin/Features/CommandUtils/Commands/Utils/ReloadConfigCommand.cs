@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -28,7 +29,7 @@ public class ReloadConfigCommand(ConfigFile config) : CommonBehaviourCommand(con
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         string? response;
         switch (args[0].ToLowerInvariant())
@@ -48,8 +49,8 @@ public class ReloadConfigCommand(ConfigFile config) : CommonBehaviourCommand(con
                 break;
             default:
                 response = $"Unknown config source '{args[0]}'. Validation was not called correctly.";
-                return ChatCommandResult.ClientError(response);
+                return UniTask.FromResult(ChatCommandResult.ClientError(response));
         }
-        return ChatCommandResult.Ok(response);
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 }

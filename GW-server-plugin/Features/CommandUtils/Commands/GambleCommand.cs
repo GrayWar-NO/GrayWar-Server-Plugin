@@ -1,5 +1,6 @@
 using System;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -33,18 +34,18 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         var player = request.Sender.player;
         if (int.Parse(args[0]) > player.Allocation)
-            return ChatCommandResult.Error(0, "You don't have that much money. Please try again");
+            return UniTask.FromResult(ChatCommandResult.Error(0, "You don't have that much money. Please try again"));
         
         if (player.Aircraft == null)
-            return ChatCommandResult.Error(0, "You must be spawned in before you can gamble!");
+            return UniTask.FromResult(ChatCommandResult.Error(0, "You must be spawned in before you can gamble!"));
         
         if (!player.Aircraft.airborne)
-            return ChatCommandResult.Error(0, "You must be airborne before you can gamble!");
+            return UniTask.FromResult(ChatCommandResult.Error(0, "You must be airborne before you can gamble!"));
         
         var bet = int.Parse(args[0]);
         if (GambleService.CoinFlip())
@@ -67,7 +68,7 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
             ChatService.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
         }
         
-        return ChatCommandResult.Ok();
+        return UniTask.FromResult(ChatCommandResult.Ok());
     }
 }
 

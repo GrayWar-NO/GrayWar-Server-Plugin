@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -28,11 +29,11 @@ public class SetTimeCommand(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var timeOfDay = int.Parse(args[0]);
         LevelInfo.i.SetTimeOfDay(timeOfDay);
         var message = $"Time set to {timeOfDay}:00";
-        return ChatCommandResult.Ok(message);
+        return UniTask.FromResult(ChatCommandResult.Ok(message));
     }
 }

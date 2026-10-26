@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -18,14 +19,14 @@ public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), 
     public override string Description => "Removes a slot from the server";
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string[] args)
     {
         var result = StaffSlotService.RemoveStaffSlot();
         if (!result)
         {
-            return ChatCommandResult.ClientError("Failed to remove staff slot: No staff slots left to remove.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("Failed to remove staff slot: No staff slots left to remove."));
         }
-        return ChatCommandResult.Ok("Successfully removed a slot from the server.");
+        return UniTask.FromResult(ChatCommandResult.Ok("Successfully removed a slot from the server."));
     }
 
     /// <inheritdoc />

@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -27,12 +28,12 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var weatherFloat = float.Parse(args[0]);
 
         LevelInfo.i.Networkconditions = weatherFloat;
         ChatService.SendChatMessageAsServer($"Weather set to {weatherFloat}");
-        return ChatCommandResult.Ok();
+        return UniTask.FromResult(ChatCommandResult.Ok());
     }
 }

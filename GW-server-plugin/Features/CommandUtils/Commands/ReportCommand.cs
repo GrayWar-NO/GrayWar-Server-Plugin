@@ -1,5 +1,6 @@
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -29,13 +30,13 @@ public class ReportCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     ];
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         GwServerPlugin.GrpcMgr.Client?.sendReportAsync(new ServerReport
         {
             Content = request.Args[0],
             Username = request.Sender.player.GetLogName()
         });
-        return ChatCommandResult.Ok($"Reported {request.Args[0]} to staff successfully!");
+        return UniTask.FromResult(ChatCommandResult.Ok($"Reported {request.Args[0]} to staff successfully!"));
     }
 }

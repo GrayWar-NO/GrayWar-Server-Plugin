@@ -2,6 +2,7 @@
 using System.Globalization;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
@@ -27,75 +28,60 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
     public override ChatCommandArgument[] Arguments =>
     [
         new("player", ChatArgumentType.Player),
-        new("amount (in millions)", ChatArgumentType.Text)
+        new("amount (in millions)", ChatArgumentType.Float)
     ];
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         var player = request.Sender.player;
         
         if (!request.TryGetTargetPlayer(0, out var target, out var error))
         {
-            return ChatCommandResult.ClientError(error);
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
         }
         
         if (player == target.player)
         {
-            return ChatCommandResult.ClientError("You can not donate to yourself.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("You can not donate to yourself."));
         }
         
-        var amountText = args[1].Trim();
-
-        if (amountText.Contains(".") && amountText.Contains(","))
+        if (!request.TryGetFloat(1, out var amount, out error))
         {
-            return ChatCommandResult.ClientError("Use either ',' or '.' as the decimal separator, not both.");
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
         }
-
-        amountText = amountText.Replace(',', '.');
-
-        if (!decimal.TryParse(
-                amountText,
-                NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign,
-                CultureInfo.InvariantCulture,
-                out var amount) || float.IsNaN((float) amount))
+        
+        if (amount <= 0)
         {
-            return ChatCommandResult.ClientError($"Could not parse '{args[1]}' as a number.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("Sum must be a positive number."));
         }
-
-        if (amount <= 0m)
+        
+        if (player.Allocation < amount)
         {
-            return ChatCommandResult.ClientError("Sum must be a positive number.");
-        }
-
-        var sum = (float)amount;
-
-        if (player.Allocation < sum)
-        {
-            return ChatCommandResult.ClientError($"Insufficient allocation. You tried to donate {sum} (million), but only have {player.Allocation} (million) available.");
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Insufficient allocation. You tried to donate {amount} (million), but only have {player.Allocation} (million) available."));
         }
         
         if (player.HQ != target.player.HQ)
-            return ChatCommandResult.ClientError("You can only donate to players in the same faction.");
+            return UniTask.FromResult(ChatCommandResult.ClientError("You can only donate to players in the same faction."));
         
         // Deduct from player and give to target
-        player.AddAllocation(-sum);
-        target.player.AddAllocation(sum);
+        player.AddAllocation(-amount);
+        target.player.AddAllocation(amount);
         
-        ChatService.SendPrivateChatMessage($"{player.GetColoredDisplayName()} has given you {sum} (million)!", target.player);
+        ChatService.SendPrivateChatMessage($"{player.GetColoredDisplayName()} has given you {amount} (million)!", target.player);
         
         // Logging
         var log = new DonationLog
         {
-            AmountMillions = (uint)sum,
+            AmountMillions = (uint)amount,
             DonatorSteamID = player.SteamID,
             ReceiverSteamID = target.SteamId,
             Time = DateTime.UtcNow.ToTimestamp()
         };
         GwServerPlugin.GrpcMgr.Client?.sendDonationAsync(log);
         
-        return ChatCommandResult.Ok($"You have successfully donated {sum} (million) to {target.player.GetDisplayName()}.");
+        return UniTask.FromResult(ChatCommandResult.Ok($"You have successfully donated {amount} (million) to {target.player.GetDisplayName()}."));
     }
     
     /// <inheritdoc />

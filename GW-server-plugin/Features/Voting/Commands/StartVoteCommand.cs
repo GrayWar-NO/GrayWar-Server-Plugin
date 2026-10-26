@@ -33,14 +33,14 @@ public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), 
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest request)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
         var player = request.Sender.player;
         var session = VoteManager.Factories[args[0]](player, args[1]);
         if (VoteManager.TryStartVote(session, out var response))
-            return ChatCommandResult.Ok(response);
-        return ChatCommandResult.ClientError(response);
+            return UniTask.FromResult(ChatCommandResult.Ok(response));
+        return UniTask.FromResult(ChatCommandResult.ClientError(response));
         
     }
 }

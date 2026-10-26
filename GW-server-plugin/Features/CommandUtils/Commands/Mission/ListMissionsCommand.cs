@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -15,10 +16,10 @@ public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(con
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
-        if (missions.Length == 0) return ChatCommandResult.Ok("No available missions")!;
+        if (missions.Length == 0) return UniTask.FromResult(ChatCommandResult.Ok("No available missions")!);
         
         var response = "Available missions:\n";
         for (var i = 0; i < missions.Length; i++)
@@ -27,7 +28,7 @@ public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(con
             response += $"[{i}] {name}\n";
         }
         
-        return ChatCommandResult.Ok(response)!;
+        return UniTask.FromResult(ChatCommandResult.Ok(response)!);
     }
     
     /// <inheritdoc />

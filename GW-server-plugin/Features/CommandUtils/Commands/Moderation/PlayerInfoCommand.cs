@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -29,16 +30,18 @@ public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), 
 
 
     /// <inheritdoc />
-    public ChatCommandResult Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string[] args)
     {
         string? response;
         ulong.TryParse(args[0], out var steamID);
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player))
         {
             response = $"Player for steamID {steamID} not found";
-            return ChatCommandResult.ClientError(response);
+            return UniTask.FromResult(ChatCommandResult.ClientError(response));
         }
+        
+        
         response = player!.GetDisplayName();
-        return ChatCommandResult.Ok(response);
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 }

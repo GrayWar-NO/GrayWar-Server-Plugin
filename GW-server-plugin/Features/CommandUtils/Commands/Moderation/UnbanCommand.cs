@@ -2,6 +2,7 @@ using System;
 using System.Security;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
+using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
@@ -30,7 +31,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override ChatCommandResult Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         string? response;
         var target = args[0];
@@ -62,7 +63,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
             ShouldBeBanned = false
         };
         GwServerPlugin.GrpcMgr.Client?.SendBanAsync(log);
-        return ChatCommandResult.Ok(response);
+        return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 
     /// <inheritdoc />

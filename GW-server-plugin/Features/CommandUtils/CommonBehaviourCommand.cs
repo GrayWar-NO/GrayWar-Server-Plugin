@@ -1,5 +1,6 @@
 using System.Linq;
 using BepInEx.Configuration;
+using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 
 namespace GW_server_plugin.Features.CommandUtils;
@@ -11,10 +12,10 @@ public abstract class CommonBehaviourCommand(ConfigFile config)
     : ConfigurableCommand(config), IConsoleCommand, IGameCommand
 {
     /// <inheritdoc />
-    public ChatCommandResult Execute(ChatCommandRequest rq)
+    public async UniTask<ChatCommandResult> Execute(ChatCommandRequest rq)
     {
         return TrySanitizeGameForCommonExec(rq, out var args, out var error)
-            ? Execute(args)
+            ? await Execute(args)
             : ChatCommandResult.ClientError(error);
     }
     
@@ -44,5 +45,5 @@ public abstract class CommonBehaviourCommand(ConfigFile config)
     
     
     /// <inheritdoc />
-    public abstract ChatCommandResult Execute(string[] args);
+    public abstract UniTask<ChatCommandResult> Execute(string[] args);
 }
