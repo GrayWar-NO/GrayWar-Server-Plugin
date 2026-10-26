@@ -1,6 +1,7 @@
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
 using Steamworks;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -23,22 +24,25 @@ public class UnKickCommand(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player (steamID)", ChatArgumentType.Text) // TODO wait for ulong type
+        new("player (steamID)", ChatArgumentType.Player)
     ];
     
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        UnKickPlayer(ulong.Parse(args[0]));
+        if (!ChatHelper.TryParseSteamId(args[0], out var targetSteamID))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid User: {args[0]}"));
+
+        UnKickPlayer(targetSteamID);
         return UniTask.FromResult(ChatCommandResult.Ok($"Unkicked player with steamID {args[0]}"));
     }
 
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
 
-    private static void UnKickPlayer(ulong steamID)
+    private static void UnKickPlayer(CSteamID steamID)
     {
-        Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Remove(new CSteamID(steamID));
-        Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Remove(new CSteamID(steamID));
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.KickList.Remove(steamID);
+        Globals.NetworkManagerNuclearOptionInstance.Authenticator.MissionKickList.Remove(steamID);
     }
 }

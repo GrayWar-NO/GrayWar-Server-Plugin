@@ -22,7 +22,7 @@ public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), 
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player", ChatArgumentType.Player) // TODO check output data for consoleCommand.
+        new("player", ChatArgumentType.Player)
     ];
 
     /// <inheritdoc />

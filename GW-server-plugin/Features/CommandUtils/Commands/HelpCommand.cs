@@ -1,9 +1,7 @@
 using System.Linq;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
-using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
-using NuclearOption.Networking;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
@@ -41,7 +39,7 @@ public class HelpCommand(ConfigFile config) : ConfigurableCommand(config), ICons
         }
         
         var commandName = args[0];
-        if (!CommandService.TryGetCommand(commandName, out var command))
+        if (!CommandService.TryGetConsoleCommand(commandName, out var command))
         {
             return UniTask.FromResult(ChatCommandResult.ClientError($"Command {commandName} not found."));
         }

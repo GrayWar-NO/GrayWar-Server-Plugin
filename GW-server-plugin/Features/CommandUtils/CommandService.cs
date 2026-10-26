@@ -14,12 +14,28 @@ public static class CommandService
 {
     private static readonly HashSet<IConsoleCommand> RegisteredConsoleCommands = [];
     
+    /// <summary>
+    ///     Registers a command to the Console and to Builtin chat commands, only if available for either.
+    /// </summary>
+    /// <param name="command"></param>
     public static void RegisterCommand(ICommand command)
     {
         if (command is IConsoleCommand consoleCommand)
             RegisteredConsoleCommands.Add(consoleCommand);
         if (command is IGameCommand gameCommand)
             RegisterBuiltinCommand(gameCommand);
+    }
+    
+    /// <summary>
+    ///     Unregisters a command from the places it can be registered.
+    /// </summary>
+    /// <param name="command"></param>
+    public static void UnregisterCommand(ICommand command)
+    {
+        if (command is IConsoleCommand consoleCommand)
+            RegisteredConsoleCommands.Remove(consoleCommand);
+        if (command is IGameCommand gameCommand)
+            ChatCommands.UnregisterServerCommand(gameCommand.Name);
     }
     
     /// <summary>
@@ -59,7 +75,13 @@ public static class CommandService
         }
     }
     
-    public static bool TryGetCommand(string name, out IConsoleCommand? command)
+    /// <summary>
+    ///     Tries to fetch a console command by name.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="command"></param>
+    /// <returns>true if success</returns>
+    public static bool TryGetConsoleCommand(string name, out IConsoleCommand? command)
     {
         try
         {
@@ -74,7 +96,14 @@ public static class CommandService
         return false;
     }
     
-    public static UniTask<ChatCommandResult> TryExecuteConsoleCommand(string name, string[] args,
+    /// <summary>
+    ///     
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="args"></param>
+    /// <param name="permissionLevel"></param>
+    /// <returns></returns>
+    public static UniTask<ChatCommandResult> ExecuteConsoleCommand(string name, string[] args,
         PermissionLevel permissionLevel)
     {
         var command = RegisteredConsoleCommands.FirstOrDefault(c => c.MatchesNameOrAlias(name));
@@ -87,6 +116,6 @@ public static class CommandService
                 $"You are not authorized to execute command {command.Name}, as it requires the {command.PermissionLevel.ToString()} permission level."));
         }
         
-        return command.Execute(args);// TODO async
+        return command.Execute(args);
     }
 }

@@ -22,8 +22,8 @@ public class RemoveMission(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("missionID", ChatArgumentType.Text), // TODO waiting for INT type
-        new("save", ChatArgumentType.Text, true)
+        new("missionID", ChatArgumentType.Int),
+        ChatCommandArgument.TrueFalse("save", true)
     ];
     
     /// <inheritdoc />

@@ -93,3 +93,9 @@ public abstract class ConfigurableCommand : ICommand
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class AutoCommandAttribute : Attribute;
+
+/// <summary>
+/// Attribute to mark a command as Dynamic. Dynamic commands will not be instantiated or registered automatically, and must rely on other mechanisms to do so.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class DynamicCommandAttribute : Attribute;

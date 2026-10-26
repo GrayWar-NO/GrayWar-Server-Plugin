@@ -23,7 +23,7 @@ public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("MissionID", ChatArgumentType.Text) // TODO waiting for INT type
+        new("MissionID", ChatArgumentType.Int)
     ];
     
     /// <inheritdoc />

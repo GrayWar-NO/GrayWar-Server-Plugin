@@ -1,6 +1,7 @@
 using System;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
+using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -22,15 +23,16 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player (steamID)", ChatArgumentType.Text), // TODO wait for ulong type
+        new("player (steamID)", ChatArgumentType.Player)
     ];
 
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var targetSteamID = ulong.Parse(args[0]);
+        if (!ChatHelper.TryParseSteamId(args[0], out var targetSteamID))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid User: {args[0]}"));
         _ = Enum.TryParse<PermissionLevel>(args[1], out var level);
-        PluginConfig.SetPermissionLevel(targetSteamID, level);
+        PluginConfig.SetPermissionLevel(targetSteamID.m_SteamID, level);
         return UniTask.FromResult(ChatCommandResult.Ok($"Successfully set permission level to {level}"));
     }
 

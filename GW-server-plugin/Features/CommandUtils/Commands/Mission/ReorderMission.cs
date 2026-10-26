@@ -25,9 +25,9 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("currentID", ChatArgumentType.Text),// TODO waiting for INT type
-        new("targetID", ChatArgumentType.Text),
-        new("save", ChatArgumentType.Text, true)
+        new("currentID", ChatArgumentType.Int),
+        new("targetID", ChatArgumentType.Int),
+        ChatCommandArgument.TrueFalse("save", true)
     ];
     
     /// <inheritdoc />

@@ -128,7 +128,8 @@ public class GwServerPlugin : BaseUnityPlugin
             var commandTypes = assembly.GetTypes()
                 .Where(t => t.IsClass
                             && !t.IsAbstract
-                            && t.IsSubclassOf(typeof(ConfigurableCommand)));
+                            && t.IsSubclassOf(typeof(ConfigurableCommand))
+                            && !Attribute.IsDefined(t, typeof(DynamicCommandAttribute)));
 
             foreach (var type in commandTypes)
             {

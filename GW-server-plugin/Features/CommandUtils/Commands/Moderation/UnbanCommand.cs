@@ -1,10 +1,10 @@
 using System;
-using System.Security;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
+using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
 using Steamworks;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -27,38 +27,36 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player (steamID)", ChatArgumentType.Text) // TODO wait for ulong type
+        new("player (steamID)", ChatArgumentType.Player)
     ];
     
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         string? response;
+        CSteamID banSteamID;
         var target = args[0];
-        ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) &&
-            targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
+        if (ChatHelper.TryParseSteamId(target, out var targetSteamID))
         {
-            banSteamID = targetID;
+            banSteamID = targetSteamID;
             response = $"Unbanned player with steamID {banSteamID}";
         }
         else
         {
             var rs = PlayerUtils.TryFindPlayer(target, out var player);
             if (!rs)
-                throw new VerificationException(
-                    $"Could not find player {target}: validation was not called properly.");
-            banSteamID = player!.SteamID;
+                return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid Player: {target}"));
+            banSteamID = player!.CSteamID;
             response = $"Unbanned player {player.GetDisplayName()}";
         }
 
         AllowBanListUtils.UnbanAndRemoveId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
-            new CSteamID(banSteamID));
+            banSteamID);
         var log = new BanRequest
         {
-            SteamID = banSteamID,
+            SteamID = banSteamID.m_SteamID,
             BanEnd = DateTime.UtcNow.ToTimestamp(),
             ShouldBeBanned = false
         };

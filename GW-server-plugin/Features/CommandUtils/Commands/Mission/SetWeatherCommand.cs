@@ -21,7 +21,7 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("amount", ChatArgumentType.Text),// TODO waiting for FLOAT type
+        new("amount", ChatArgumentType.Float)
     ];
     
     /// <inheritdoc />

@@ -164,11 +164,11 @@ public class GrpcClientManager
         {
             if (!data.Result)
             {
-                _ = CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
+                _ = CommandService.ExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
                 return;
             }
             
-            var result = await CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
+            var result = await CommandService.ExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
             
             await stream.RequestStream.WriteAsync(new CommandResult
             {
