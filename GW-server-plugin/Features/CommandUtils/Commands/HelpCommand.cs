@@ -35,20 +35,7 @@ public class HelpCommand(ConfigFile config): ConfigurableCommand(config), IConso
     {
         return UniTask.FromResult(args.Length <= 1);
     }
-
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
-    {
-        if (args.Length != 0) return Execute(args);
-        
-        var accessibleCommands = CommandService.GetGameCommands()
-            .Where(c => c.PermissionLevel <= PlayerUtils.GetPlayerPermissionLevel(player)).ToList();
-        var commandNames = accessibleCommands.Select(c => c.OutputName).ToList();
-        return UniTask.FromResult<(bool, string?)>((true, 
-            $"You have access to the following commands:{string.Join(", ", commandNames)}" +
-            $"\n{PluginConfig.CommandPrefixChar}{Usage} for command details"));
-    }
-
+    
     /// <inheritdoc />
     public UniTask<(bool success, string? response)> Execute(string[] args)
     {

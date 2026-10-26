@@ -164,16 +164,17 @@ public class GrpcClientManager
         {
             if (!data.Result)
             {
-                _ = CommandService.TryExecuteCommand(data.Name, [.. data.Arguments], data.PermLevel);
+                _ = CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel);
                 return;
             }
             
-            var result = await CommandService.TryExecuteCommand(data.Name, [.. data.Arguments], data.PermLevel);
+            var result = CommandService.TryExecuteConsoleCommand(data.Name, [.. data.Arguments], data.PermLevel); // TODO await when async is available.
+            
             await stream.RequestStream.WriteAsync(new CommandResult
             {
                 RequestID = data.RequestID,
-                Ok = result.success,
-                Result = result.response
+                Ok = result.Success,
+                Result = result.Message
             });
         });
     }

@@ -33,5 +33,9 @@ public interface ICommand
     ///     Aliases the command can be called with.
     /// </summary>
     string[] Aliases { get; }
-
+    
+    /// <summary>
+    ///     Returns true if the provided <paramref name="name"/> matches with any alias or the name of this command.
+    /// </summary>
+    bool MatchesNameOrAlias(string name);
 }

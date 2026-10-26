@@ -138,8 +138,8 @@ public class GwServerPlugin : BaseUnityPlugin
                     var commandInstance = (ConfigurableCommand)Activator.CreateInstance(type, Config);
                     
                     if (!commandInstance.Enable) continue;
+                    CommandService.RegisterCommand(commandInstance);
                     
-                    // TODO call command registration here;
                     Logger.LogInfo($"Loaded command {type.Name}");
                 }
                 catch (TargetInvocationException ex)

@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using BepInEx.Configuration;
+using HarmonyLib;
 using JetBrains.Annotations;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -32,6 +34,17 @@ public abstract class ConfigurableCommand : ICommand
     
     /// <inheritdoc />
     public string[] Aliases => AliasesConfig.Value.Split(';');
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public bool MatchesNameOrAlias(string name)
+    {
+        return name.Equals(Name, StringComparison.OrdinalIgnoreCase) ||
+               Aliases.Any(alias => name.Equals(alias, StringComparison.OrdinalIgnoreCase));
+    }
     
     /// <summary>
     ///     Getter for the enable config option.
