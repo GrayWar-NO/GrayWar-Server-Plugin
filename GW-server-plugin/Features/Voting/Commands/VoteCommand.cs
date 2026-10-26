@@ -13,7 +13,7 @@ namespace GW_server_plugin.Features.Voting.Commands;
 [AutoCommand]
 [DynamicCommand]
 public class VoteCommand(ConfigFile config)
-    : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister
+    : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     public override string Name => "vote";

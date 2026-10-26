@@ -12,7 +12,7 @@ namespace GW_server_plugin.Features.Voting.Commands;
 /// <param name="config"></param>
 [AutoCommand]
 [DynamicCommand]
-public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister.
+public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand
 {
     /// <inheritdoc />
     protected override string[] DefaultAliases => ["startvote", "votestart", "sv", "vs"];

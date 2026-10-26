@@ -195,8 +195,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
             ChatService.SendChatMessageAsServer($"{SessionName} vote failed!");
             OnFail();
         }
-
-        Destroy();
+        VoteManager.CancelVote();
     }
 
     /// <summary>

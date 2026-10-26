@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Configuration;
+using GW_server_plugin.Features.CommandUtils;
+using GW_server_plugin.Features.Voting.Commands;
 using JetBrains.Annotations;
 using NuclearOption.Networking;
 
@@ -28,6 +30,9 @@ public static class VoteManager
     /// </summary>
     public static readonly Dictionary<string, Func<Player, string?, IVoteSession>> Factories = new();
     
+    private static VoteCommand _voteCommand = null!;
+    private static StartVoteCommand _startVoteCommand = null!;
+    
     /// <summary>
     ///     Initialises all the voteSession configs.
     /// </summary>
@@ -38,6 +43,9 @@ public static class VoteManager
         
         var baseOpenType = typeof(ConfigurableVoteSession<,>);
         var assembly = Assembly.GetAssembly(baseOpenType)!;
+        
+        _voteCommand = new VoteCommand(pluginConfig);
+        _startVoteCommand = new StartVoteCommand(pluginConfig);
         
         var sessionTypes = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract)
@@ -74,6 +82,9 @@ public static class VoteManager
             Factories[sessionAttr.ShortName] = (p, s) => (IVoteSession)Activator.CreateInstance(sessionType, p, s);
             GwServerPlugin.Logger.LogInfo($"Initialized vote session for {sessionType.Name} successfully");
         }
+        
+        CommandService.RegisterCommand(_startVoteCommand);
+        
     }    
     /// <summary>
     ///     Starts a voteSession.
@@ -98,6 +109,8 @@ public static class VoteManager
         
         Session = session;
         Session.Start();
+        CommandService.UnregisterCommand(_startVoteCommand);
+        CommandService.RegisterCommand(_voteCommand);
         response = $"{Session.SessionName} vote started! Dont forget to use /vote to vote for the outcome you want!";
         return true;
     }
@@ -107,6 +120,8 @@ public static class VoteManager
     /// </summary>
     public static void CancelVote()
     {
+        CommandService.UnregisterCommand(_voteCommand);
+        CommandService.RegisterCommand(_startVoteCommand);
         Session?.Destroy();
         Session = null;
     }
