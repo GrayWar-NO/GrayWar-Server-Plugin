@@ -1,8 +1,8 @@
 using BepInEx.Configuration;
-using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Features.CommandUtils;
-using NuclearOption.Networking;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.Voting.Commands;
 
@@ -11,7 +11,9 @@ namespace GW_server_plugin.Features.Voting.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
-public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister
+[DynamicCommand]
+public class VoteCommand(ConfigFile config)
+    : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister
 {
     /// <inheritdoc />
     public override string Name => "vote";
@@ -20,26 +22,29 @@ public class VoteCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     public override string Description => "Votes for the currently ongoing vote session";
     
     /// <inheritdoc />
-    public override string Usage =>
-        $"vote <Outcome>. You can use  \"{PluginConfig.CommandPrefixChar}vote ?\" to get available options";
+    public override ChatCommandArgument[] Arguments =>
+    [
+        new("outcome", ChatArgumentType.Text)
+    ];
     
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public UniTask<bool> Validate(Player player, string[] args)
+    public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        if (args.Length < 1) return UniTask.FromResult(false);
-        return UniTask.FromResult((args[0] == "?" && args.Length == 1) ||
-                                  (VoteManager.Session?.ValidateVote(player, string.Join(" ", args)) ?? false));
-    }
-    
-    /// <inheritdoc />
-    public UniTask<(bool success, string? response)> Execute(Player player, string[] args)
-    {
-        if (VoteManager.Session == null) return UniTask.FromResult((false, "No vote was started"))!;
-        if (args[0] == "?") return UniTask.FromResult((true, string.Join("\n", VoteManager.Session.GetAllOutcomes())))!;
-        var rst = VoteManager.Session.TryAddVote(player,  string.Join(" ", args), out var response);
-        return UniTask.FromResult((rst, response))!;
+        var args = request.Args;
+        var player = request.Sender.player;
+        
+        if (args.Count != 1)
+            return UniTask.FromResult(ChatCommandResult.ClientError("Invalid number of arguments"));
+        if (VoteManager.Session == null)
+            return UniTask.FromResult(ChatCommandResult.ClientError("No vote was started"));
+        if (args[0] == "?")
+            return UniTask.FromResult(ChatCommandResult.Ok(string.Join("\n", VoteManager.Session.GetAllOutcomes())));
+        if (!VoteManager.Session.ValidateVote(player, string.Join(" ", args)))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid vote outcome: {args[0]}. Use one of {string.Join("\n", VoteManager.Session.GetAllOutcomes())}"));
+        var rst = VoteManager.Session.TryAddVote(player, string.Join(" ", args), out var response);
+        return UniTask.FromResult(rst ? ChatCommandResult.Ok(response) : ChatCommandResult.ClientError(response));
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using BepInEx.Configuration;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
@@ -34,7 +33,6 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
     /// <inheritdoc />
     public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        var args = request.Args;
         var player = request.Sender.player;
         
         if (!request.TryGetTargetPlayer(0, out var target, out var error))

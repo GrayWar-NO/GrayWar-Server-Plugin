@@ -11,6 +11,7 @@ namespace GW_server_plugin.Features.Voting.Commands;
 /// </summary>
 /// <param name="config"></param>
 [AutoCommand]
+[DynamicCommand]
 public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), IGameCommand // TODO dynamic register/unregister.
 {
     /// <inheritdoc />

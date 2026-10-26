@@ -92,8 +92,12 @@ public static class CommandService
         {
             command = null;
             return false;
-        }    
-        return false;
+        }
+        catch (Exception)
+        {
+            command = null;
+            return false;
+        }
     }
     
     /// <summary>
