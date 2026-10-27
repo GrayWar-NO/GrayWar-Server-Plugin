@@ -32,7 +32,7 @@ public abstract class ConfigurableCommand : ICommand
     public PermissionLevel PermissionLevel => PermissionLevelConfig.Value;
     
     /// <inheritdoc />
-    public string[] Aliases => AliasesConfig.Value.Split(';');
+    public string[] Aliases => AliasesConfig.Value.Split([';'], StringSplitOptions.RemoveEmptyEntries);
     
     /// <summary>
     /// 
