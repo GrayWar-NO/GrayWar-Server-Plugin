@@ -49,14 +49,15 @@ internal sealed class PlayerIdentificationService
         return _players.TryGetValue(player.SteamID, out id);
     }
 
-    public void GetPlayerById(int id, out ulong? player)
+    public bool TryGetPlayerById(int id, out ulong? player)
     {
         foreach (var keyValuePair in _players.Where(keyValuePair => keyValuePair.Value == id))
         {
             player = keyValuePair.Key;
-            return;
+            return true;
         }
 
         player = null;
+        return false;
     }
 }

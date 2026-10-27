@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
+using Steamworks;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils;
@@ -105,6 +107,131 @@ public static class CommandService
                 $"You are not authorized to execute command {command.Name}, as it requires the {command.PermissionLevel.ToString()} permission level."));
         }
         
+        if (!ValidateConsoleCommandArguments(command, ref args, out var error))
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
+        TrimNullOrEmpty(ref args);
+        
         return command.Execute(args);
+    }
+    
+    
+    private static void TrimNullOrEmpty(ref string[] array)
+    {
+        var length = array.Length;
+        
+        while (length > 0 && string.IsNullOrEmpty(array[length - 1]))
+            length--;
+        
+        if (length < array.Length)
+            Array.Resize(ref array, length);
+    }
+    
+    
+    private static bool ValidateConsoleCommandArguments(IConsoleCommand command, ref string[] args, out string? error)
+    {
+        var argumentsToParse = new string[args.Length];
+        args.CopyTo(argumentsToParse, 0);
+        error = null;
+        var currentTextArgIndex = 0;
+        args = new string[command.Arguments.Length];
+        
+        foreach (var (argument, i) in command.Arguments.Select((x, i) => (x, i)))
+        {
+            if (currentTextArgIndex == argumentsToParse.Length)
+            {
+                if (argument.Optional)
+                    return true;
+                error = "Not enough arguments!";
+                return false;
+            }
+            
+            var currentArg = argumentsToParse[currentTextArgIndex];
+            
+            switch (argument.Type)
+            {
+                case ChatArgumentType.Choices:
+                    if (argument.Choices.Any(x => x.Equals(
+                            currentArg,
+                            StringComparison.OrdinalIgnoreCase)
+                        ))
+                    {
+                        args[i] = argument.Choices.First(x => x.Equals(
+                            currentArg,
+                            StringComparison.OrdinalIgnoreCase));
+                        currentTextArgIndex++;
+                    }
+                    else if (!argument.Optional)
+                    {
+                        error = $"Invalid choice for {argument.Name}: {argumentsToParse[currentTextArgIndex]}";
+                        return false;
+                    }
+                    
+                    break;
+                case ChatArgumentType.Float:
+                    if (float.TryParse(currentArg, out _))
+                    {
+                        args[i] = currentArg;
+                        currentTextArgIndex++;
+                    }
+                    else if (!argument.Optional)
+                    {
+                        error = $"{currentArg} is not a valid floating point number!";
+                        return false;
+                    }
+                    
+                    break;
+                
+                case ChatArgumentType.Int:
+                    if (int.TryParse(currentArg, out _))
+                    {
+                        args[i] = currentArg;
+                        currentTextArgIndex++;
+                    }
+                    else if (!argument.Optional)
+                    {
+                        error = $"{currentArg} is not a valid floating point number!";
+                        return false;
+                    }
+                    
+                    break;
+                case ChatArgumentType.Player:
+                    if (!ChatHelper.TryParseSteamId(currentArg, out var steamId)) // TODO check parsing of IDs n names.
+                    {
+                        if (GwServerPlugin.TryGetConnectedPlayerSteamId(currentArg, out var uSteamId))
+                            steamId = new CSteamID(uSteamId!.Value);
+                        else if (int.TryParse(currentArg, out var id) &&
+                            GwServerPlugin.PlayerIdentifier.TryGetPlayerById(id, out uSteamId))
+                            steamId = new CSteamID(uSteamId!.Value);
+                        else
+                        {
+                            if (argument.Optional)
+                                break;
+                            error = $"{currentArg} is not a valid player!";
+                            return false;
+                        }
+                    }
+                    
+                    args[i] = ChatHelper.FormatMention(steamId.m_SteamID);
+                    currentTextArgIndex++;
+                    break;
+                case ChatArgumentType.Text:
+                    if (i == command.Arguments.Length - 1)
+                    {
+                        args[i] += string.Join(" ", argumentsToParse.Skip(currentTextArgIndex));
+                        return true;
+                    }
+                    
+                    args[i] = currentArg;
+                    currentTextArgIndex++;
+                    break;
+                default:
+                case ChatArgumentType.Command:
+                    args[i] = currentArg;
+                    currentTextArgIndex++;
+                    break;
+            }
+        }
+        
+        return true;
     }
 }

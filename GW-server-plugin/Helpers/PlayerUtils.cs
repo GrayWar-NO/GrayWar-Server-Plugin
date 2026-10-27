@@ -127,14 +127,14 @@ public static class PlayerUtils
         var normalizedName = StripStaffPrefix(StripIdPrefix(playerName));
         
         if (GwServerPlugin.TryGetConnectedPlayerSteamId(normalizedName, out var steamId))
-            TryFindPlayerBySteamId(steamId, out playerObject);
+            TryFindPlayerBySteamId(steamId!.Value, out playerObject);
         
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
             ulong? playerSteamId;
             if (playerId <= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
             {
-                GwServerPlugin.PlayerIdentifier.GetPlayerById((int)playerId, out playerSteamId);
+                GwServerPlugin.PlayerIdentifier.TryGetPlayerById((int)playerId, out playerSteamId);
             }
             else playerSteamId = playerId;
             

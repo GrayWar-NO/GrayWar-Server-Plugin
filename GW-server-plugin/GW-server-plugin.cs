@@ -63,7 +63,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     private static readonly object ConnectedPlayerNamesLock = new();
 
-    internal static bool TryGetConnectedPlayerSteamId(string playerName, out ulong steamId)
+    internal static bool TryGetConnectedPlayerSteamId(string playerName, out ulong? steamId)
     {
         lock (ConnectedPlayerNamesLock)
         {
