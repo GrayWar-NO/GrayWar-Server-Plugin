@@ -34,7 +34,7 @@ public class SetTimeCommand(ConfigFile config) : CommonBehaviourCommand(config)
         if (!int.TryParse(args[0].Split(':')[0], out var timeOfDay))
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid time of day: {args[0]}"));
      
-        LevelInfo.i.SetTimeOfDay(timeOfDay);
+        LevelInfo.i.NetworktimeOfDay = timeOfDay;
         var message = $"Time set to {timeOfDay}:00";
         return UniTask.FromResult(ChatCommandResult.Ok(message));
     }
