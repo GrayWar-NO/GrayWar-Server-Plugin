@@ -27,7 +27,7 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
     public override ChatCommandArgument[] Arguments =>
     [
         new("player", ChatArgumentType.Player),
-        new("amount (in millions)", ChatArgumentType.Float)
+        new("amountMillions", ChatArgumentType.Float)
     ];
     
     /// <inheritdoc />

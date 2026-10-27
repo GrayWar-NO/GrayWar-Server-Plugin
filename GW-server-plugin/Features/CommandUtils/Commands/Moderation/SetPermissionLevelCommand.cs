@@ -23,7 +23,7 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player (steamID)", ChatArgumentType.Player)
+        new("player", ChatArgumentType.Player)
     ];
 
     /// <inheritdoc />

@@ -25,7 +25,7 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     public override ChatCommandArgument[] Arguments =>
     [
         new("target", ChatArgumentType.Player),
-        new("amount in millions", ChatArgumentType.Text)
+        new("amountMillions", ChatArgumentType.Text)
     ];
     
     /// <inheritdoc />

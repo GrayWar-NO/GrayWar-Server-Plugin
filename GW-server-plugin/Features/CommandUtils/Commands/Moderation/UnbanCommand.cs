@@ -27,7 +27,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player (steamID)", ChatArgumentType.Player)
+        new("player", ChatArgumentType.Player)
     ];
     
     /// <inheritdoc />

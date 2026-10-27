@@ -26,7 +26,7 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
     [
         new("player", ChatArgumentType.Player),
         new("reason", ChatArgumentType.Text, true),
-        new("duration (in [d]ays or [h]ours)", ChatArgumentType.Text, true)
+        new("duration", ChatArgumentType.Text, true)
     ];
     
     /// <inheritdoc />
