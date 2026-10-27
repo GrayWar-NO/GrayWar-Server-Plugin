@@ -16,7 +16,8 @@ using GW_server_plugin.Features.Voting;
 using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
-using JetBrains.Annotations; using NuclearOption.Networking;
+using JetBrains.Annotations;
+using NuclearOption.Networking;
 using Steamworks;
 
 namespace GW_server_plugin;
@@ -284,6 +285,9 @@ public class GwServerPlugin : BaseUnityPlugin
                 .Forget();
             return;
         }
+        
+        var pl = PermissionLevelUtils.GetPlayerPermissionLevel(player);
+        player.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(pl));
         
         var originalName = player.GetPlayerName().SanitizedName;
         lock (ConnectedPlayerNamesLock)

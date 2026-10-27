@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -53,26 +54,9 @@ public static class CommandService
             command.Description,
             command.Execute,
             command.Arguments,
-            ProtoToShockfrontPermissionLevel(command.PermissionLevel),
+            PermissionLevelUtils.ProtoToShockfrontPermissionLevel(command.PermissionLevel),
             command.Aliases
         );
-    }
-    
-    private static NuclearOption.ModdingApi.PermissionLevel ProtoToShockfrontPermissionLevel(
-        PermissionLevel permissionLevel)
-    {
-        switch (permissionLevel)
-        {
-            case PermissionLevel.Owner:
-                return NuclearOption.ModdingApi.PermissionLevel.Host;
-            case PermissionLevel.Admin:
-                return NuclearOption.ModdingApi.PermissionLevel.Admin;
-            case PermissionLevel.Moderator:
-                return NuclearOption.ModdingApi.PermissionLevel.Moderator;
-            case PermissionLevel.Everyone:
-            default:
-                return NuclearOption.ModdingApi.PermissionLevel.Player;
-        }
     }
     
     /// <summary>

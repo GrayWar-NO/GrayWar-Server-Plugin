@@ -9,6 +9,28 @@ namespace GW_server_plugin.Helpers;
 public static class PermissionLevelUtils
 {
     /// <summary>
+    ///     Transforms a proto-defined permission level to an internal shockfront permission level.
+    /// </summary>
+    /// <param name="permissionLevel"></param>
+    /// <returns></returns>
+    public static NuclearOption.ModdingApi.PermissionLevel ProtoToShockfrontPermissionLevel(
+        PermissionLevel permissionLevel)
+    {
+        switch (permissionLevel)
+        {
+            case PermissionLevel.Owner:
+                return (NuclearOption.ModdingApi.PermissionLevel)0xFE;
+            case PermissionLevel.Admin:
+                return NuclearOption.ModdingApi.PermissionLevel.Admin;
+            case PermissionLevel.Moderator:
+                return NuclearOption.ModdingApi.PermissionLevel.Moderator;
+            case PermissionLevel.Everyone:
+            default:
+                return NuclearOption.ModdingApi.PermissionLevel.Player;
+        }
+    }
+
+    /// <summary>
     ///     Get a player's permission level
     /// </summary>
     /// <param name="player"> Player </param>
