@@ -1,6 +1,7 @@
 using System;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
+using GW_server_plugin.Helpers;
 using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -33,6 +34,9 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid User: {args[0]}"));
         _ = Enum.TryParse<PermissionLevel>(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID.m_SteamID, level);
+        if (PlayerHandle.TryGet(targetSteamID.m_SteamID, out var playerHandle))
+            playerHandle.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(level));
+
         return UniTask.FromResult(ChatCommandResult.Ok($"Successfully set permission level to {level}"));
     }
 

@@ -19,7 +19,7 @@ public class VoteCommand(ConfigFile config)
     public override string Name => "vote";
     
     /// <inheritdoc />
-    public override string Description => "Votes for the currently ongoing vote session";
+    public override string Description => "Votes for the currently ongoing vote session\n use /vote ? to get more info on outcomes.";
     
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>

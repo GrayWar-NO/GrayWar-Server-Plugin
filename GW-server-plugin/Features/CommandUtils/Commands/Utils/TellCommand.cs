@@ -29,7 +29,7 @@ public class TellCommand(ConfigFile config) : CommonBehaviourCommand(config)
     {
         var message = string.Join(" ", args);
         ChatService.SendChatMessageAsServer(message);
-        return UniTask.FromResult(ChatCommandResult.Ok());
+        return UniTask.FromResult(ChatCommandResult.Ok("Message sent!"));
     }
 
     /// <inheritdoc />

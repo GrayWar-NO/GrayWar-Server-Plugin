@@ -49,14 +49,15 @@ public static class CommandService
     
     private static void RegisterBuiltinCommand(IGameCommand command)
     {
-        ChatCommands.RegisterServerCommand(
-            command.Name,
-            command.Description,
-            command.Execute,
-            command.Arguments,
-            PermissionLevelUtils.ProtoToShockfrontPermissionLevel(command.PermissionLevel),
-            command.Aliases
-        );
+        if (!ChatCommands.RegisterServerCommand(
+                command.Name,
+                command.Description,
+                command.Execute,
+                command.Arguments,
+                PermissionLevelUtils.ProtoToShockfrontPermissionLevel(command.PermissionLevel),
+                command.Aliases
+            ))
+            GwServerPlugin.Logger.LogError("Failed to register server command " + command.Name);
     }
     
     /// <summary>

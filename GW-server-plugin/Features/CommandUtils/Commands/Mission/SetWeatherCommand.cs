@@ -33,7 +33,6 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
         var weatherFloat = float.Parse(args[0]);
 
         LevelInfo.i.Networkconditions = weatherFloat;
-        ChatService.SendChatMessageAsServer($"Weather set to {weatherFloat}");
-        return UniTask.FromResult(ChatCommandResult.Ok());
+        return UniTask.FromResult(ChatCommandResult.Ok($"Weather set to {weatherFloat}"));
     }
 }

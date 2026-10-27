@@ -25,7 +25,7 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     public override ChatCommandArgument[] Arguments =>
     [
         new("target", ChatArgumentType.Player),
-        new("amountMillions", ChatArgumentType.Text)
+        new("amountMillions", ChatArgumentType.Float)
     ];
     
     /// <inheritdoc />
@@ -33,7 +33,7 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     {
         return !request.TryGetTargetPlayer(0, out var targetPlayer, out var error)
             ? ChatCommandResult.ClientError(error)
-            : await Common(request.Args[2], targetPlayer.player);
+            : await Common(request.Args[1], targetPlayer.player);
     }
     
     

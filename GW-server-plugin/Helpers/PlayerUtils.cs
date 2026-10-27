@@ -5,6 +5,7 @@ using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Mirage;
+using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
 using NuclearOption.Networking;
 using Steamworks;
@@ -118,6 +119,11 @@ public static class PlayerUtils
     public static bool TryFindPlayer(string playerName, out Player? playerObject)
     {
         playerObject = null;
+        if (ChatHelper.TryParseSteamId(playerName, out var cSteamID))
+        {
+            return TryFindPlayerBySteamId(cSteamID.m_SteamID, out playerObject);
+        }
+        
         var normalizedName = StripStaffPrefix(StripIdPrefix(playerName));
         
         if (GwServerPlugin.TryGetConnectedPlayerSteamId(normalizedName, out var steamId))

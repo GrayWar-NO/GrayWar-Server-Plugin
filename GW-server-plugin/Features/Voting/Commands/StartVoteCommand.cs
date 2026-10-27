@@ -38,10 +38,11 @@ public class StartVoteCommand(ConfigFile config) : ConfigurableCommand(config), 
     {
         var args = request.Args;
         var player = request.Sender.player;
-        var session = VoteManager.Factories[args[0]](player, args[1]);
+        var session = args.Count == 1
+            ? VoteManager.Factories[args[0]](player, null)
+            : VoteManager.Factories[args[0]](player, args[1]);
         if (VoteManager.TryStartVote(session, out var response))
             return UniTask.FromResult(ChatCommandResult.Ok(response));
         return UniTask.FromResult(ChatCommandResult.ClientError(response));
-        
     }
 }
