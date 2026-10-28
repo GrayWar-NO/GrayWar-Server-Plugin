@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace GW_server_plugin.Helpers;
 
@@ -25,7 +25,7 @@ public static class SteamWebApi
     /// <param name="steamId">The 64-bit SteamID to look up.</param>
     /// <param name="cancellationToken">Token used to cancel the web request.</param>
     /// <returns>The persona name, or <see langword="null"/> when the key is unavailable or Steam has no result.</returns>
-    public static async Task<string?> GetUsernameAsync(ulong steamId, CancellationToken cancellationToken = default)
+    public static async UniTask<string?> GetUsernameAsync(ulong steamId, CancellationToken cancellationToken = default)
     {
         var apiKey = PluginConfig.SteamWebApiKey?.Value;
         if (string.IsNullOrWhiteSpace(apiKey))

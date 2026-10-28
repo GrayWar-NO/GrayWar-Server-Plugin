@@ -12,7 +12,6 @@ using NuclearOption.DedicatedServer;
 using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
 using Steamworks;
-using UnityEngine;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Helpers;
@@ -66,28 +65,6 @@ public static class PlayerUtils
         }
         
         /// <summary>
-        /// Gets the name used by this plugin when displaying a connected player, with the associated faction colour.
-        /// </summary>
-        /// <remarks>
-        /// The dedicated server does not receive client names over Mirage. This uses the
-        /// Steam Web API name cached at connection time, rather than Player.GetPlayerName().
-        /// </remarks>
-        public string GetColoredDisplayName()
-        {
-            var name = player.GetLogName();
-            
-            if (TryGetFactionColor(player, out var factionColor))
-                name = $"<color=#{ColorUtility.ToHtmlStringRGB(factionColor)}>{name}</color>";
-            
-            var rt = $"[{player.PlayerIndex}]";
-            
-            if (!player.ServerTag.IsNullOrWhiteSpace())
-                rt += $"[{player.ServerTag}]";
-            
-            return rt + name;
-        }
-        
-        /// <summary>
         /// Gets the plain Steam persona name used in logs and audit records.
         /// This deliberately omits staff and player-ID display tags.
         /// </summary>
@@ -98,20 +75,6 @@ public static class PlayerUtils
                 ? cachedName
                 : player.SteamID.ToString();
         }
-    }
-    
-    private static bool TryGetFactionColor(Player player, out Color factionColor)
-    {
-        factionColor = default;
-        var faction = player.HQ?.faction;
-        if (faction == null ||
-            string.Equals(faction.factionName, FactionHelper.NO_FACTION, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(faction.factionName, FactionHelper.NEUTRAL_FACTION, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(faction.factionName, "Spectator", StringComparison.OrdinalIgnoreCase))
-            return false;
-        
-        factionColor = faction.color;
-        return true;
     }
     
     /// <summary>

@@ -327,7 +327,7 @@ public class GwServerPlugin : BaseUnityPlugin
     private static async Task UpdateConnectedPlayerNameAsync(Player player, DateTime joinedAt)
     {
         var steamId = player.SteamID;
-        var username = await SteamWebApi.GetUsernameAsync(steamId).ConfigureAwait(false);
+        var username = await SteamWebApi.GetUsernameAsync(steamId);
         if (string.IsNullOrWhiteSpace(username)) return;
 
         var playerIsStillConnected = false;
