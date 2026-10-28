@@ -34,7 +34,6 @@ public class GwServerPlugin : BaseUnityPlugin
     internal static GwServerPlugin Instance { get; private set; } = null!;
     
     internal new static ManualLogSource Logger { get; private set; } = null!;
-    internal static PlayerIdentificationService PlayerIdentifier { get; private set; } = null!;
     
     internal static WeatherRandomizer WeatherRandomizer { get; private set; } = null!;
 
@@ -110,15 +109,6 @@ public class GwServerPlugin : BaseUnityPlugin
         VoteManager.Initialize(Config);
         Logger.LogInfo("Initialized VoteManager");
         
-        try
-        {
-            PlayerIdentifier = new PlayerIdentificationService();
-            Logger.LogInfo("Loaded PlayerID");
-        } catch (Exception e)
-        {
-            Logger.LogDebug($"Failed loading PlayerID with exception {e}");
-        }
-        
         Logger.LogInfo($"Loading {PluginInfo.PLUGIN_NAME} v{PluginInfo.PLUGIN_VERSION}...");
         
         PatchAll();
@@ -162,11 +152,15 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
         
         PlayerHandle.PlayerJoined += OnHandlePlayerJoin;
+        PlayerHandle.PlayerJoined += PlayerIdentificationService.AddPlayer;
         PlayerHandle.PlayerJoined += _ => RestartService.CancelRestart();
         PlayerHandle.PlayerJoined += MissionBalanceService.OnPlayerJoin;
 
         PlayerHandle.PlayerLeft += OnHandlePlayerLeave;
+        PlayerHandle.PlayerLeft += handle => PlayerIdentificationService.RemovePlayer(handle.PlayerIndex);
         PlayerHandle.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
+        
+        PlayerHandle.PlayersCleared += PlayerIdentificationService.Clear;
         
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
         MissionEvents.MissionLoaded += _ => VoteManager.RemoveInhibit(MissionService.VoteInhibitionReason);

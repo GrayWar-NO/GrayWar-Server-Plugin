@@ -195,13 +195,13 @@ public static class CommandService
                     
                     break;
                 case ChatArgumentType.Player:
-                    if (!ChatHelper.TryParseSteamId(currentArg, out var steamId)) // TODO check parsing of IDs n names.
+                    if (!ChatHelper.TryParseSteamId(currentArg, out var steamId))
                     {
                         if (GwServerPlugin.TryGetConnectedPlayerSteamId(currentArg, out var uSteamId))
                             steamId = new CSteamID(uSteamId!.Value);
                         else if (int.TryParse(currentArg, out var id) &&
-                            GwServerPlugin.PlayerIdentifier.TryGetPlayerById(id, out uSteamId))
-                            steamId = new CSteamID(uSteamId!.Value);
+                            PlayerIdentificationService.TryGetPlayerById(id, out var playerHandle))
+                            steamId = playerHandle!.Value.player.CSteamID;
                         else
                         {
                             if (argument.Optional)

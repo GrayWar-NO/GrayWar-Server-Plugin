@@ -5,6 +5,7 @@ using BepInEx;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using GW_server_plugin.Features;
 using Mirage;
 using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
@@ -134,14 +135,15 @@ public static class PlayerUtils
         
         if (playerObject == null && ulong.TryParse(playerName, out var playerId))
         {
-            ulong? playerSteamId;
+            steamId = null;
             if (playerId <= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
             {
-                GwServerPlugin.PlayerIdentifier.TryGetPlayerById((int)playerId, out playerSteamId);
+                if (PlayerIdentificationService.TryGetPlayerById((int)playerId, out var playerHandle))
+                    steamId = playerHandle!.Value.SteamId;
             }
-            else playerSteamId = playerId;
+            else steamId = playerId;
             
-            TryFindPlayerBySteamId(playerSteamId ?? 0ul, out playerObject);
+            TryFindPlayerBySteamId(steamId ?? 0ul, out playerObject);
         }
         
         return playerObject != null;

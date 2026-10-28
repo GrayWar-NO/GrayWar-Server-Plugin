@@ -1,63 +1,24 @@
 using System.Collections.Generic;
-using System.Linq;
-using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
+using NuclearOption.ModdingApi;
 
 namespace GW_server_plugin.Features;
 
-internal sealed class PlayerIdentificationService
+internal static class PlayerIdentificationService
 {
-    private readonly Dictionary<ulong, int> _players  = new();
-    private readonly Stack<int> _ids =  new();
-    private bool _idsOk;
-
-    private void InitIDs()
+    private static readonly Dictionary<int, PlayerHandle> IDNameCache = new();
+    
+    public static void AddPlayer(PlayerHandle handle) => IDNameCache.Add(handle.PlayerIndex, handle);
+    
+    public static void RemovePlayer(int id) => IDNameCache.Remove(id);
+    
+    public static void Clear() => IDNameCache.Clear();
+    
+    public static bool TryGetPlayerById(int id, out PlayerHandle? player)
     {
-        GwServerPlugin.Logger.LogDebug("Initializing IDs");
-        for (var i = Globals.DedicatedServerManagerInstance.Config.MaxPlayers; i > 0; i--)
-        {
-            _ids.Push(i);
-        }
-        _idsOk = true;
-    }
-
-    public void AssignNewPlayer(Player player)
-    {
-        if (!_idsOk) InitIDs();
-        var steamID = player.SteamID;
-        if (!_players.ContainsKey(player.SteamID))
-        {
-            _players.Add(steamID, _ids.Pop());
-        }
-    }
-
-    public void RemovePlayer(Player player)
-    {
-        var found = _players.TryGetValue(player.SteamID, out var id);
-        if (!found) return;
-        _ids.Push(id);
-        _players.Remove(player.SteamID);
-    }
-
-    public int GetPlayerId(Player player)
-    {
-        return _players[player.SteamID];
-    }
-
-    public bool TryGetPlayerId(Player player, out int id)
-    {
-        return _players.TryGetValue(player.SteamID, out id);
-    }
-
-    public bool TryGetPlayerById(int id, out ulong? player)
-    {
-        foreach (var keyValuePair in _players.Where(keyValuePair => keyValuePair.Value == id))
-        {
-            player = keyValuePair.Key;
-            return true;
-        }
-
-        player = null;
-        return false;
+        if (!IDNameCache.TryGetValue(id, out var playerHandle))
+            player = null;
+        else
+            player = playerHandle;
+        return player != null;
     }
 }
