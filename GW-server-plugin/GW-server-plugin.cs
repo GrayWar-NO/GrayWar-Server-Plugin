@@ -17,6 +17,7 @@ using GW_server_plugin.Helpers;
 using GW_server_plugin.Patches.KillsLogging;
 using HarmonyLib;
 using JetBrains.Annotations;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
 using Steamworks;
 
@@ -157,14 +158,16 @@ public class GwServerPlugin : BaseUnityPlugin
             }
         }
         
-        PlayerEvents.PlayerLeft += OnPlayerLeave;
-        PlayerEvents.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
-        PlayerEvents.PlayerJoined += OnPlayerJoin;
-        PlayerEvents.PlayerJoined += MissionBalanceService.OnPlayerJoin;
-        PlayerEvents.PlayerJoined += _ => RestartService.CancelRestart();
         PlayerEvents.PlayerJoinedFaction += OnPlayerJoinFaction;
         PlayerEvents.PlayerJoinedFaction += (_, _) => MissionBalance.CheckAndApplyBalance();
+        
+        PlayerHandle.PlayerJoined += OnHandlePlayerJoin;
+        PlayerHandle.PlayerJoined += _ => RestartService.CancelRestart();
+        PlayerHandle.PlayerJoined += MissionBalanceService.OnPlayerJoin;
 
+        PlayerHandle.PlayerLeft += OnHandlePlayerLeave;
+        PlayerHandle.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
+        
         MissionEvents.MissionLoaded += m => MissionBalance.OnMissionLoad(m);
         MissionEvents.MissionLoaded += _ => VoteManager.RemoveInhibit(MissionService.VoteInhibitionReason);
         
@@ -272,46 +275,40 @@ public class GwServerPlugin : BaseUnityPlugin
         Logger.LogDebug("Unpatched!");
     }
     
-    private static void OnPlayerJoin(Player player)
+    
+    private static void OnHandlePlayerJoin(PlayerHandle handle)
     {
-        if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(player))
+        if (StaffSlotService.IsSlotStaff(Globals.DedicatedServerManagerInstance.RealPlayerCount()) && !PlayerUtils.IsStaff(handle))
         {
             Globals
                 .NetworkManagerNuclearOptionInstance
                 .KickPlayerAsync(
-                    player,
+                    handle.player,
                     $"This slot is reserved for staff. The max capacity is {Globals.DedicatedServerManagerInstance.Config.MaxPlayers}.",
                     false)
                 .Forget();
             return;
         }
         
-        var pl = PermissionLevelUtils.GetPlayerPermissionLevel(player);
-        player.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(pl));
-        
-        var originalName = player.GetPlayerName().SanitizedName;
-        lock (ConnectedPlayerNamesLock)
-        {
-            ConnectedPlayerNames[player.SteamID] = originalName;
-        }
-        // Assign an ID used by PlayerUtils.GetDisplayName for non-staff players.
-        if (!PlayerUtils.IsStaff(player))
-        {
-            PlayerIdentifier.AssignNewPlayer(player);
-        }
+        var pl = PermissionLevelUtils.GetPlayerPermissionLevel(handle.player);
+        handle.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(pl));
 
-        _ = UpdateConnectedPlayerNameAsync(player, DateTime.UtcNow);
-        
+        if (PlayerUtils.IsStaff(handle))
+            handle.SetServerTag(PluginConfig.StaffTag!.Value);
+
+        _ = UpdateConnectedPlayerNameAsync(handle.player, DateTime.UtcNow);
+
         // Start Autorestart timer only when first player joins
         if (PlayerUtils.GetPlayerCount() == 1)
         {
             RestartService.ResetAutoRestart();
         }
-        
+
     }
 
-    private static void OnPlayerLeave(Player player)
+    private static void OnHandlePlayerLeave(PlayerHandle handle)
     {
+        var player = handle.GetInternalPlayer();
         var logName = player.GetLogName();
         lock (ConnectedPlayerNamesLock)
         {
@@ -320,7 +317,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
         Logger.LogInfo($"{logName} : {player.SteamID} - left the game");
         VoteManager.Session?.RemoveVoter(player);
-        PlayerIdentifier.RemovePlayer(player);
+
         var log = new JoinLeaveLog
         {
             SteamID = player.SteamID,

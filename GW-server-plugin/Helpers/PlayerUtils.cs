@@ -1,15 +1,18 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BepInEx;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Mirage;
 using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
 using Steamworks;
 using UnityEngine;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Helpers;
 
@@ -53,12 +56,12 @@ public static class PlayerUtils
         {
             var name = player.GetLogName();
             
-            if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
-                return $"{PluginConfig.StaffPrefix!.Value} {name}";
+            var rt = $"[{player.PlayerIndex}]";
             
-            return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
-                ? $"[{id}] {name}"
-                : name;
+            if (!player.ServerTag.IsNullOrWhiteSpace())
+                rt += $"[{player.ServerTag}]";
+            
+            return rt + name;
         }
         
         /// <summary>
@@ -75,12 +78,12 @@ public static class PlayerUtils
             if (TryGetFactionColor(player, out var factionColor))
                 name = $"<color=#{ColorUtility.ToHtmlStringRGB(factionColor)}>{name}</color>";
             
-            if (PluginConfig.UseStaffPrefix?.Value == true && IsStaff(player))
-                return $"{PluginConfig.StaffPrefix!.Value} {name}";
+            var rt = $"[{player.PlayerIndex}]";
             
-            return GwServerPlugin.PlayerIdentifier.TryGetPlayerId(player, out var id)
-                ? $"[{id}] {name}"
-                : name;
+            if (!player.ServerTag.IsNullOrWhiteSpace())
+                rt += $"[{player.ServerTag}]";
+            
+            return rt + name;
         }
         
         /// <summary>
@@ -166,7 +169,7 @@ public static class PlayerUtils
         if (string.IsNullOrEmpty(playerName))
             return playerName;
         
-        var pattern = $@"^{Regex.Escape(PluginConfig.StaffPrefix!.Value)}\s*";
+        var pattern = $@"^{Regex.Escape(PluginConfig.StaffTag!.Value)}\s*";
         var cleanName = Regex.Replace(playerName, pattern, "", RegexOptions.IgnoreCase);
         
         return cleanName;
@@ -186,6 +189,13 @@ public static class PlayerUtils
         
         return Regex.Replace(playerName, pattern, "");
     }
+    
+    /// <summary>
+    ///     Checks if a player is staff.
+    /// </summary>
+    /// <param name="handle"></param>
+    /// <returns></returns>
+    public static bool IsStaff(PlayerHandle handle) => IsStaff(handle.player);
     
     /// <summary>
     /// Checks if a player is staff.

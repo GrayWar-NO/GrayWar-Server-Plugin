@@ -34,8 +34,8 @@ public static class PluginConfig
     internal static ConfigEntry<bool>? UseStaffPrefix;
     internal const bool DefaultUseStaffPrefix = true;
 
-    internal static ConfigEntry<string>? StaffPrefix;
-    internal const string DefaultStaffPrefix = "<color=#FFD700>[Staff]</color>";
+    internal static ConfigEntry<string>? StaffTag;
+    internal const string DefaultStaffTag = "<color=#FFD700>Staff</color>";
 
     internal static ConfigEntry<string>? ServerBroadcastName;
     internal const string DefaultServerBroadcastName = "<color=#99182e>[GrayWar]</color>";
@@ -117,9 +117,9 @@ public static class PluginConfig
             "Whether to use staff prefix or not.");
         GwServerPlugin.Logger.LogDebug($"UseStaffPrefix: {UseStaffPrefix.Value}");
 
-        StaffPrefix = config.Bind(GeneralSection, "StaffPrefix", DefaultStaffPrefix,
+        StaffTag = config.Bind(GeneralSection, "StaffPrefix", DefaultStaffTag,
             "The prefix added in-front of the usernames of Moderators, Admins and the Owner.");
-        GwServerPlugin.Logger.LogDebug($"StaffTag: {StaffPrefix.Value}");
+        GwServerPlugin.Logger.LogDebug($"StaffTag: {StaffTag.Value}");
 
 
         ServerBroadcastName = config.Bind(GeneralSection, "ServerBroadcastName", DefaultServerBroadcastName,

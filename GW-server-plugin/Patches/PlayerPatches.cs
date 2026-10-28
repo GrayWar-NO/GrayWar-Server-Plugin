@@ -1,7 +1,6 @@
 using System;
 using Com.Graywar.NoServerManager.Proto;
 using Google.Protobuf.WellKnownTypes;
-using GW_server_plugin.Events;
 using HarmonyLib;
 using NuclearOption.Networking;
 
@@ -50,19 +49,5 @@ public class PlayerPatches
             Time = DateTime.UtcNow.ToTimestamp()
         };
         GwServerPlugin.GrpcMgr.Client?.SendSortieChangeAsync(log);
-    }
-    
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(Player.OnStartServer))]
-    private static void JoinMessagePostfix(Player __instance)
-    {
-        PlayerEvents.OnPlayerJoined(__instance);
-    }
-    
-    [HarmonyPostfix]
-    [HarmonyPatch(nameof(Player.OnStopServer))]
-    private static void DisconnectedMessagePostfix(Player __instance)
-    {
-        PlayerEvents.OnPlayerLeft(__instance);
     }
 }
