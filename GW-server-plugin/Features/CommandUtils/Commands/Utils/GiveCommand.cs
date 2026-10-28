@@ -67,16 +67,11 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
             return UniTask.FromResult(ChatCommandResult.ClientError($"Could not parse '{amountText}' as a number."));
         }
         
-        if (amount <= 0m)
-        {
-            return UniTask.FromResult(ChatCommandResult.ClientError("Sum must be a positive number."));
-        }
-        
         var sum = (float)amount;
         targetPlayer.AddAllocation(sum);
         
         ChatService.SendPrivateChatMessage($"You were given {sum} (million)!", targetPlayer);
-        return UniTask.FromResult(ChatCommandResult.ClientError(
+        return UniTask.FromResult(ChatCommandResult.Ok(
             $"You have successfully given {sum} (million) to {targetPlayer.GetDisplayName()}."));
     }
     
