@@ -334,7 +334,7 @@ public class GwServerPlugin : BaseUnityPlugin
         lock (ConnectedPlayerNamesLock)
         {
             // Do not re-add a player who left while the web request was pending.
-            if (ConnectedPlayerNames.ContainsKey(steamId))
+            if (UnitRegistry.playerLookupSteamId.ContainsKey(player.CSteamID))
             {
                 ConnectedPlayerNames[steamId] = username!;
                 playerIsStillConnected = true;
