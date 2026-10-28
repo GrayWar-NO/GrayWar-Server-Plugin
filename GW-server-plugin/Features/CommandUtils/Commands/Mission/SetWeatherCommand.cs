@@ -1,4 +1,5 @@
-﻿using BepInEx.Configuration;
+﻿using System.Linq;
+using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
@@ -21,7 +22,7 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("amount", ChatArgumentType.Float)
+        ChatCommandArgument.FromChoices("weather", [.. LevelInfo.i.cloudLayer.weatherSets.Select(ws => ws.displayName)])
     ];
     
     /// <inheritdoc />
@@ -30,9 +31,11 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var weatherFloat = float.Parse(args[0]);
-
+        
+        var weatherSet = LevelInfo.i.cloudLayer.weatherSets.FirstOrDefault(ws => ws.displayName == args[0]);
+        var weatherFloat = weatherSet.coverage;
+        
         LevelInfo.i.Networkconditions = weatherFloat;
-        return UniTask.FromResult(ChatCommandResult.Ok($"Weather set to {weatherFloat}"));
+        return UniTask.FromResult(ChatCommandResult.Ok($"Weather set to {weatherSet.displayName}"));
     }
 }

@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.ModdingApi;
+using UnityEngine.Assertions.Must;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;
@@ -31,10 +32,9 @@ public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConso
     public async UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
         var args = request.Args;
-        var player = request.Sender.player;
-        var target = args[0];
-        PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return await Execute([.. args]);
+        if (!request.TryGetTargetPlayer(0, out var target, out var error))
+            return ChatCommandResult.ClientError(error);
+        if (target != request.Sender) return await Execute([.. args]);
         return ChatCommandResult.ClientError("You cannot kick yourself!");
     }
 
@@ -42,13 +42,12 @@ public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConso
     public UniTask<ChatCommandResult> Execute(string[] args)
     {
         var target = args[0];
-        if (PlayerUtils.TryFindPlayer(target, out var targetPlayer))
+        if (PlayerUtils.TryFindPlayer(target, out var targetPlayer, out var error))
         {
-            PlayerUtils.KickPlayer(targetPlayer!,  string.Join(" ", args.Skip(1)));
-            return UniTask.FromResult(ChatCommandResult.Ok($"{targetPlayer!.MentionArg} has been kicked!"));
+            PlayerUtils.KickPlayer(targetPlayer!.Value.GetInternalPlayer(),  args[1]);
+            return UniTask.FromResult(ChatCommandResult.Ok($"{targetPlayer.Value.Mention} has been kicked!"));
         }
-
-        return UniTask.FromResult(ChatCommandResult.ClientError($"{target} is not a valid player!"));
+        return UniTask.FromResult(ChatCommandResult.ClientError(error));
     }
 
     /// <inheritdoc />

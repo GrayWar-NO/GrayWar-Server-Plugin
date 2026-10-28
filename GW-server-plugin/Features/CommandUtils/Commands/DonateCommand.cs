@@ -33,14 +33,12 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
     /// <inheritdoc />
     public UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        var player = request.Sender.player;
-        
         if (!request.TryGetTargetPlayer(0, out var target, out var error))
         {
             return UniTask.FromResult(ChatCommandResult.ClientError(error));
         }
         
-        if (player == target.player)
+        if (request.Sender == target)
         {
             return UniTask.FromResult(ChatCommandResult.ClientError("You can not donate to yourself."));
         }
@@ -55,6 +53,8 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
             return UniTask.FromResult(ChatCommandResult.ClientError("Sum must be a positive number."));
         }
         
+        var player = request.Sender.player;
+
         if (player.Allocation < amount)
         {
             return UniTask.FromResult(ChatCommandResult.ClientError($"Insufficient allocation. You tried to donate {amount} (million), but only have {player.Allocation} (million) available."));
@@ -79,7 +79,7 @@ public class DonateCommand(ConfigFile config): ConfigurableCommand(config), IGam
         };
         GwServerPlugin.GrpcMgr.Client?.sendDonationAsync(log);
         
-        return UniTask.FromResult(ChatCommandResult.Ok($"You have successfully donated {amount} (million) to {target.player.GetDisplayName()}."));
+        return UniTask.FromResult(ChatCommandResult.Ok($"You have successfully donated {amount} (million) to {target.Mention}."));
     }
     
     /// <inheritdoc />

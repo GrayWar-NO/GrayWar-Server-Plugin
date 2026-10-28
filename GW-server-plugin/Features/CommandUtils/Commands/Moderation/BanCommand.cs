@@ -1,8 +1,8 @@
-using System.Linq;
-using System.Security;
+using System;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
+using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
@@ -25,77 +25,37 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
     public override ChatCommandArgument[] Arguments =>
     [
         new("player", ChatArgumentType.Player),
-        new("reason", ChatArgumentType.Text, true),
-        new("duration", ChatArgumentType.Text, true)
+        new("durationDays", ChatArgumentType.Int, true),
+        new("reason", ChatArgumentType.Text, true)
     ];
     
     /// <inheritdoc />
     public async UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        var args = request.Args;
-        var player = request.Sender.player;
-        
-        var target = args[0];
-        PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return await Execute([.. args]);
+        if (!request.TryGetTargetPlayer(0, out var target, out var error))
+            return ChatCommandResult.ClientError(error);
+        if (target != request.Sender) return await Execute([.. request.Args]);
         return ChatCommandResult.ClientError("You cannot ban yourself!");
     }
 
     /// <inheritdoc />
     public UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var target = args[0];
-        string? duration = null;
-        string reason;
-        if (args.Length > 1)
-        {
-            var tmp = args[args.Length - 1].Last();
-            duration = tmp is 'd' or 'h' ? args[args.Length - 1] : null;
-            var reasonEnum = args.Skip(1).ToList();
-            if (duration is not null)
-            {
-                reasonEnum.RemoveAt(reasonEnum.Count - 1);
-            }
-
-            reason = string.Join(" ", reasonEnum);
-        }
-        else
-        {
-            reason = "Unknown reason";
-        }
-
-        string? response;
-
-        ulong banSteamID;
-        if (ulong.TryParse(target, out var targetID) &&
-            targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
-        {
-            banSteamID = targetID;
-            response = $"Banned player with steamID {banSteamID} for reason {reason}";
-            if (PlayerUtils.TryFindPlayerBySteamId(banSteamID, out var targetPlayer))
-            {
-                Globals.NetworkManagerNuclearOptionInstance
-                    .KickPlayerAsync(targetPlayer!, $"Banned for reason: {reason}").Forget();
-            }
-        }
-        else
-        {
-            var rs = PlayerUtils.TryFindPlayer(target, out var player);
-            if (!rs)
-                throw new VerificationException(
-                    $"Could not find player {target}: validation was not called properly.");
-            banSteamID = player!.SteamID;
-            Globals.NetworkManagerNuclearOptionInstance
-                .KickPlayerAsync(player, $"Banned for reason: {reason}").Forget();
-            response = $"Banned player {player.GetDisplayName()} for reason {reason}";
-        }
-
+        TimeSpan? duration = args.Length >= 2 ? TimeSpan.FromDays(int.Parse(args[1])) : null;
+        var reason = args.Length == 3 ? args[2] : "Unknown reason";
+        
+        if (!ChatHelper.TryParseSteamId(args[0], out var banSteamID))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"{args[0]} is not a valid player."));
+        if (UnitRegistry.playerLookupSteamId.TryGetValue(banSteamID, out var playerObject))
+            PlayerUtils.KickPlayer(playerObject, "Banned for " + reason);
+        var response = $"Banned player {playerObject?.MentionArg ?? banSteamID.m_SteamID.ToString()} for {reason}";
+        
         if (duration is not null)
         {
             response += $" for {duration}.";
         }
 
-        PlayerUtils.BanPlayer(banSteamID, reason, duration);
+        PlayerUtils.BanPlayer(banSteamID.m_SteamID, reason, duration);
         return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 

@@ -18,7 +18,7 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("MissionID", ChatArgumentType.Text, true)
+        new("MissionID", ChatArgumentType.Int, true)
     ];
     
     /// <inheritdoc />

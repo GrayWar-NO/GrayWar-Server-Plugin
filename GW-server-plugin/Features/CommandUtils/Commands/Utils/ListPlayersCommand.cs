@@ -24,19 +24,17 @@ public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(conf
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var players = Globals.AuthenticatedPlayers;
-        var playerNames = "";
-        foreach (INetworkPlayer player in players)
+        var players = UnitRegistry.playerLookupSteamId.Values;
+        var playerNames = new string[players.Count];
+        var i = 0;
+        foreach (var player in players)
         {
-            Player? p;
-            player.TryGetPlayer(out p);
-            if (p != null)
-            {
-                playerNames += $"{p.GetDisplayName()}, ";
-            }
+            
+            playerNames[i] = player.MentionArg;
+            i++;
         }
         var response = $"[{players.Count - 1}] ";
-        response += playerNames;
+        response += string.Join(", ", playerNames);
         return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 

@@ -5,7 +5,6 @@ using BepInEx;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
-using GW_server_plugin.Features;
 using Mirage;
 using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
@@ -80,36 +79,28 @@ public static class PlayerUtils
     /// <summary>
     ///     Try to find a player by name.
     /// </summary>
-    /// <param name="playerName"> The name of the player to find. </param>
-    /// <param name="playerObject"> The Player object, if available. </param>
+    /// <param name="playerInput"> The steamID or mention of the player to find.</param>
+    /// <param name="player"> The PlayerHandle object, if available. </param>
+    /// <param name="error"> Descriptive error string if failed.</param>
     /// <returns></returns>
-    public static bool TryFindPlayer(string playerName, out Player? playerObject)
+    public static bool TryFindPlayer(string playerInput, out PlayerHandle? player, out string? error)
     {
-        playerObject = null;
-        if (ChatHelper.TryParseSteamId(playerName, out var cSteamID))
+        error = null;
+        player = null;
+        if (!ChatHelper.TryParseSteamId(playerInput, out var banSteamID))
         {
-            return TryFindPlayerBySteamId(cSteamID.m_SteamID, out playerObject);
+            error = $"{playerInput} is not a valid format.";
+            return false;
         }
         
-        var normalizedName = StripStaffPrefix(StripIdPrefix(playerName));
-        
-        if (GwServerPlugin.TryGetConnectedPlayerSteamId(normalizedName, out var steamId))
-            TryFindPlayerBySteamId(steamId!.Value, out playerObject);
-        
-        if (playerObject == null && ulong.TryParse(playerName, out var playerId))
+        if (!PlayerHandle.TryGet(banSteamID.m_SteamID, out var outPlayerHandle))
         {
-            steamId = null;
-            if (playerId <= (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
-            {
-                if (PlayerIdentificationService.TryGetPlayerById((int)playerId, out var playerHandle))
-                    steamId = playerHandle!.Value.SteamId;
-            }
-            else steamId = playerId;
-            
-            TryFindPlayerBySteamId(steamId ?? 0ul, out playerObject);
+            error = $"{playerInput} is not on the server";
+            return false;
         }
         
-        return playerObject != null;
+        player = outPlayerHandle;
+        return true;
     }
     
     /// <summary>
@@ -122,22 +113,6 @@ public static class PlayerUtils
     {
         playerObject = Globals.AuthenticatedPlayers.FirstOrDefault(p => p.GetPlayer()?.SteamID == steamid)?.GetPlayer();
         return playerObject != null;
-    }
-    
-    /// <summary>
-    ///     Utility function to strip a player name of the staff tag, if they have it.
-    /// </summary>
-    /// <param name="playerName"> The player name. </param>
-    /// <returns>Actual playername.</returns>
-    private static string StripStaffPrefix(string playerName)
-    {
-        if (string.IsNullOrEmpty(playerName))
-            return playerName;
-        
-        var pattern = $@"^{Regex.Escape(PluginConfig.StaffTag!.Value)}\s*";
-        var cleanName = Regex.Replace(playerName, pattern, "", RegexOptions.IgnoreCase);
-        
-        return cleanName;
     }
     
     /// <summary>
@@ -227,9 +202,9 @@ public static class PlayerUtils
     /// </summary>
     /// <param name="banSteamID">banned player's SteamID</param>
     /// <param name="reason">ban reason</param>
-    /// <param name="duration">Ban duration, as format xh or xd</param>
+    /// <param name="duration">Ban duration</param>
     /// <param name="log">if true, this will enable logging the ban back to the central service.</param>
-    public static void BanPlayer(ulong banSteamID, string reason, string? duration, bool log = true)
+    public static void BanPlayer(ulong banSteamID, string reason, TimeSpan? duration, bool log = true)
     {
         AllowBanList.BanAndAppendId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
@@ -249,26 +224,8 @@ public static class PlayerUtils
             BanStart = now.ToTimestamp(),
             ShouldBeBanned = true
         };
-        
         if (duration != null)
-        {
-            string? amountStr = null;
-            try
-            {
-                amountStr = duration.Substring(0, duration.Length - 1);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-            }
-            
-            if (amountStr != null && uint.TryParse(amountStr, out var amount))
-            {
-                if (duration.EndsWith("d", StringComparison.OrdinalIgnoreCase))
-                    banLog.BanEnd = now.AddDays(amount).ToTimestamp();
-                if (duration.EndsWith("h", StringComparison.OrdinalIgnoreCase))
-                    banLog.BanEnd = now.AddHours(amount).ToTimestamp();
-            }
-        }
+            banLog.BanEnd = now.Add(duration.Value).ToTimestamp();
         
         GwServerPlugin.GrpcMgr.Client?.SendBanAsync(banLog);
     }

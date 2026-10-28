@@ -29,7 +29,7 @@ public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(conf
     public override ChatCommandArgument[] Arguments =>
     [
         new("WorkshopID", ChatArgumentType.Text),
-        new("save", ChatArgumentType.Text, true)
+        ChatCommandArgument.TrueFalse("save", true)
     ];
     
     /// <inheritdoc />

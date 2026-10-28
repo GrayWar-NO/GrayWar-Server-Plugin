@@ -34,7 +34,7 @@ public class UnKickCommand(ConfigFile config) : CommonBehaviourCommand(config)
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid User: {args[0]}"));
 
         UnKickPlayer(targetSteamID);
-        return UniTask.FromResult(ChatCommandResult.Ok($"Unkicked player with steamID {args[0]}"));
+        return UniTask.FromResult(ChatCommandResult.Ok($"Unkicked player [@{targetSteamID}]"));
     }
 
     /// <inheritdoc />

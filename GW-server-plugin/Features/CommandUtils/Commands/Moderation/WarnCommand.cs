@@ -31,42 +31,24 @@ public class WarnCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     /// <inheritdoc />
     public async UniTask<ChatCommandResult> Execute(ChatCommandRequest request)
     {
-        var args = request.Args;
-        var player = request.Sender.player;
-        
-        var target = args[0];
-        PlayerUtils.TryFindPlayer(target, out var targetPlayer);
-        if (targetPlayer != player) return await Execute([.. args]);
+        if (!PlayerUtils.TryFindPlayer(request.Args[0], out var targetPlayer, out var error))
+            return ChatCommandResult.ClientError(error);
+        if (targetPlayer != request.Sender) return await Execute([.. request.Args]);
         return ChatCommandResult.ClientError("You cannot warn yourself!");
     }
     
     /// <inheritdoc />
     public UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var target = args[0];
-        var reason = string.Join(" ", args.Skip(1));
-        string? response;
-        ulong warnSteamID;
-        if (ulong.TryParse(target, out var targetID) &&
-            targetID > (ulong)Globals.DedicatedServerManagerInstance.Config.MaxPlayers)
-        {
-            warnSteamID = targetID;
-            response = $"Warned player with steamID {warnSteamID} for reason {reason}";
-        }
-        else
-        {
-            var rs = PlayerUtils.TryFindPlayer(target, out var player);
-            if (!rs)
-                throw new VerificationException(
-                    $"Could not find player {target}: validation was not called properly.");
-            warnSteamID = player!.SteamID;
-            response = $"Warned player {player.GetDisplayName()} for reason {reason}";
-        }
+        var reason = args[1];
         
+        if (!PlayerUtils.TryFindPlayer(args[0], out var targetPlayer, out var error))
+            return UniTask.FromResult(ChatCommandResult.ClientError(error));
+
         return UniTask.FromResult(
-            GwServerPlugin.WarnService.AddWarn(warnSteamID, reason)
-            ? ChatCommandResult.Ok(response)
-            : ChatCommandResult.ClientError($"failed to warn {target}: is no longer on server.")
+            GwServerPlugin.WarnService.AddWarn(targetPlayer!.Value.SteamId, reason)
+            ? ChatCommandResult.Ok($"Warned {targetPlayer.Value.Mention}.")
+            : ChatCommandResult.ClientError($"failed to warn {args[0]}: is no longer on server.")
             );
     }
     

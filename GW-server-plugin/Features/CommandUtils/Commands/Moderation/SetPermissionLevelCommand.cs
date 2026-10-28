@@ -31,9 +31,11 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
+        if (!Enum.TryParse<PermissionLevel>(args[1], out var level))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid permission level {args[1]}"));
+        
         if (!ChatHelper.TryParseSteamId(args[0], out var targetSteamID))
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid User: {args[0]}"));
-        _ = Enum.TryParse<PermissionLevel>(args[1], out var level);
         PluginConfig.SetPermissionLevel(targetSteamID.m_SteamID, level);
         if (PlayerHandle.TryGet(targetSteamID.m_SteamID, out var playerHandle))
             playerHandle.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(level));

@@ -32,9 +32,7 @@ public class SetRankCommand(ConfigFile config) : ConfigurableCommand(config), IG
         var args = request.Args;
         
         if (!request.TryGetTargetPlayer(0, out var target, out var error))
-        {
             return UniTask.FromResult(ChatCommandResult.ClientError(error));
-        }
         
         var rankInput = args[1].Trim();
         

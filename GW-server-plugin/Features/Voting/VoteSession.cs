@@ -222,7 +222,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
         ChatUtils.SendChatMessageAsServer(_votes.Any()
             ? $"Vote expires in {_timeLeft} seconds. {ValueStringGetter(GetWinningOutcome())} is winning."
             : $"Vote expires in {_timeLeft} seconds.");
-        ChatUtils.SendChatMessageAsServer($"Target: '{SessionName}', initiated by {initiator.GetDisplayName()}");
+        ChatUtils.SendChatMessageAsServer($"Target: '{SessionName}', initiated by {initiator.MentionArg}");
         if (Reason == null) return;
         ChatUtils.SendChatMessageAsServer($"Reason: {Reason}");
     }

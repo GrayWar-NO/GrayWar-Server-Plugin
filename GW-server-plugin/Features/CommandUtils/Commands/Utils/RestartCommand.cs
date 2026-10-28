@@ -44,7 +44,7 @@ public class Restart(ConfigFile config) : CommonBehaviourCommand(config)
             if (playerCount == 0 || (args.Length == 1 && (args[0] == "force" || args[0] == "f")))
                 return UniTask.FromResult(ChatCommandResult.Ok("Server restarting..."));
             
-            var reason = (args.Length != 0) ? string.Join(" ", args) : null;
+            var reason = args.Length == 2 ? args[1] : null;
             RestartService.ScheduleRestart(reason);
             return UniTask.FromResult(ChatCommandResult.Ok("Server has been scheduled to restart after mission"));
         }

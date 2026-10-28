@@ -20,7 +20,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
     public override string Name => "unban";
-
+    
     /// <inheritdoc />
     public override string Description => "Unbans a player from the server.";
     
@@ -33,23 +33,11 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        string? response;
-        CSteamID banSteamID;
-        var target = args[0];
-        if (ChatHelper.TryParseSteamId(target, out var targetSteamID))
-        {
-            banSteamID = targetSteamID;
-            response = $"Unbanned player with steamID {banSteamID}";
-        }
-        else
-        {
-            var rs = PlayerUtils.TryFindPlayer(target, out var player);
-            if (!rs)
-                return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid Player: {target}"));
-            banSteamID = player!.CSteamID;
-            response = $"Unbanned player {player.GetDisplayName()}";
-        }
-
+        if (!ChatHelper.TryParseSteamId(args[0], out var banSteamID))
+            return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid SteamID: {args[0]}"));
+        
+        var response = $"Unbanned player with steamID {banSteamID}";
+        
         AllowBanListUtils.UnbanAndRemoveId(
             Globals.NetworkManagerNuclearOptionInstance.Authenticator.BanList,
             Globals.DedicatedServerManagerInstance.Config.BanListPaths[0],
@@ -63,7 +51,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
         GwServerPlugin.GrpcMgr.Client?.SendBanAsync(log);
         return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
-
+    
     /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel { get; } = PermissionLevel.Moderator;
 }

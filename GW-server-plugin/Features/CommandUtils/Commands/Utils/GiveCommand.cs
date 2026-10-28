@@ -40,13 +40,9 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     /// <inheritdoc />
     public async UniTask<ChatCommandResult> Execute(string[] args)
     {
-        var found = PlayerUtils.TryFindPlayer(args[0], out var targetPlayer);
-        if (!found || targetPlayer == null)
-        {
-            return ChatCommandResult.ClientError($"Could not find a player by {args[0]}");
-        }
-        
-        return await Common(args[1], targetPlayer);
+        if (!PlayerUtils.TryFindPlayer(args[0], out var targetPlayer, out var error))
+            return ChatCommandResult.ClientError(error);
+        return await Common(args[1], targetPlayer!.Value.player);
     }
     
     private static UniTask<ChatCommandResult> Common(string amountText, Player targetPlayer)
@@ -77,7 +73,7 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
         
         ChatUtils.SendPrivateChatMessage($"You were given {sum} (million)!", targetPlayer);
         return UniTask.FromResult(ChatCommandResult.ClientError(
-            $"You have successfully given {sum} (million) to {targetPlayer.GetDisplayName()}."));
+            $"You have successfully given {sum} (million) to {targetPlayer.MentionArg}."));
     }
     
     /// <inheritdoc />

@@ -41,7 +41,7 @@ public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), 
         }
         
         
-        response = player!.GetDisplayName();
+        response = player!.MentionArg;
         return UniTask.FromResult(ChatCommandResult.Ok(response));
     }
 }
