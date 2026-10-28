@@ -75,7 +75,7 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
         var sum = (float)amount;
         targetPlayer.AddAllocation(sum);
         
-        ChatService.SendPrivateChatMessage($"You were given {sum} (million)!", targetPlayer);
+        ChatUtils.SendPrivateChatMessage($"You were given {sum} (million)!", targetPlayer);
         return UniTask.FromResult(ChatCommandResult.ClientError(
             $"You have successfully given {sum} (million) to {targetPlayer.GetDisplayName()}."));
     }

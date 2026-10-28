@@ -50,22 +50,22 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
         var bet = int.Parse(args[0]);
         if (GambleService.CoinFlip())
         {
-            ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has won +${bet}m!");
+            ChatUtils.SendChatMessageAsServer($"{player.MentionArg} has won +${bet}m!");
             player.SetAllocation(player.Allocation + bet);
-            ChatService.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
+            ChatUtils.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
         }
         else
         {
-            ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has lost -${bet}m!", player);
+            ChatUtils.SendChatMessageAsServer($"{player.MentionArg} has lost -${bet}m!");
             player.SetAllocation(player.Allocation - bet);
             var punishment = GambleService.Rnd.NextDouble() * 100;
             if (punishment <= 20)
             {
-                ChatService.SendChatMessageAsServer($"{player.GetDisplayName()} has ejected out of rage!", player);
+                ChatUtils.SendChatMessageAsServer($"{player.MentionArg} has ejected out of rage!");
                 player.Aircraft.StartEjectionSequence();
             }
             
-            ChatService.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
+            ChatUtils.SendPrivateChatMessage($"Current balance: ${player.Allocation}m", player);
         }
         
         return UniTask.FromResult(ChatCommandResult.Ok());

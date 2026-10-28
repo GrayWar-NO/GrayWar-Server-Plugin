@@ -212,8 +212,8 @@ public static class RestartService
             {
                 while (true)
                 {
-                    ChatService.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
-                    if (Reason != null) ChatService.SendChatMessageAsServer($"Reason: {Reason}");
+                    ChatUtils.SendChatMessageAsServer("WARNING: SERVER WILL RESTART AFTER MISSION ENDS");
+                    if (Reason != null) ChatUtils.SendChatMessageAsServer($"Reason: {Reason}");
                     await Task.Delay(TimeSpan.FromSeconds(180), ct);
                 }
             }
@@ -239,8 +239,8 @@ public static class RestartService
             _restartReminderCts.Cancel();
             _restartReminderCts = null;
             Reason = null;
-            ChatService.SendChatMessageAsServer("WARNING: Server restart has been canceled");
-            if (cancelReason != null) ChatService.SendChatMessageAsServer($"Reason: {cancelReason}");
+            ChatUtils.SendChatMessageAsServer("WARNING: Server restart has been canceled");
+            if (cancelReason != null) ChatUtils.SendChatMessageAsServer($"Reason: {cancelReason}");
         }
     }
 }

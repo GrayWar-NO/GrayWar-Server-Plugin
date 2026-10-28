@@ -9,6 +9,7 @@ using Grpc.Core;
 using Grpc.Core.Utils;
 using GW_server_plugin.Features.CommandUtils;
 using GW_server_plugin.Helpers;
+using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
 using Steamworks;
 using UnityEngine;
@@ -262,7 +263,7 @@ public class GrpcClientManager
                 try
                 {
                     var text = $"<color=#5865F2>[DC]</color> {data.SenderName}: {data.Message}";
-                    Globals.ChatManagerInstance.RpcServerMessage(text, true);
+                    ServerChat.SendToAll(text, true);
                     return Task.CompletedTask;
                 }
                 catch (Exception exception)

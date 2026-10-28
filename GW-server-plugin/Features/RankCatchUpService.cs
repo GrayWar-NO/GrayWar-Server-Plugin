@@ -53,7 +53,7 @@ public static class RankCatchUpService
         
         if (player.PlayerRank >= rank) return;
         player.SetRank(rank, false);
-        ChatService.SendPrivateChatMessage($"Late join - You have been promoted to Rank {rank}! :)", player);
+        ChatUtils.SendPrivateChatMessage($"Late join - You have been promoted to Rank {rank}! :)", player);
     }
     
     private static void ParseThresholds()

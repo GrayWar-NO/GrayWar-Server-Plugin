@@ -24,7 +24,7 @@ internal class MissionBalanceService
             {
                 faction.FactionHQ.NetworkpreventJoin = shouldPreventJoin;
 
-                ChatService.SendChatMessageAsServer(
+                ChatUtils.SendChatMessageAsServer(
                     shouldPreventJoin
                         ? $"{faction.factionName} is no longer joinable for balance reasons."
                         : $"{faction.factionName} can be joined again!");

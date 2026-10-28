@@ -15,6 +15,6 @@ public static class BroadcastService
         if (PluginConfig.NBroadcastMessages!.Value == 0) return;
         var random = new Random();
         var index = random.Next(PluginConfig.BroadcastMessages.Count);
-        ChatService.SendChatMessageAsServer(PluginConfig.BroadcastMessages[index]!.Value);
+        ChatUtils.SendChatMessageAsServer(PluginConfig.BroadcastMessages[index]!.Value);
     }
 }

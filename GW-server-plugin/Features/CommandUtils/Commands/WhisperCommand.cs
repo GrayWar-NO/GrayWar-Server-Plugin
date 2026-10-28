@@ -59,7 +59,7 @@ public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IG
     private UniTask<ChatCommandResult> Common(string message, Player target, Player? sender)
     {
         message = $"(whisper): {message}";
-        ChatService.SendPrivateChatMessage(message, target, sender);
+        ChatUtils.SendPrivateChatMessage(message, target, sender);
         if (sender != null)
         {
             var senderSteamId = sender.SteamID;

@@ -50,7 +50,7 @@ public class WarnService(ConfigFile config)
         _playerWarnCount[steamID]++;
         if (_playerWarnCount[steamID] < WarnsToKickConfig.Value || !WarnsToKickOnConfig.Value) return true;
         if (!PlayerUtils.TryFindPlayerBySteamId(steamID, out var player)) return false;
-        ChatService.SendPrivateChatMessage($"You have been warned for {reason}", player!);
+        ChatUtils.SendPrivateChatMessage($"You have been warned for {reason}", player!);
 
         PlayerUtils.KickPlayer(player!, "Too many warnings!");
         return true;

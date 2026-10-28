@@ -42,7 +42,7 @@ public class SetRankCommand(ConfigFile config) : ConfigurableCommand(config), IG
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid rank {rankInput}."));
         
         target.player.SetRank(rank, false);
-        ChatService.SendPrivateChatMessage($"Staff has set your rank to {rank}!", target.player);
+        ChatUtils.SendPrivateChatMessage($"Staff has set your rank to {rank}!", target.player);
         
         return UniTask.FromResult(ChatCommandResult.Ok($"Successfully set {target.Mention}'s rank to {rank}!"));
     }
