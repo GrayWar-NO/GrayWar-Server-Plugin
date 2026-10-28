@@ -24,7 +24,8 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("player", ChatArgumentType.Player)
+        new("player", ChatArgumentType.Player),
+        ChatCommandArgument.FromChoices("level", Enum.GetNames(typeof(PermissionLevel)))
     ];
 
     /// <inheritdoc />
