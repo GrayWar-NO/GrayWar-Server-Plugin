@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using BepInEx.Configuration;
+﻿using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using NuclearOption.ModdingApi;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;

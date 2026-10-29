@@ -6,7 +6,6 @@ using Google.Protobuf.WellKnownTypes;
 using GW_server_plugin.Helpers;
 using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
-using Steamworks;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands.Moderation;

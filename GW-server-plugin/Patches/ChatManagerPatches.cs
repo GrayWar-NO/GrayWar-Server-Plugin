@@ -5,7 +5,6 @@ using HarmonyLib;
 using Mirage;
 using NuclearOption.Chat;
 using GW_server_plugin.Helpers;
-using NuclearOption.Networking;
 
 namespace GW_server_plugin.Patches;
 
