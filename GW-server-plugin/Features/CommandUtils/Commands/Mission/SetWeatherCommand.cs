@@ -22,7 +22,7 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        ChatCommandArgument.FromChoices("weather", [.. LevelInfo.i.cloudLayer.weatherSets.Select(ws => ws.displayName)])
+        new("amount", ChatArgumentType.Float)
     ];
     
     /// <inheritdoc />
@@ -31,11 +31,11 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string[] args)
     {
-        
-        var weatherSet = LevelInfo.i.cloudLayer.weatherSets.FirstOrDefault(ws => ws.displayName == args[0]);
-        var weatherFloat = weatherSet.coverage;
+        var weatherFloat = float.Parse(args[0]);
+        if (weatherFloat is < 0f or > 1f)
+            return UniTask.FromResult(ChatCommandResult.ClientError($"{weatherFloat} is not between 0 and 1"));
         
         LevelInfo.i.Networkconditions = weatherFloat;
-        return UniTask.FromResult(ChatCommandResult.Ok($"Weather set to {weatherSet.displayName}"));
+        return UniTask.FromResult(ChatCommandResult.Ok($"Weather set to {weatherFloat}."));
     }
 }
