@@ -50,7 +50,7 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
         
         if (startingID >= missions.Length || targetID >= missions.Length)
             return UniTask.FromResult(ChatCommandResult.ClientError(
-                $"One of {startingID} or {targetID} is not a valid missionID. Max is {missions.Length - 1}. Use {PluginConfig.CommandPrefixChar}missions to get list."));
+                $"One of {startingID} or {targetID} is not a valid missionID. Max is {missions.Length - 1}. Use /missions to get list."));
         
         var dsm = Globals.DedicatedServerManagerInstance;
         var oldMr = dsm.missionRotation!;

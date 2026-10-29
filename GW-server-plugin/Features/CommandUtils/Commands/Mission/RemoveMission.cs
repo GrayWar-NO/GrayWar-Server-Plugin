@@ -42,7 +42,7 @@ public class RemoveMission(ConfigFile config) : CommonBehaviourCommand(config)
         
         if (missionID >= missions.Length)
             return UniTask.FromResult(ChatCommandResult.ClientError(
-                $"{missionID} is not a valid missionID. Max is {missions.Length - 1}. Use {PluginConfig.CommandPrefixChar}missions to get list."));
+                $"{missionID} is not a valid missionID. Max is {missions.Length - 1}. Use /missions to get list."));
         
         var name = missions[missionID].Key.TryGetKey(out var key) ? key.Name : missions[missionID].Key.Name;
         

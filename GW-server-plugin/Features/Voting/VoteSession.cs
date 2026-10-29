@@ -116,7 +116,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
             if (DefaultVote == null)
             {
                 response =
-                    $"cannot vote YES to {SessionName} vote: no default value is set.\nUse {PluginConfig.CommandPrefixChar}vote ? to get available options.";
+                    $"cannot vote YES to {SessionName} vote: no default value is set.\nUse /vote ? to get available options.";
                 return false;
             }
 
@@ -216,7 +216,7 @@ public abstract class VoteSession<T>(Player initiator, string? reason)
     private void _sendReminderMessage()
     {
         ChatUtils.SendChatMessageAsServer(
-            $"Type '{PluginConfig.CommandPrefixChar}vote <val>' to vote. (Use '{PluginConfig.CommandPrefixChar}vote ?' to get acceptable values)");
+            $"Type '/vote <val>' to vote. (Use '/vote ?' to get acceptable values)");
         ChatUtils.SendChatMessageAsServer(
             $"({NYesVotes}/{AutoPassLimit} PASSING votes, {NNoVotes}/{AutoPassLimit} NO votes).");
         ChatUtils.SendChatMessageAsServer(_votes.Any()

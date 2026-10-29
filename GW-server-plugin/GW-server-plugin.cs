@@ -287,7 +287,7 @@ public class GwServerPlugin : BaseUnityPlugin
         var pl = PermissionLevelUtils.GetPlayerPermissionLevel(handle.player);
         handle.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(pl));
 
-        if (PlayerUtils.IsStaff(handle))
+        if (PlayerUtils.IsStaff(handle) && PluginConfig.UseStaffTag!.Value)
             handle.SetServerTag(PluginConfig.StaffTag!.Value);
 
         _ = UpdateConnectedPlayerNameAsync(handle.player, DateTime.UtcNow);
