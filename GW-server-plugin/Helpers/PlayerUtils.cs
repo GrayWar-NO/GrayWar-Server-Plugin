@@ -5,6 +5,7 @@ using BepInEx;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
+using GW_server_plugin.Features;
 using Mirage;
 using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
@@ -69,7 +70,7 @@ public static class PlayerUtils
         /// </summary>
         public string GetLogName()
         {
-            return GwServerPlugin.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
+            return PlayerNameResolver.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
                    !string.IsNullOrWhiteSpace(cachedName)
                 ? cachedName
                 : player.SteamID.ToString();

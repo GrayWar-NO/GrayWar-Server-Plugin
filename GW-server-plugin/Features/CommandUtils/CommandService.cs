@@ -199,7 +199,7 @@ public static class CommandService
                 case ChatArgumentType.Player:
                     if (!ChatHelper.TryParseSteamId(currentArg, out var steamId))
                     {
-                        if (GwServerPlugin.TryGetConnectedPlayerSteamId(currentArg, out var uSteamId))
+                        if (PlayerNameResolver.TryGetConnectedPlayerSteamId(currentArg, out var uSteamId))
                             steamId = new CSteamID(uSteamId!.Value);
                         else if (int.TryParse(currentArg, out var id) &&
                             PlayerIdentificationService.TryGetPlayerById(id, out var playerHandle))
