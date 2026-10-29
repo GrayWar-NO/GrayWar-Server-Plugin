@@ -243,7 +243,7 @@ class PatchUnitHitOnPhysicsFrame
             AccessTools.Method(attr.StateMachineType, "MoveNext");
     }
     
-#if DEBUG
+#if DEVELOPMENT_BUILD
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
     {
         var list = new List<CodeInstruction>(instructions);
