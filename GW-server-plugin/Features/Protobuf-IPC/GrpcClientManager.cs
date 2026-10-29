@@ -45,7 +45,6 @@ public class GrpcClientManager
             "Hostname or IP of the manager");
         _centralPort = config.Bind(PluginConfig.RpcSection, "central port", 50051u,
             new ConfigDescription("Port of the manager", new AcceptableValueRange<uint>(0, 65535)));
-        
         if (!enable.Value) return;
         try
         {
@@ -69,11 +68,24 @@ public class GrpcClientManager
         }
         catch (Exception e)
         {
-            GwServerPlugin.Logger.LogError($"Failed to find load gRPC: {e.Message}. Disabling gRPC. Stacktrace:\n{e.StackTrace}");
+            GwServerPlugin.Logger.LogError(
+                $"Failed to find load gRPC: {e.Message}. Disabling gRPC. Stacktrace:\n{e.StackTrace}");
         }
         
-        
+        _ = CancelMonitorOnShutdown();
         ConnectAndMonitor();
+    }
+    
+    private async Task CancelMonitorOnShutdown()
+    {
+        try
+        {
+            await Task.Delay(Timeout.Infinite, GwServerPlugin.shutdownCts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            _monitorCts?.Cancel();
+        }
     }
     
     private async void ConnectAndMonitor()
@@ -88,48 +100,50 @@ public class GrpcClientManager
             Connect(channel);
             var lastState = channel.State;
             
+            await Task.WhenAny(channel.WaitForStateChangedAsync(lastState),
+                Task.Delay(Timeout.Infinite, token));
+            if (token.IsCancellationRequested)
+                return;
+            lastState = channel.State;
+            
+            GwServerPlugin.Logger.LogDebug($"gRPC Channel state changed to: {lastState}");
+            
             while (!token.IsCancellationRequested)
             {
-                await channel.WaitForStateChangedAsync(lastState);
+                await Task.WhenAny(channel.WaitForStateChangedAsync(lastState),
+                    Task.Delay(Timeout.Infinite, token));
+                if (token.IsCancellationRequested)
+                    return;
                 lastState = channel.State;
                 
                 GwServerPlugin.Logger.LogDebug($"gRPC Channel state changed to: {lastState}");
                 
-                
-                while (!token.IsCancellationRequested)
+                switch (lastState)
                 {
-                    await channel.WaitForStateChangedAsync(lastState);
-                    lastState = channel.State;
+                    case ChannelState.Idle:
+                        GwServerPlugin.Logger.LogInfo(
+                            "gRPC Channel is Idle. Forcing connection attempt to wake it up...");
+                        _ = channel.ConnectAsync();
+                        break;
                     
-                    GwServerPlugin.Logger.LogDebug($"gRPC Channel state changed to: {lastState}");
+                    case ChannelState.Connecting:
+                        GwServerPlugin.Logger.LogDebug("Channel is attempting to connect...");
+                        break;
                     
-                    switch (lastState)
-                    {
-                        case ChannelState.Idle:
-                            GwServerPlugin.Logger.LogInfo(
-                                "gRPC Channel is Idle. Forcing connection attempt to wake it up...");
-                            _ = channel.ConnectAsync();
-                            break;
-                        
-                        case ChannelState.Connecting:
-                            GwServerPlugin.Logger.LogDebug("Channel is attempting to connect...");
-                            break;
-                        
-                        case ChannelState.TransientFailure:
-                            GwServerPlugin.Logger.LogWarning(
-                                "Connection lost or failed. gRPC will automatically backoff and retry.");
-                            break;
-                        
-                        case ChannelState.Ready:
-                            GwServerPlugin.Logger.LogInfo("Channel is Ready! Establishing streams...");
-                            Connect(channel);
-                            break;
-                        case ChannelState.Shutdown:
-                            GwServerPlugin.Logger.LogInfo("Channel was explicitly shut down. Stopping monitor.");
-                            return;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                    case ChannelState.TransientFailure:
+                        GwServerPlugin.Logger.LogWarning(
+                            "Connection lost or failed. gRPC will automatically backoff and retry.");
+                        break;
+                    
+                    case ChannelState.Ready:
+                        GwServerPlugin.Logger.LogInfo("Channel is Ready! Establishing streams...");
+                        Connect(channel);
+                        break;
+                    case ChannelState.Shutdown:
+                        GwServerPlugin.Logger.LogInfo("Channel was explicitly shut down. Stopping monitor.");
+                        return;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
             }
         }
@@ -149,13 +163,14 @@ public class GrpcClientManager
     /// <returns></returns>
     private void Connect(ChannelBase channel)
     {
+        var token = _monitorCts!.Token;
         Client = new EdgeAgentService.EdgeAgentServiceClient(channel);
-        var chatStream = Client.SendChatLogsStream();
+        var chatStream = Client.SendChatLogsStream(new CallOptions(cancellationToken: token));
         ChatLogStream = chatStream.RequestStream;
         
-        BanInputBehaviour(Client.SubscribeToBans(new Empty()));
-        CommandBehaviour(Client.SubscribeToCommands());
-        _ = StatusRequestBehaviour(Client.StatusStream(), GwServerPlugin.shutdownCts.Token);
+        BanInputBehaviour(Client.SubscribeToBans(new Empty(), new CallOptions(cancellationToken: token)));
+        CommandBehaviour(Client.SubscribeToCommands(new CallOptions(cancellationToken: token)));
+        _ = StatusRequestBehaviour(Client.StatusStream(new CallOptions(cancellationToken: token)), GwServerPlugin.shutdownCts.Token);
         ProcessDiscordMessages(chatStream.ResponseStream);
     }
     
