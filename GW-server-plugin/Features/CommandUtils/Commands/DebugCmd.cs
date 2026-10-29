@@ -3,7 +3,8 @@
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
-using Com.Graywar.NoServerManager.Proto;
+using NuclearOption.ModdingApi;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils.Commands;
 
@@ -15,28 +16,19 @@ namespace GW_server_plugin.Features.CommandUtils.Commands;
 public class DebugCmd(ConfigFile config): CommonBehaviourCommand(config)
 {
     /// <inheritdoc />
-    public override string OutputName => "dbg";
+    public override string Name => "dbg";
 
     /// <inheritdoc />
     public override string Description => "debug-only command";
 
     /// <inheritdoc />
-    public override string Usage => "take a guess bro";
-
-    /// <inheritdoc />
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override UniTask<bool> Validate(string[] args)
-    {
-        return UniTask.FromResult(true);
-    }
-    
-    /// <inheritdoc />
-    public override UniTask<(bool success, string? response)> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string[] args)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
-        return UniTask.FromResult((true, $"DSMtf:{dsm.currentMission.environment.timeFactor}"))!;
+        return UniTask.FromResult(ChatCommandResult.Ok($"DSMtf:{dsm.currentMission.environment.timeFactor}"));
     }
 }
 #endif
