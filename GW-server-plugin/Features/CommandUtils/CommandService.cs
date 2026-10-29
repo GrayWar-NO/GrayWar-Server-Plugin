@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using GW_server_plugin.Helpers;
 using NuclearOption.Chat;
 using NuclearOption.ModdingApi;
-using Steamworks;
 using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin.Features.CommandUtils;
@@ -199,9 +198,9 @@ public static class CommandService
                 case ChatArgumentType.Player:
                     if (!ChatHelper.TryParseSteamId(currentArg, out var steamId))
                     {
-                        if (PlayerNameResolver.TryGetConnectedPlayerSteamId(currentArg, out var uSteamId))
-                            steamId = new CSteamID(uSteamId!.Value);
-                        else if (int.TryParse(currentArg, out var id) &&
+                        if (PlayerUtils.TryGetSteamIdFromName(currentArg, out steamId))
+                            break;
+                        if (int.TryParse(currentArg, out var id) &&
                             PlayerIdentificationService.TryGetPlayerById(id, out var playerHandle))
                             steamId = playerHandle!.Value.player.CSteamID;
                         else

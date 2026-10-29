@@ -5,7 +5,6 @@ using BepInEx;
 using Com.Graywar.NoServerManager.Proto;
 using Cysharp.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
-using GW_server_plugin.Features;
 using Mirage;
 using NuclearOption.Chat;
 using NuclearOption.DedicatedServer;
@@ -43,6 +42,28 @@ public static class PlayerUtils
         return playerComponent != null;
     }
     
+    /// <summary>
+    ///     Gets the steamID of a player from the name string.
+    /// </summary>
+    /// <param name="name">name string input</param>
+    /// <param name="steamId">result steamID</param>
+    /// <returns>true if success</returns>
+    public static bool TryGetSteamIdFromName(string name, out CSteamID steamId)
+    {
+        steamId = CSteamID.Nil;
+        try
+        {
+            var tmp = UnitRegistry.cachedPlayerNames
+                .First(pair => pair.Value.RawSteamName.Equals(name, StringComparison.OrdinalIgnoreCase)).Key;
+            steamId = tmp;
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+    }
+    
     extension(Player player)
     {
         /// <summary>
@@ -70,10 +91,45 @@ public static class PlayerUtils
         /// </summary>
         public string GetLogName()
         {
-            return PlayerNameResolver.TryGetConnectedPlayerName(player.SteamID, out var cachedName) &&
-                   !string.IsNullOrWhiteSpace(cachedName)
-                ? cachedName
-                : player.SteamID.ToString();
+            return player.GetPlayerNameSteamWeb().RawSteamName;
+        }
+        
+        /// <summary>
+        ///     Get a player's name from the steam web API or the <see cref="UnitRegistry.cachedPlayerNames"/> cache.
+        /// </summary>
+        /// <returns></returns>
+        public PlayerName GetPlayerNameSteamWeb()
+        {
+            if (player._playerNameCache != null)
+                return player._playerNameCache;
+            
+            if (!player.CSteamID.IsValid())
+            {
+                player._playerNameCache = PlayerName.FallbackNoSteamId(string.Empty);
+                return player._playerNameCache;
+            }
+            
+            if (UnitRegistry.cachedPlayerNames.TryGetValue(player.CSteamID, out var cachedName))
+            {
+                player._playerNameCache = cachedName;
+                return player._playerNameCache;
+            }
+            
+            _ = player.FetchPlayerName();
+            return PlayerName.FallbackSteamID(player.CSteamID);
+        }
+        
+        /// <summary>
+        ///     Fetch the PlayerName from steam
+        /// </summary>
+        /// <returns></returns>
+        public async UniTask<PlayerName> FetchPlayerName()
+        {
+            var name = await SteamWebApi.GetUsernameAsync(player.SteamID);
+            var playerName = new PlayerName(name, name);
+            UnitRegistry.cachedPlayerNames[player.CSteamID] = playerName;
+            player._playerNameCache = playerName;
+            return playerName;
         }
     }
     

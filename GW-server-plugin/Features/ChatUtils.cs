@@ -1,4 +1,3 @@
-using System;
 using System.Text.RegularExpressions;
 using NuclearOption.Chat;
 using NuclearOption.Networking;

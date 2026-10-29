@@ -266,7 +266,6 @@ public class GwServerPlugin : BaseUnityPlugin
         if (PlayerUtils.IsStaff(handle) && PluginConfig.UseStaffTag!.Value)
             handle.SetServerTag(PluginConfig.StaffTag!.Value);
 
-        _ = UpdateNameAndLogJoin(handle.player, DateTime.UtcNow);
 
         // Start Autorestart timer only when first player joins
         if (PlayerUtils.GetPlayerCount() == 1)
@@ -280,8 +279,7 @@ public class GwServerPlugin : BaseUnityPlugin
     {
         var player = handle.GetInternalPlayer();
         var logName = player.GetLogName();
-        PlayerNameResolver.RemovePlayer(handle.SteamId);
-
+        
         Logger.LogInfo($"{logName} : {player.SteamID} - left the game");
         VoteManager.Session?.RemoveVoter(player);
 
@@ -300,16 +298,14 @@ public class GwServerPlugin : BaseUnityPlugin
     private static async UniTask UpdateNameAndLogJoin(Player player, DateTime joinedAt)
     {
         var steamId = player.SteamID;
-        var username = await PlayerNameResolver.FetchConnectedPlayerName(player);
-        if (string.IsNullOrWhiteSpace(username)) return;
-        
-        var logName = player.GetLogName();
-        Logger.LogInfo($"{logName} : {steamId} - joined the game");
+        var playerName = await player.FetchPlayerName();
+
+        Logger.LogInfo($"{playerName.RawSteamName} : {steamId} - joined the game");
         var log = new JoinLeaveLog
         {
             SteamID = steamId,
             IsOn = true,
-            Name = logName,
+            Name = playerName.RawSteamName,
             Time = joinedAt.ToTimestamp()
         };
         GrpcMgr.Client?.SendPlayerActivityAsync(log);
