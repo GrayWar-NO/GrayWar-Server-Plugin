@@ -132,7 +132,7 @@ public class GwServerPlugin : BaseUnityPlugin
         PlayerHandle.PlayerJoined += _ => RestartService.CancelRestart();
         PlayerHandle.PlayerJoined += MissionBalanceService.OnPlayerJoin;
 
-        PlayerHandle.PlayerLeft += OnHandlePlayerLeave;
+        PlayerHandle.PlayerLeft += LogPlayerLeft;
         PlayerHandle.PlayerLeft += handle => PlayerIdentificationService.RemovePlayer(handle.PlayerIndex);
         PlayerHandle.PlayerLeft += _ => MissionBalance.CheckAndApplyBalance();
         
@@ -259,13 +259,13 @@ public class GwServerPlugin : BaseUnityPlugin
                 .Forget();
             return;
         }
+        _ = UpdateNameAndLogJoin(handle.player, DateTime.UtcNow);
         
         var pl = PermissionLevelUtils.GetPlayerPermissionLevel(handle.player);
         handle.SetPermissionLevel(PermissionLevelUtils.ProtoToShockfrontPermissionLevel(pl));
 
         if (PlayerUtils.IsStaff(handle) && PluginConfig.UseStaffTag!.Value)
             handle.SetServerTag(PluginConfig.StaffTag!.Value);
-
 
         // Start Autorestart timer only when first player joins
         if (PlayerUtils.GetPlayerCount() == 1)
@@ -275,7 +275,7 @@ public class GwServerPlugin : BaseUnityPlugin
 
     }
 
-    private static void OnHandlePlayerLeave(PlayerHandle handle)
+    private static void LogPlayerLeft(PlayerHandle handle)
     {
         var player = handle.GetInternalPlayer();
         var logName = player.GetLogName();
