@@ -27,7 +27,7 @@ public class GambleCommand(ConfigFile config) : ConfigurableCommand(config), IGa
     /// <inheritdoc />
     public override ChatCommandArgument[] Arguments =>
     [
-        new("amount", ChatArgumentType.Text)
+        new("amount", ChatArgumentType.Int)
     ];
     
     /// <inheritdoc />
