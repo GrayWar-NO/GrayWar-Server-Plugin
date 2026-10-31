@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using BepInEx.Configuration;
 using Cysharp.Threading.Tasks;
@@ -44,13 +45,19 @@ public class HelpCommand(ConfigFile config) : ConfigurableCommand(config), ICons
             return UniTask.FromResult(ChatCommandResult.ClientError($"Command {commandName} not found."));
         }
         
-        var response = $"Command '{command!.Name}': {command.Description}\nArguments";
+        var response = $"Command '{command!.Name}': {command.Description}\nArguments:\n";
         
         foreach (var arg in command.Arguments)
         {
-            response += $"{arg.Name}: {arg.Type}";
-            if (arg.Optional) response += ", optional";
-            response += ";\t";
+            if (arg.Type == ChatArgumentType.Choices)
+                if (arg.Choices.Length > 1)
+                    response += $"{arg.Name}: {string.Join(", ",arg.Choices.Take(arg.Choices.Length-1))} or {arg.Choices.Last()}";
+                else
+                    response += $"{arg.Name}: {arg.Choices[0]}";
+            else
+                response += $"{arg.Name}: {arg.Type}";
+            if (arg.Optional) response += " (optional)";
+            response += "\n";
         }
         
         return UniTask.FromResult(ChatCommandResult.Ok(response));
