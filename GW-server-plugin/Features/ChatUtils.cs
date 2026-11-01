@@ -17,6 +17,7 @@ public static class ChatUtils
     /// <param name="message"> The message to send. </param>
     public static void SendChatMessageAsServer(string message)
     {
+        if (Globals.ChatManagerInstance ==null) return;
         ServerChat.SendToAll($"{PluginConfig.ServerBroadcastName!.Value}: {message}", true);
     }
 
