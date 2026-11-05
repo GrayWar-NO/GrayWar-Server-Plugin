@@ -38,11 +38,11 @@ public class GiveCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     
     
     /// <inheritdoc />
-    public async UniTask<ChatCommandResult> Execute(string[] args)
+    public async UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        if (!PlayerUtils.TryFindPlayer(args[0], out var targetPlayer, out var error))
+        if (!PlayerUtils.TryFindPlayer(args[0]!, out var targetPlayer, out var error))
             return ChatCommandResult.ClientError(error);
-        return await Common(args[1], targetPlayer!.Value.player);
+        return await Common(args[1]!, targetPlayer!.Value.player);
     }
     
     private static UniTask<ChatCommandResult> Common(string amountText, Player targetPlayer)

@@ -19,7 +19,7 @@ public class RemoveSlotCommand(ConfigFile config): ConfigurableCommand(config), 
     public override string Description => "Removes a slot from the server";
     
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var result = StaffSlotService.RemoveStaffSlot();
         if (!result)

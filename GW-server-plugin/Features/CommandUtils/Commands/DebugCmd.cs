@@ -25,7 +25,7 @@ public class DebugCmd(ConfigFile config): CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var dsm = Globals.DedicatedServerManagerInstance;
         return UniTask.FromResult(ChatCommandResult.Ok($"DSMtf:{dsm.currentMission.environment.timeFactor}"));

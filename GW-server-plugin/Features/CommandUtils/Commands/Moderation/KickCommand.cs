@@ -37,12 +37,12 @@ public class KickCommand(ConfigFile config): ConfigurableCommand(config), IConso
     }
 
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        var target = args[0];
+        var target = args[0]!;
         if (PlayerUtils.TryFindPlayer(target, out var targetPlayer, out var error))
         {
-            PlayerUtils.KickPlayer(targetPlayer!.Value.GetInternalPlayer(),  args[1]);
+            PlayerUtils.KickPlayer(targetPlayer!.Value.GetInternalPlayer(),  args[1] ?? "unknown reason");
             return UniTask.FromResult(ChatCommandResult.Ok($"{targetPlayer.Value.Mention} has been kicked!"));
         }
         return UniTask.FromResult(ChatCommandResult.ClientError(error));

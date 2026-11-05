@@ -30,7 +30,7 @@ public class WhisperCommand(ConfigFile config) : ConfigurableCommand(config), IG
     ];
     
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
         ChatHelper.TryParseSteamId(args[0], out var steamId);
         if (!UnitRegistry.playerLookupSteamId.TryGetValue(steamId, out var target))

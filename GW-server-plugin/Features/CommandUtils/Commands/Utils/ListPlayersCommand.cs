@@ -19,7 +19,7 @@ public class ListPlayersCommand(ConfigFile config) : CommonBehaviourCommand(conf
     public override string Description => "Returns the list of players currently on the server.";
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var players = UnitRegistry.playerLookupSteamId.Values;
         var playerNames = new string[players.Count];

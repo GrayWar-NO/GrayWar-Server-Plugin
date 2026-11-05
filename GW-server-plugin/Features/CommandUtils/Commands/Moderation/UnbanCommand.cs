@@ -30,7 +30,7 @@ public class UnbanCommand(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         if (!ChatHelper.TryParseSteamId(args[0], out var banSteamID))
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid SteamID: {args[0]}"));

@@ -26,7 +26,7 @@ public class ClearKickListCommand(ConfigFile config) : CommonBehaviourCommand(co
     ];
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var mode = args.Length > 0 ? args[0] : null;
 

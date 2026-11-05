@@ -29,7 +29,7 @@ public class SetPermissionLevelCommand(ConfigFile config) : CommonBehaviourComma
     ];
 
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         if (!Enum.TryParse<PermissionLevel>(args[1], out var level))
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid permission level {args[1]}"));

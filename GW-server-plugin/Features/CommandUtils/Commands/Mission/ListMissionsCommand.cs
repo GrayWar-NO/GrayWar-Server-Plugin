@@ -16,7 +16,7 @@ public class ListMissionsCommand(ConfigFile config) : CommonBehaviourCommand(con
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Everyone;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         if (missions.Length == 0) return UniTask.FromResult(ChatCommandResult.Ok("No available missions")!);

@@ -21,6 +21,7 @@ using JetBrains.Annotations;
 using NuclearOption.ModdingApi;
 using NuclearOption.Networking;
 using Steamworks;
+using PermissionLevel = Com.Graywar.NoServerManager.Proto.PermissionLevel;
 
 namespace GW_server_plugin;
 
@@ -174,6 +175,7 @@ public class GwServerPlugin : BaseUnityPlugin
             }
         } while (false); // Do - while false block is used to have a clean way to exit the try block directly.
         
+        _ = CommandService.ExecuteConsoleCommand("ban", ["76561198030369393", "test"], PermissionLevel.Owner);    
     }
     
     private void OnProcessExit()

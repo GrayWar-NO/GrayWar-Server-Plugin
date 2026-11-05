@@ -19,7 +19,7 @@ public class AddSlotCommand(ConfigFile config): ConfigurableCommand(config), ICo
     public override string Description => "Adds a slot to the server";
 
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
         StaffSlotService.AddStaffSlot();
         return UniTask.FromResult(ChatCommandResult.Ok("Successfully added a slot to the server."));

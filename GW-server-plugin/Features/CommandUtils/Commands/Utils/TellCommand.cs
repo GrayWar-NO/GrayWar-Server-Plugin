@@ -25,9 +25,9 @@ public class TellCommand(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        ChatUtils.SendChatMessageAsServer(args[0]);
+        ChatUtils.SendChatMessageAsServer(args[0]!);
         return UniTask.FromResult(ChatCommandResult.Ok("Message sent!"));
     }
 

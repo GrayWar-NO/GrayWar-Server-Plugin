@@ -28,7 +28,7 @@ public class Restart(ConfigFile config) : CommonBehaviourCommand(config)
     ];
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         try
         {

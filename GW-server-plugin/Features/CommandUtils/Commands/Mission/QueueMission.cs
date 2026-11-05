@@ -30,7 +30,7 @@ public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var missionIndex = int.Parse(args[0]);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);

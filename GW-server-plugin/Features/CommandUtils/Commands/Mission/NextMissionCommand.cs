@@ -22,7 +22,7 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
     ];
     
     /// <inheritdoc />
-    public override async UniTask<ChatCommandResult> Execute(string[] args)
+    public override async UniTask<ChatCommandResult> Execute(string?[] args)
     {
         if (GameManager.gameResolution != GameResolution.Ongoing)
             return ChatCommandResult.ClientError("Cannot start next mission: current mission has ended");

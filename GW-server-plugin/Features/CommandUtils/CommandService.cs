@@ -190,7 +190,7 @@ public static class CommandService
                     }
                     else if (!argument.Optional)
                     {
-                        error = $"{currentArg} is not a valid floating point number!";
+                        error = $"{currentArg} is not a valid integer!";
                         return false;
                     }
                     

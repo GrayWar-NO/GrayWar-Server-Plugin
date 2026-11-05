@@ -30,7 +30,7 @@ public class PlayerInfoCommand(ConfigFile config): ConfigurableCommand(config), 
 
 
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
         string? response;
         ulong.TryParse(args[0], out var steamID);

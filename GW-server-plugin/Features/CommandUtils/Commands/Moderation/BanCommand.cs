@@ -39,10 +39,10 @@ public class BanCommand(ConfigFile config) : ConfigurableCommand(config), IGameC
     }
 
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        TimeSpan? duration = args.Length >= 2 ? TimeSpan.FromDays(int.Parse(args[1])) : null;
-        var reason = args.Length == 3 ? args[2] : "Unknown reason";
+        TimeSpan? duration = args.Length >= 2 && args[1] != null ? TimeSpan.FromDays(int.Parse(args[1]!)) : null;
+        var reason = args.Length == 3 && args[2] != null ? args[2]! : "Unknown reason";
         
         if (!ChatHelper.TryParseSteamId(args[0], out var banSteamID))
             return UniTask.FromResult(ChatCommandResult.ClientError($"{args[0]} is not a valid player."));

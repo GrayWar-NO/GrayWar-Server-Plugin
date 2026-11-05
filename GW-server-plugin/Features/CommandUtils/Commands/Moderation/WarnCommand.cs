@@ -36,11 +36,11 @@ public class WarnCommand(ConfigFile config) : ConfigurableCommand(config), IGame
     }
     
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        var reason = args[1];
+        var reason = args[1]!;
         
-        if (!PlayerUtils.TryFindPlayer(args[0], out var targetPlayer, out var error))
+        if (!PlayerUtils.TryFindPlayer(args[0]!, out var targetPlayer, out var error))
             return UniTask.FromResult(ChatCommandResult.ClientError(error));
 
         return UniTask.FromResult(

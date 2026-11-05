@@ -37,7 +37,7 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         

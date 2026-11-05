@@ -33,7 +33,7 @@ public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(conf
     ];
     
     /// <inheritdoc />
-    public override async UniTask<ChatCommandResult> Execute(string[] args)
+    public override async UniTask<ChatCommandResult> Execute(string?[] args)
     {
         var keySaveable = new MissionKeySaveable
         {

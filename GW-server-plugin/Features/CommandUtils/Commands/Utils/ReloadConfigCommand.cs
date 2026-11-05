@@ -29,10 +29,10 @@ public class ReloadConfigCommand(ConfigFile config) : CommonBehaviourCommand(con
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Admin;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
         string? response;
-        switch (args[0].ToLowerInvariant())
+        switch (args[0]!.ToLowerInvariant())
         {
             case "bepinex":
                 GwServerPlugin.Instance.Config.Reload();

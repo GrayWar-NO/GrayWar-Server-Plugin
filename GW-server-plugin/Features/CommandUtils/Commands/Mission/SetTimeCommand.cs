@@ -29,9 +29,9 @@ public class SetTimeCommand(ConfigFile config) : CommonBehaviourCommand(config)
     protected override PermissionLevel DefaultPermissionLevel => PermissionLevel.Moderator;
     
     /// <inheritdoc />
-    public override UniTask<ChatCommandResult> Execute(string[] args)
+    public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        if (!int.TryParse(args[0].Split(':')[0], out var timeOfDay))
+        if (!int.TryParse(args[0]!.Split(':')[0], out var timeOfDay))
             return UniTask.FromResult(ChatCommandResult.ClientError($"Invalid time of day: {args[0]}"));
      
         LevelInfo.i.NetworktimeOfDay = timeOfDay;

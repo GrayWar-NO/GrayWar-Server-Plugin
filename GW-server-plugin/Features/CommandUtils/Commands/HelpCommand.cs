@@ -31,15 +31,15 @@ public class HelpCommand(ConfigFile config) : ConfigurableCommand(config), ICons
     ];
     
     /// <inheritdoc />
-    public UniTask<ChatCommandResult> Execute(string[] args)
+    public UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        if (args.Length == 0)
+        if (args.Length == 0 || args[0] == null)
         {
             var commandNames = CommandService.GetConsoleCommands().Select(c => c.Name).ToList();
             return UniTask.FromResult(ChatCommandResult.Ok($"Available commands: {string.Join(", ", commandNames)}"));
         }
         
-        var commandName = args[0];
+        var commandName = args[0]!;
         if (!CommandService.TryGetConsoleCommand(commandName, out var command))
         {
             return UniTask.FromResult(ChatCommandResult.ClientError($"Command {commandName} not found."));

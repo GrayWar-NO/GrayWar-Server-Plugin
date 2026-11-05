@@ -45,5 +45,5 @@ public abstract class CommonBehaviourCommand(ConfigFile config)
     
     
     /// <inheritdoc />
-    public abstract UniTask<ChatCommandResult> Execute(string[] args);
+    public abstract UniTask<ChatCommandResult> Execute(string?[] args);
 }
