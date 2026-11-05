@@ -35,7 +35,7 @@ public class NextMissionCommand(ConfigFile config) : CommonBehaviourCommand(conf
                 : ChatCommandResult.ClientError("Failed to start next mission.");
         }
         
-        var missionIndex = int.Parse(args[0]);
+        var missionIndex = int.Parse(args[0]!);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
         if (missionOption == null) return ChatCommandResult.ClientError("Mission not found.");
         

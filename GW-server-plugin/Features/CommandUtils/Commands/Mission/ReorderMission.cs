@@ -41,12 +41,12 @@ public class ReorderMission(ConfigFile config) : CommonBehaviourCommand(config)
     {
         var missions = MissionService.GetAllAvailableMissionOptions();
         
-        var startingID = int.Parse(args[0]);
-        var targetID = int.Parse(args[1]);
+        var startingID = int.Parse(args[0]!);
+        var targetID = int.Parse(args[1]!);
         
         bool? save = null;
         if (args.Length == 3)
-            save = bool.Parse(args[2]);
+            save = bool.Parse(args[2]!);
         
         if (startingID >= missions.Length || targetID >= missions.Length)
             return UniTask.FromResult(ChatCommandResult.ClientError(

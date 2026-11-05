@@ -41,9 +41,9 @@ public class AddWorkshopMission(ConfigFile config) : CommonBehaviourCommand(conf
             Name = args[0],
         };
         
-        var workshopID = ulong.Parse(args[0]);
+        var workshopID = ulong.Parse(args[0]!);
         // ReSharper disable once SimplifyConditionalTernaryExpression
-        var save = args.Length > 1 ? bool.Parse(args[1]) : false;
+        var save = args.Length > 1 ? bool.Parse(args[1]!) : false;
         try
         {
             var downloadResult = await SteamWorkshop.DownloadItemServer(new PublishedFileId_t(workshopID));

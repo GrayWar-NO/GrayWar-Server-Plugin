@@ -30,7 +30,7 @@ public class SetWeatherCommand(ConfigFile config) : CommonBehaviourCommand(confi
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        var weatherFloat = float.Parse(args[0]);
+        var weatherFloat = float.Parse(args[0]!);
         if (weatherFloat is < 0f or > 1f)
             return UniTask.FromResult(ChatCommandResult.ClientError($"{weatherFloat} is not between 0 and 1"));
         

@@ -33,10 +33,10 @@ public class RemoveMission(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        var missionID = int.Parse(args[0]);
+        var missionID = int.Parse(args[0]!);
         bool? save = null;
         if (args.Length == 2)
-            save = bool.Parse(args[1]);
+            save = bool.Parse(args[1]!);
         
         var missions = MissionService.GetAllAvailableMissionOptions();
         

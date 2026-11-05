@@ -32,7 +32,7 @@ public class QueueMission(ConfigFile config) : CommonBehaviourCommand(config)
     /// <inheritdoc />
     public override UniTask<ChatCommandResult> Execute(string?[] args)
     {
-        var missionIndex = int.Parse(args[0]);
+        var missionIndex = int.Parse(args[0]!);
         var missionOption = MissionService.GetMissionOptionByIndex(missionIndex);
         if (missionOption == null) return UniTask.FromResult(ChatCommandResult.ClientError("Mission not found."));
         {
