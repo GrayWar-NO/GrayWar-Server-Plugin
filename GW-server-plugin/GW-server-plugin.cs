@@ -305,7 +305,7 @@ public class GwServerPlugin : BaseUnityPlugin
         {
             SteamID = steamId,
             IsOn = true,
-            Name = playerName.RawSteamName,
+            Name = playerName.RawSteamName ?? "",
             Time = joinedAt.ToTimestamp()
         };
         GrpcMgr.Client?.SendPlayerActivityAsync(log);
